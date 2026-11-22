@@ -25,6 +25,7 @@
 --serif:'Newsreader',Georgia,serif; --sans:'Inter',system-ui,-apple-system,Segoe UI,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 #bg{position:fixed;inset:0;z-index:0;pointer-events:none}
@@ -323,6 +324,34 @@ label.btn{cursor:pointer;display:inline-flex;align-items:center}
 .libitem button.x{color:var(--faint);padding:6px 8px;border-left:1px solid var(--line2)}
 .libitem button.x:hover{color:var(--bad)}
 .done-wrap{text-align:center;padding:20px 0}
+/* essay library */
+.sheet.mgsheet{max-width:640px}
+.mgcount{font-size:12px;font-weight:600;color:var(--muted);background:var(--track);padding:2px 9px;border-radius:99px}
+.mgback{margin-right:2px}
+.mglist{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.mrow{display:flex;align-items:stretch;border:1px solid var(--line2);border-radius:14px;background:var(--surface);transition:border-color .15s,box-shadow .15s}
+.mrow:hover{border-color:var(--sky2);box-shadow:0 4px 16px rgba(14,116,190,.08)}
+.mrow.on{border-color:var(--sky);box-shadow:inset 3px 0 0 var(--sky)}
+.mmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;text-align:left;border:0;background:none;padding:12px 14px;border-radius:14px 0 0 14px;color:var(--ink)}
+.mt{font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mmeta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:12px;color:var(--muted)}
+.mk2{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:99px;background:var(--tint);color:var(--skyink)}
+.mk2.creative{background:var(--vtint);color:#6d28d9}
+.mcur{font-size:11px;font-weight:600;color:var(--skyink)}
+.mbar{height:4px;border-radius:99px;background:var(--track);overflow:hidden;margin-top:2px}
+.mbar i{display:block;height:100%;background:var(--sky2);border-radius:99px}
+.macts{display:flex;align-items:center;gap:4px;padding:0 10px;border-left:1px solid var(--line2)}
+.iconbtn{width:32px;height:32px;border-radius:9px;border:0;background:none;color:var(--muted);display:grid;place-items:center;transition:all .15s}
+.iconbtn:hover{background:var(--hover);color:var(--skyink)}
+.iconbtn.del:hover{background:var(--redsoft);color:#b91c1c}
+.iconbtn:disabled{opacity:.35;cursor:not-allowed;background:none!important;color:var(--muted)!important}
+.mgnote{font-size:12.5px;color:var(--muted);margin:14px 2px 0}
+.btn.danger{color:#b91c1c;border-color:#fecaca}
+.btn.danger:hover{background:var(--redsoft);border-color:#f87171;color:#991b1b}
+#mgTitle{display:block;width:100%}
+body.gamify .mk2.creative{color:#c4b5fd}
+body.gamify .btn.danger{color:#fca5a5;border-color:rgba(239,68,68,.4)}
+body.gamify .iconbtn.del:hover{color:#fca5a5}
 /* upload panel */
 .sheet.upsheet{max-width:620px}
 #upTitle{display:block;width:100%}
@@ -855,18 +884,24 @@ button:focus:not(:focus-visible){outline:none}
 </div>
 
 <div class="modal" id="essayModal" hidden>
-<div class="sheet wide">
-<div class="sheet-head"><h2 id="essayH">Your essays</h2><span class="spacer"></span><button class="xbtn" id="bCloseEssay" title="Close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
-<p class="sub">Paste or upload any essay. Paragraphs, topic sentences, quote + analysis units and word chunks are detected automatically. Essays and progress save in this browser.</p>
-<div class="lib" id="lib"></div>
-<div class="erow"><input id="essayTitle" class="etitle" placeholder="Title (e.g. Mod A · Hamlet + Dickinson)" maxlength="60">
-<label class="btn small" title="Load a .txt or .md file">Upload file<input type="file" id="essayFile" accept=".txt,.md,text/plain" hidden></label></div>
-<label class="ck"><input type="checkbox" id="essayKind"> <span><b>This is not an essay</b> (imaginative, discursive or reflective piece). It’s split by headings, paragraphs and lines instead of topic sentences and quotes; a Reflection section is still analysed like an essay.</span></label>
-<textarea id="essayIn" class="essay-in" placeholder="Paste your essay here. Leave a blank line (or a line break) between paragraphs."></textarea>
-<div class="ana-head"><span id="anaStats" class="ana-stats"></span><span class="spacer"></span>
-<span class="legend2"><span class="rt ts">Topic sentence</span><span class="rt lead">Lead-in</span><span class="rt quote">Quote</span><span class="rt an">Analysis</span></span></div>
-<div class="ana" id="ana"></div>
-<div class="sheet-foot"><button class="btn small" id="bExport" title="Download all essays + progress as a file">Back up</button><label class="btn small" title="Restore from a backup file">Restore<input type="file" id="bImport" accept=".json,application/json" hidden></label><span class="spacer"></span><button class="btn" id="bNew">+ Upload new</button><button class="btn primary" id="bUseEssay">Save &amp; memorise</button></div>
+<div class="sheet mgsheet">
+<div class="sheet-head"><button class="xbtn mgback" id="mgBack" title="All essays" aria-label="Back to all essays" hidden><svg width="12" height="12" viewBox="0 0 12 12"><path d="M8 1L3 6l5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h2 id="mgH">Your essays</h2><span class="mgcount" id="mgCount"></span><span class="spacer"></span><button class="xbtn" id="bCloseEssay" title="Close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+<div id="mgListView">
+<div class="mglist" id="mgList"></div>
+<p class="mgnote">Saved in this browser only. Use <b>Back up</b> to keep a copy or move to another device.</p>
+<div class="sheet-foot"><button class="btn small" id="bExport">Back up</button><label class="btn small">Restore<input type="file" id="bImport" accept=".json,application/json" hidden></label><button class="btn small" id="mgSample" hidden>Bring back sample</button><span class="spacer"></span><button class="btn primary" id="bNew">+ Upload essay</button></div>
+</div>
+<div id="mgEditView" hidden>
+<label class="uplab" for="mgTitle">Title</label>
+<input id="mgTitle" class="etitle" maxlength="60" autocomplete="off">
+<div class="uplab">Text</div>
+<div class="drop has"><textarea id="mgText"></textarea></div>
+<div class="uplab">Type</div>
+<div class="seg up-seg" id="mgKind"><button data-v="essay">Essay</button><button data-v="creative">Creative piece</button></div>
+<p class="uphelp" id="mgWarn"></p>
+<div class="upsum" id="mgSum"></div>
+<div class="sheet-foot"><button class="btn danger" id="mgDel">Delete</button><span class="spacer"></span><button class="btn" id="mgCancel">Cancel</button><button class="btn primary" id="mgSave">Save</button></div>
+</div>
 </div>
 </div>
 
@@ -1122,7 +1157,7 @@ const essayText=id=>id==='sample'?RAW:(LIB.find(e=>e.id===id)||{}).text;
 const essayKind=id=>id==='sample'?'essay':(LIB.find(e=>e.id===id)||{}).kind||'essay';
 const save=()=>{if(S)S.nS=SENTS.length;ls.set('state.'+ACTIVE,S);ls.set('settings',SET);ls.set('active',ACTIVE)};
 function loadEssay(id){
-let text=essayText(id);if(!text){id='sample';text=RAW}
+if(!allEssays().some(e=>e.id===id))id=allEssays()[0].id;let text=essayText(id);
 ACTIVE=id;
 ({paras:PARAS,sents:SENTS,pstart:PSTART,total:TOTALW}=parseEssay(text,essayKind(id)));
 TOTALW=TOTALW||1;
@@ -1549,33 +1584,12 @@ $('btnStart').onclick=openModal;
 // × always works: if nothing has been picked yet, start from the top rather than leaving the user stuck
 $('bCloseStart').onclick=()=>{if(S.started)closeModal();else setStart(0)};
 
-/* ---------- essay editor + library ---------- */
-let anaT=0;
-function renderAnalysis(){
-const txt=$('essayIn').value;
-if(!txt.trim()){$('ana').innerHTML='';$('anaStats').textContent='';return}
-const kind=$('essayKind').checked?'creative':'essay';
-const m=parseEssay(txt,kind),units=m.sents.filter(x=>x.cp).length,quotes=m.sents.filter(x=>x.role==='quote').length;
-const pl=(n,w)=>`${n} ${w}${n===1?'':'s'}`;
-$('anaStats').textContent=[pl(m.paras.length,kind==='creative'?'block':'paragraph'),pl(m.sents.length,'sentence'),kind==='creative'?pl(m.sents.filter(x=>x.role==='heading').length,'heading'):pl(quotes,'quote'),pl(units,'full-piece checkpoint'),pl(m.total,'word')].join(' · ');
-$('ana').innerHTML=m.paras.map((ss,p)=>{
-let html='',open=false;
-ss.forEach((t,s)=>{
-const x=m.sents[m.pstart[p]+s];
-if(!open){html+='<span class="unit">';open=true}
-html+=`<span class="s ${x.role}" title="${ROLE[x.role]}">${chunkSentence(t,SET.phrase).map(c=>`<span class="ch">${esc(c)}</span>`).join('')}</span> `;
-if(x.unitEnd){html+='</span>';open=false}
-});
-if(open)html+='</span>';
-return `<div class="ap"><h6>Paragraph ${p+1}</h6>${html}</div>`;
-}).join('');
-}
+/* ---------- essay library: list + edit view ---------- */
 /* Essays live in localStorage (cookies cap out at ~4 KB, far too small for essays). It is per browser/device,
 so Back up / Restore moves everything between devices as one JSON file. */
 const SAMPLE_TITLE='Sample · Bart for President';
-const allEssays=()=>[{id:'sample',title:SAMPLE_TITLE},...LIB];
+const allEssays=()=>[...(ls.get('sampleGone')?[]:[{id:'sample',title:SAMPLE_TITLE,kind:'essay'}]),...LIB];
 const essayTitle=id=>(allEssays().find(e=>e.id===id)||{}).title||'Essay';
-let editId=null;
 function pctOf(id){
 const st=id===ACTIVE?S:ls.get('state.'+id);if(!st||!st.learned)return 0;
 const n=st.learned.filter(Boolean).length,m=id===ACTIVE?SENTS.length:Math.max(n,(st.nS||1));return Math.round(n/Math.max(1,m)*100);
@@ -1598,20 +1612,66 @@ if(e.key==='ArrowDown'){e.preventDefault();(it[i+1]||it[0]).focus()}else if(e.ke
 else if(e.key==='Escape'){$('essPop').hidden=true;$('essBtn').classList.remove('open');$('essBtn').focus()}
 });
 document.addEventListener('click',()=>{$('essPop').hidden=true;$('essBtn').classList.remove('open')});
-function renderLib(){
-$('lib').innerHTML=allEssays().map(e=>`<span class="libitem ${e.id===editId||(!editId&&e.id===ACTIVE&&$('essayIn').value)?'on':''}"><button data-edit="${e.id}" title="Edit">${esc(e.title)}</button><span class="pct">${pctOf(e.id)}%</span>${e.id==='sample'?'':`<button class="x" data-del="${e.id}" title="Delete">×</button>`}</span>`).join('');
+
+const ICON={edit:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+del:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>'};
+let editId=null,editKind='essay';
+const wordsOf=id=>tokens(mdClean(essayText(id)||'')).length;
+function mgList(){
+const list=allEssays(),only=list.length<=1;
+$('mgCount').textContent=list.length;
+$('mgList').innerHTML=list.map(e=>{
+const p=pctOf(e.id),cur=e.id===ACTIVE,k=essayKind(e.id);
+return `<div class="mrow ${cur?'on':''}">
+<button class="mmain" data-open="${e.id}" title="${cur?'Currently studying':'Study this essay'}">
+<span class="mt">${esc(e.title)}</span>
+<span class="mmeta"><span class="mk2 ${k}">${k==='creative'?'Creative':'Essay'}</span><span>${wordsOf(e.id).toLocaleString()} words</span><span>${p}% memorised</span>${cur?'<span class="mcur">Studying</span>':''}</span>
+<span class="mbar"><i style="width:${p}%"></i></span>
+</button>
+<div class="macts">
+<button class="iconbtn" data-edit="${e.id}" title="Edit" aria-label="Edit ${esc(e.title)}">${ICON.edit}</button>
+<button class="iconbtn del" data-del="${e.id}" ${only?'disabled title="Keep at least one essay"':'title="Delete"'} aria-label="Delete ${esc(e.title)}">${ICON.del}</button>
+</div></div>`;
+}).join('');
+$('mgSample').hidden=!ls.get('sampleGone');
+}
+function mgShow(view){
+const list=view==='list';
+$('mgListView').hidden=!list;$('mgEditView').hidden=list;$('mgBack').hidden=list;
+$('mgH').textContent=list?'Your essays':(editId==='sample'?'Sample essay':'Edit essay');$('mgCount').hidden=!list;
 }
 function openEssay(id){
-editId=id===undefined?ACTIVE:id;
-const fresh=editId===null;
-$('essayH').textContent=fresh?'Upload an essay':'Your essays';
-$('essayTitle').value=fresh?'':(editId==='sample'?'':essayTitle(editId));
-const src=fresh?'':(essayText(editId)||'');
-$('essayIn').value=essayKind(editId)==='creative'?src:src.replace(/\n(?!\n)/g,'\n\n');
-$('essayKind').checked=!fresh&&essayKind(editId)==='creative';$('essayKind').dataset.touched=fresh?'':'1';$('essayKind').parentElement.classList.remove('auto');
-$('bUseEssay').textContent=editId==='sample'?'Save as my copy':'Save & memorise';
-renderLib();renderAnalysis();$('essayModal').hidden=false;
-setTimeout(()=>(fresh?$('essayTitle'):$('essayIn')).focus(),50);
+$('upModal').hidden=true;
+if(id){mgEdit(id)}else{mgList();mgShow('list')}
+$('essayModal').hidden=false;
+}
+function mgSetKind(k){editKind=k;$('mgKind').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===k));mgDirty()}
+function mgEdit(id){
+editId=id;
+$('mgTitle').value=essayTitle(id);
+const src=essayText(id)||'';
+$('mgText').value=essayKind(id)==='creative'?src:src.replace(/\n(?!\n)/g,'\n\n');
+mgSetKind(essayKind(id));
+$('mgDel').disabled=allEssays().length<=1;$('mgDel').title=$('mgDel').disabled?'Keep at least one essay':'';
+$('mgSave').textContent=id==='sample'?'Save as my copy':'Save';
+mgShow('edit');mgDirty();setTimeout(()=>$('mgTitle').focus(),50);
+}
+function mgDirty(){
+const txt=$('mgText').value;
+if(!txt.trim()){$('mgSum').innerHTML='';$('mgSave').disabled=true;return}
+$('mgSave').disabled=false;
+const m=parseEssay(txt,editKind),pl=(n,w)=>`<span>${n.toLocaleString()} ${w}${n===1?'':'s'}</span>`;
+$('mgSum').innerHTML=pl(m.paras.length,editKind==='creative'?'block':'paragraph')+pl(m.sents.length,'sentence')+pl(m.total,'word');
+const changed=editId!=='sample'&&(txt.replace(/\s+/g,' ').trim()!==(essayText(editId)||'').replace(/\s+/g,' ').trim()||editKind!==essayKind(editId));
+$('mgWarn').textContent=editId==='sample'?'The sample stays as it is. Saving creates your own editable copy.':changed?'Changing the text or type resets progress for this essay.':'';
+}
+function mgDelete(id){
+const list=allEssays();if(list.length<=1)return;
+if(!confirm(`Delete “${essayTitle(id)}” and its progress? This can’t be undone (unless you have a backup).`))return;
+if(id==='sample')ls.set('sampleGone',1);else{LIB=LIB.filter(x=>x.id!==id);ls.set('lib',LIB)}
+ls.del('state.'+id);
+if(id===ACTIVE){const next=allEssays()[0];ACTIVE='';loadEssay(next.id);save();loadTask();if(!S.started)$('modal').hidden=true}
+renderSwitcher();mgList();mgShow('list');toast('Essay deleted');
 }
 function closeEssay(){$('essayModal').hidden=true;focusTa()}
 function switchEssay(id){
@@ -1622,49 +1682,35 @@ if(!S.started)openModal();
 }
 function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2000)}
 document.addEventListener('keydown',e=>{if(e.altKey&&/^[1-9]$/.test(e.key)){const t=allEssays()[+e.key-1];if(t){e.preventDefault();switchEssay(t.id)}}});
-function autoKind(){ // suggest creative mode for pasted/uploaded pieces unless the user chose themselves
-const ck=$('essayKind');if(ck.dataset.touched)return;
-const c=looksCreative($('essayIn').value);ck.checked=c;ck.parentElement.classList.toggle('auto',c);
-}
-$('essayKind').onchange=()=>{$('essayKind').dataset.touched='1';$('essayKind').parentElement.classList.remove('auto');renderAnalysis()};
-$('essayIn').addEventListener('input',()=>{clearTimeout(anaT);anaT=setTimeout(()=>{autoKind();renderAnalysis()},180)});
-$('essayFile').onchange=async e=>{
-const f=e.target.files[0];if(!f)return;
-$('essayIn').value=(await f.text()).replace(/\r/g,'');autoKind();
-if(!$('essayTitle').value)$('essayTitle').value=f.name.replace(/\.[^.]+$/,'');
-renderAnalysis();e.target.value='';
-};
-$('lib').addEventListener('click',e=>{
-const o=e.target.closest('[data-edit]'),d=e.target.closest('[data-del]');
-if(o){
-if(o.dataset.edit===editId||(!editId&&o.dataset.edit===ACTIVE))switchEssay(o.dataset.edit);
-else openEssay(o.dataset.edit);
-}else if(d&&confirm('Delete this essay and its progress?')){
-const id=d.dataset.del;LIB=LIB.filter(x=>x.id!==id);ls.set('lib',LIB);ls.del('state.'+id);
-if(id===ACTIVE){loadEssay('sample');loadTask()}
-renderSwitcher();openEssay(ACTIVE);
-}
+
+$('mgList').addEventListener('click',e=>{
+const o=e.target.closest('[data-open]'),ed=e.target.closest('[data-edit]'),d=e.target.closest('[data-del]');
+if(o)switchEssay(o.dataset.open);else if(ed)mgEdit(ed.dataset.edit);else if(d&&!d.disabled)mgDelete(d.dataset.del);
 });
-$('bNew').onclick=openUpload;
-$('bUseEssay').onclick=()=>{
-const txt=$('essayIn').value.trim();if(!txt){$('essayIn').focus();return}
-const title=($('essayTitle').value.trim()||titleOf(mdClean(txt))).slice(0,60),kind=$('essayKind').checked?'creative':'essay';
-let id=editId;
-if(!id||id==='sample'){
-id='e'+Date.now().toString(36);LIB.unshift({id,title,text:txt,kind,updated:Date.now()});
-}else{
-const e=LIB.find(x=>x.id===id);
-if(e){if(e.text.replace(/\s+/g,' ')!==txt.replace(/\s+/g,' ')||(e.kind||'essay')!==kind){ls.del('state.'+id);if(id===ACTIVE)ACTIVE='__reload'}e.text=txt;e.title=title;e.kind=kind;e.updated=Date.now()}
+$('mgKind').onclick=e=>{const b=e.target.closest('button');if(b)mgSetKind(b.dataset.v)};
+let mgT=0;$('mgText').addEventListener('input',()=>{clearTimeout(mgT);mgT=setTimeout(mgDirty,150)});
+$('mgBack').onclick=()=>{mgList();mgShow('list')};
+$('mgCancel').onclick=()=>{mgList();mgShow('list')};
+$('mgDel').onclick=()=>{if(!$('mgDel').disabled)mgDelete(editId)};
+$('mgSample').onclick=()=>{ls.del('sampleGone');renderSwitcher();mgList();toast('Sample is back')};
+$('mgSave').onclick=()=>{
+const txt=$('mgText').value.trim();if(!txt)return;
+const title=($('mgTitle').value.trim()||titleOf(mdClean(txt))).slice(0,60);
+if(editId==='sample'){
+const id='e'+Date.now().toString(36);LIB.unshift({id,title:title===SAMPLE_TITLE?'My copy · Bart for President':title,text:txt,kind:editKind,updated:Date.now()});
+ls.set('lib',LIB);renderSwitcher();switchEssay(id);return;
 }
-ls.set('lib',LIB);renderSwitcher();
-if(ACTIVE==='__reload'){ACTIVE=id;loadEssay(id);loadTask();closeEssay();if(!S.started)openModal()}
-else switchEssay(id);
-renderSwitcher();
+const e=LIB.find(x=>x.id===editId);if(!e)return;
+const reset=e.text.replace(/\s+/g,' ').trim()!==txt.replace(/\s+/g,' ').trim()||(e.kind||'essay')!==editKind;
+e.text=txt;e.title=title;e.kind=editKind;e.updated=Date.now();ls.set('lib',LIB);
+if(reset){ls.del('state.'+e.id);if(e.id===ACTIVE){loadEssay(e.id);loadTask()}}
+renderSwitcher();mgList();mgShow('list');toast('Saved');
 };
+$('bNew').onclick=openUpload;
 $('bExport').onclick=()=>{
 save();
 const states={};allEssays().forEach(e=>{const st=ls.get('state.'+e.id);if(st)states[e.id]=st});
-const blob=new Blob([JSON.stringify({app:'essay-recall',v:2,lib:LIB,states,settings:SET},null,1)],{type:'application/json'});
+const blob=new Blob([JSON.stringify({app:'essay-recall',v:2,lib:LIB,sampleGone:!!ls.get('sampleGone'),states,settings:SET},null,1)],{type:'application/json'});
 const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`recallhsc-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 };
 $('bImport').onchange=async e=>{
@@ -1675,11 +1721,12 @@ const d=JSON.parse(await f.text());if(!d||d.app!=='essay-recall')throw 0;
 const inc=cleanLib(d.lib);
 inc.forEach(x=>{const i=LIB.findIndex(y=>y.id===x.id);if(i<0)LIB.push(x);else LIB[i]=x});
 if(d.states&&typeof d.states==='object')Object.entries(d.states).forEach(([k,v])=>{const c=cleanState(v);if(c&&(k==='sample'||okId(k)))ls.set('state.'+k,c)});
-ls.set('lib',LIB);renderSwitcher();loadEssay(ACTIVE);loadTask();openEssay(ACTIVE);toast(`Restored ${inc.length} essays`);
+ls.set('lib',LIB);renderSwitcher();loadEssay(ACTIVE);loadTask();mgList();toast(`Restored ${inc.length} essays`);
 }catch(err){alert('That file is not a RecallHSC backup.')}
 };
 $('bCloseEssay').onclick=closeEssay;
 $('essayModal').addEventListener('click',e=>{if(e.target.id==='essayModal')closeEssay()});
+$('essayModal').addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('mgEditView').hidden){e.stopPropagation();mgList();mgShow('list')}});
 $('btnEssay').onclick=()=>openEssay();
 $('btnUpload').onclick=openUpload;
 
