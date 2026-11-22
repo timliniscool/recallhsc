@@ -670,13 +670,18 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 body.gamify{--bg:#06080b;--glass:rgba(14,18,24,.86);--glass2:rgba(14,18,24,.92);--ink:#eef2f6;--ink2:#cbd5e1;--muted:#a3b1c2;--faint:#8b9bb0;
 --line:rgba(163,230,53,.16);--line2:#1e2833;--sky:#a3e635;--sky2:#bef264;--skysoft:rgba(163,230,53,.12);--skyink:#d9f99d;--warnsoft:rgba(245,158,11,.14);--badsoft:rgba(239,68,68,.14);
 --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 40px rgba(0,0,0,.45);color-scheme:dark;
---surface:#131a22;--surface2:#10161d;--hover:#1a232e;--track:#222d39;--tint:rgba(163,230,53,.13);--tint2:rgba(163,230,53,.32);
+--surface:#18212c;--surface2:#151c26;--hover:#222d3a;--track:#5d6d82;--line2:#5a6a7f;--tint:rgba(163,230,53,.13);--tint2:rgba(163,230,53,.32);
 --vtint:rgba(167,139,250,.16);--amber:rgba(245,158,11,.16);--redsoft:rgba(239,68,68,.16);--greensoft:rgba(34,197,94,.12);
 --topbg:rgba(6,8,11,.8);--edge:rgba(163,230,53,.12)}
+/* progress tracks, map squares and panel cards stay visible on dark */
+body.gamify .bar .bt{background:var(--track)}
+body.gamify .k{background:var(--surface)!important;border-color:var(--line2)!important}
+body.gamify .q{border-color:var(--line2)}
+body.gamify .hist{border-top-color:var(--line2)}
 /* coloured text that was tuned for light tints */
 body.gamify :is(.rt.lead,.chip.para,.badge.alt,.eitem .kind,.ana .s.lead){color:#c4b5fd}
 body.gamify :is(.rt.quote,.tag.new,.chip.essay,.idea.newi .num){color:#fcd34d}
-body.gamify :is(.rt.an,.rt.context,.tag.old,.idea.oldi .num){color:#94a3b8}
+body.gamify :is(.rt.an,.rt.context,.tag.old,.idea.oldi .num){color:#d5dde7}
 body.gamify .ana .s.ts{color:var(--sky2)}
 body.gamify :is(.fc .node .st,.tt th,.flowv li::before,.sn,.seq span::before){color:#0b1324}
 body.gamify .tt th.alt{background:#65a30d;color:#0b1324}
@@ -689,12 +694,12 @@ body.gamify .menu-pop label{color:var(--ink2)}
 body.gamify .ehead,body.gamify .gnh,body.gamify .rlab{color:#8b9bb0}
 body.gamify .toast{background:#ecfccb;color:#0b1324}
 /* switches: clearly off (grey track, outlined) vs clearly on (lime track) */
-body.gamify .sw{background:#2b3747;box-shadow:inset 0 0 0 1px #3d4b5c}
+body.gamify .sw{background:#4d5c70;box-shadow:inset 0 0 0 1px #6b7c92}
 body.gamify .sw::after{background:#cbd5e1;box-shadow:0 1px 3px rgba(0,0,0,.5)}
 body.gamify .sw:checked{background:#a3e635;box-shadow:inset 0 0 0 1px #bef264,0 0 10px rgba(163,230,53,.35)}
 body.gamify .sw:checked::after{background:#0b1324}
-body.gamify .seg{background:#10161d;box-shadow:inset 0 0 0 1px #1f2a36}
-body.gamify .seg button.on{background:#1f2a36;color:var(--sky2)}
+body.gamify .seg{background:var(--surface2);box-shadow:inset 0 0 0 1px var(--line2)}
+body.gamify .seg button.on{background:#334255;color:var(--sky2);box-shadow:inset 0 0 0 1px #a3e635}
 body.gamify::before{background-image:radial-gradient(rgba(163,230,53,.14) 1px,transparent 1.2px)}
 body.gamify .top{background:rgba(6,8,11,.78);border-bottom-color:rgba(163,230,53,.18)}
 body.gamify .brand{font-family:'Press Start 2P',monospace;font-size:12px;letter-spacing:0}
@@ -702,7 +707,7 @@ body.gamify .brand .hsc{margin-left:-6px}
 body.gamify .logo{background:linear-gradient(135deg,#bef264,#65a30d);box-shadow:0 0 14px rgba(163,230,53,.45);border-radius:3px}
 body.gamify .tabs{background:#10151c}
 body.gamify .tab.on{background:#1a222c;color:var(--sky2);box-shadow:inset 0 0 0 1px rgba(163,230,53,.35)}
-body.gamify .btn{background:#10151c;border-color:#26313d;color:var(--ink2)}
+body.gamify .btn{background:#161e28;border-color:#64758b;color:var(--ink2)}
 body.gamify .btn:hover{background:#151c25;border-color:var(--sky);color:var(--sky2)}
 body.gamify .btn.primary{background:var(--sky);border-color:var(--sky);color:#0b1324;box-shadow:0 0 18px rgba(163,230,53,.35)}
 body.gamify .btn.primary:hover{background:#bef264;color:#0b1324}
@@ -711,7 +716,7 @@ body.gamify :is(.menu-pop,.sheet,.sheet-foot){background:#0e1319;border-color:#1
 body.gamify .eitem:hover,body.gamify .eitem:focus-visible,body.gamify .menu-pop label:hover{background:#151c25}
 body.gamify .modal{background:rgba(0,0,0,.6)}
 body.gamify :is(.panel,.gsec,.gnav){border-color:rgba(163,230,53,.12)}
-body.gamify :is(.k,.q,.etitle,.essay-in,.ck,.libitem,.sopt,.card2,.mk,.theme,.tier,.defs div,.fmt div,.phr span,.wgrid span,.plan>div,.seq3>div,.qset,.tpl,.fc .node,.tt table,.years span,.checks span,.toc a,.verbs6 span,.chips.verbs span,.stat3 div,.reflect,.fig,.sample,.ana .ap,.stat,.empty-prof,.page,.bar .bt){background:#10161d!important;border-color:#1f2a36!important;color:var(--ink2)}
+body.gamify :is(.k,.q,.etitle,.essay-in,.ck,.libitem,.sopt,.card2,.mk,.theme,.tier,.defs div,.fmt div,.phr span,.wgrid span,.plan>div,.seq3>div,.qset,.tpl,.fc .node,.tt table,.years span,.checks span,.toc a,.verbs6 span,.chips.verbs span,.stat3 div,.reflect,.fig,.sample,.ana .ap,.stat,.empty-prof,.page){background:var(--surface2)!important;border-color:var(--line2)!important;color:var(--ink2)}
 body.gamify .tier.t1,body.gamify .callout,body.gamify .callout.big,body.gamify .fc .node.key{background:linear-gradient(135deg,rgba(163,230,53,.1),#10161d)!important;border-color:rgba(163,230,53,.3)!important}
 body.gamify .gnav button.on{background:#1a222c;color:var(--sky2);box-shadow:inset 0 0 0 1px rgba(163,230,53,.3)}
 body.gamify .gnav button:hover{background:#151c25}
@@ -720,10 +725,12 @@ body.gamify .rubric,body.gamify .outc,body.gamify .doc.ex .piece,body.gamify .qs
 body.gamify .rk{background:rgba(163,230,53,.2);color:#ecfccb}
 body.gamify .prompt mark{color:#0b1324}
 body.gamify .chips span,body.gamify .badge,body.gamify .rt.ts,body.gamify .exn,body.gamify .idea .num,body.gamify .flow{background:rgba(163,230,53,.14);color:var(--sky2)}
-body.gamify .set input[type=range]{background:linear-gradient(var(--sky),var(--sky)) 0 50%/var(--p) 4px no-repeat,linear-gradient(#26313d,#26313d) 0 50%/100% 4px no-repeat}
+body.gamify .set input[type=range]{background:linear-gradient(var(--sky),var(--sky)) 0 50%/var(--p) 4px no-repeat,linear-gradient(var(--track),var(--track)) 0 50%/100% 4px no-repeat}
 body.gamify .set input[type=range]::-webkit-slider-thumb{background:#0e1319}
 body.gamify .bar .bf{background:linear-gradient(90deg,#4d7c0f,var(--sky))}
-body.gamify .dot{background:#1a222c}body.gamify .dot.l{background:var(--sky)}
+body.gamify .dot{background:#5d6d82}
+body.gamify .eitem .bar{background:#6b7c92}
+body.gamify .tag.old{background:#2b3747;color:#e5e7eb}body.gamify .dot.l{background:var(--sky)}
 body.gamify .page{background:#e5e7eb!important}
 body.gamify .q.cur{background:var(--sky);color:#0b1324}
 body.gamify .card{box-shadow:0 0 0 4px #a3e635,0 0 0 8px #0b1324,0 0 60px rgba(163,230,53,.25);
@@ -2166,6 +2173,23 @@ idle:['going to C block swimming pool','falcon pride','fly falcon fly','hi','vis
 hello:['hello hello','back for more? love that','the study falcon has arrived','Don here, cookies ready','welcome back, scholar','let’s lock in','ready when you are']
 };
 for(const k in MORE)LINES[k]=(LINES[k]||[]).concat(MORE[k]);
+// 2026 lines: terms checked against current slang coverage (lock in, cooked, crash out, tuff, unc, "I know ball",
+// "quiet on the creek", "son I'm crine", "you paid me no mind", "I can't do Nathan", wrizz, "2026 is the new 2016").
+const NOW={
+pass:['locked in fr','you know ball','that was tuff (the good kind)','son I’m crine, that was clean','not cooked. not even a little','memory said “I got you”','lock-in era activated','ok you’re actually HIM','that sentence paid you mind'],
+fail:['that’s tuff. go again','we are not crashing out over one word','lightly toasted, not cooked','you paid that word no mind 😔','unc moment. retry','I can’t do Nathan… jk we go again','reroute, not a crash out'],
+checkpoint:['son I’m crine, the WHOLE essay??','you know ball fr','that’s a lock-in for the history books','the markers are not ready for this'],
+para:['locked that paragraph in','paragraph = secured. no crash out','you know ball'],
+fast:['go go go go go','locked in AND speedy?','typing like there’s a crash out behind you'],
+sleep:['zz… locked out, not locked in…','zz… quiet on the creek…'],
+long:['even lock-ins need water breaks','stretch before your shoulders crash out','unc needs a 5 minute break. so do you'],
+pet:['wrizz detected','ok the wrizz is real','you paid me mind 🥹'],
+eat:['cookie lock-in','this cookie is tuff','unc snack: plain biscuit','I can’t do Nathan without a cookie first'],
+study:['locked in on this integral','quiet on the creek, I’m doing calc','the derivative of a lock-in is a Band 6','I know ball and I know calculus','2026 is the new 2016 but the maths is still hard'],
+idle:['quiet on the creek, Don is studying','lock in, no crash outs today','you paid this essay no mind yesterday. today we lock in','2026 is the new 2016 and I still can’t find my calculator','we are so cooked if Paper 1 is tomorrow (it isn’t… right?)','unc behaviour: highlighting the entire page','I know ball: your next chunk is a pass','son I’m crine, the canteen ran out of cookies','can’t do Nathan till this paragraph is done','lowkey this paragraph is tuff','period 6 is a crash out waiting to happen','the group chat paid me no mind so I’m studying','wrizz is remembering their quote for them'],
+hello:['locked in? let’s go','we lock in today','quiet on the creek. study time']
+};
+for(const k in NOW)LINES[k]=(LINES[k]||[]).concat(NOW[k]);
 let sessionStart=performance.now(),longSaid=0;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 function say(t,force){const now=performance.now();if(!force&&now-lastSay<14000)return;lastSay=now;bub.textContent=t;bub.classList.add('show');clearTimeout(bubT);bubT=setTimeout(()=>bub.classList.remove('show'),3400)}
