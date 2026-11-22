@@ -49,7 +49,7 @@ body.guide .mem-only{display:none}
 .menu{position:relative}
 .menu-pop{position:absolute;right:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--line2);border-radius:14px;box-shadow:0 20px 50px rgba(15,23,42,.15);padding:8px;min-width:220px;z-index:30}
 .menu-pop[hidden]{display:none}
-.menu-pop label{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:9px;font-size:13px;color:var(--ink2);cursor:pointer}
+.menu-pop label{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:7px 10px;border-radius:10px;font-size:13px;color:var(--ink2);cursor:pointer}
 .menu-pop label:hover{background:#f3f9ff}
 .menu-pop input{accent-color:var(--sky)}
 .menu-pop hr{border:0;border-top:1px solid var(--line2);margin:6px 0}
@@ -184,7 +184,7 @@ body.focus .hud{display:flex}
 .k .v small{font-family:var(--sans);font-size:11px;color:var(--faint)}
 .k.wide{grid-column:1/-1}
 .k.wide .v{font-family:var(--serif);font-size:16px}
-.k .sub{font-size:11px;color:var(--faint);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.k .sub{font-size:11px;color:var(--faint);margin-top:1px;line-height:1.35}
 .hist{display:flex;align-items:flex-end;gap:2px;height:44px;margin-top:10px;padding-top:4px;border-top:1px dashed var(--line2)}
 .hist i{flex:1;min-width:2px;border-radius:2px 2px 0 0;background:var(--sky2);opacity:.85}
 .hist i.f{background:#fca5a5}
@@ -199,11 +199,25 @@ body.focus .hud{display:flex}
 .dot.ue{margin-right:6px}
 .dot.cur{box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--sky)}
 .maphint{font-size:11.5px;color:var(--faint);margin-top:8px}
-.set{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px;color:var(--ink2)}
-.set input[type=range]{width:110px;accent-color:var(--sky)}
-.set select{font:inherit;font-size:12.5px;border:1px solid var(--line2);border-radius:8px;padding:4px 6px;background:#fff}
-.set input[type=checkbox]{accent-color:var(--sky);width:16px;height:16px}
-.set output{font-variant-numeric:tabular-nums;color:var(--muted);min-width:34px;text-align:right;font-size:12px}
+.set{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;min-height:34px;padding:2px 0;font-size:13px;color:var(--ink2);cursor:default}
+.set+.set{border-top:1px solid rgba(227,237,248,.7)}
+label.set{cursor:pointer}
+.set.stack{grid-template-columns:1fr;gap:6px;padding:8px 0}
+.rng{display:grid;grid-template-columns:minmax(0,1fr) 38px;align-items:center;gap:8px;width:148px}
+.rng output{font-variant-numeric:tabular-nums;color:var(--ink2);text-align:right;font-size:12px;font-family:var(--mono)}
+.set input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:18px;background:transparent;margin:0;cursor:pointer;
+--p:50%;background:linear-gradient(var(--sky),var(--sky)) 0 50%/var(--p) 4px no-repeat,linear-gradient(#e3edf8,#e3edf8) 0 50%/100% 4px no-repeat}
+.set input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--sky);box-shadow:0 2px 6px rgba(14,116,190,.25);transition:transform .15s}
+.set input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--sky);box-shadow:0 2px 6px rgba(14,116,190,.25)}
+.set input[type=range]:active::-webkit-slider-thumb{transform:scale(1.15)}
+.sw{-webkit-appearance:none;appearance:none;width:34px;height:20px;border-radius:99px;background:#dbe6f2;position:relative;cursor:pointer;transition:background .2s;margin:0;flex:none}
+.sw::after{content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.2);transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+.sw:checked{background:var(--sky)}
+.sw:checked::after{transform:translateX(14px)}
+.sw:focus-visible{outline:2px solid var(--sky2);outline-offset:2px}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:#eaf3fc;border-radius:10px;padding:3px;gap:3px}
+.seg button{border:0;background:none;border-radius:8px;padding:6px 8px;font-size:12px;color:var(--muted);transition:all .15s}
+.seg button.on{background:#fff;color:var(--skyink);font-weight:600;box-shadow:0 1px 4px rgba(14,116,190,.15)}
 /* ---------- modals ---------- */
 .modal{position:fixed;inset:0;z-index:50;background:rgba(15,23,42,.25);backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px;animation:fade .2s}
 .modal[hidden]{display:none}
@@ -236,11 +250,33 @@ body.focus .hud{display:flex}
 .ana .ch:last-child{border-right:0}
 .lib{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .erow{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+.ck{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--ink2);line-height:1.45;margin:0 0 10px;padding:10px 12px;border:1px solid var(--line2);border-radius:12px;background:#f8fbff;cursor:pointer}
+.ck input{accent-color:var(--sky);width:16px;height:16px;margin-top:1px;flex:none}
+.ck.auto{border-color:var(--sky2);background:var(--skysoft)}
+.ana .s.heading{font-family:var(--sans);font-weight:700;color:var(--skyink);background:#e0f2fe;border-radius:4px}
+.ana .s.line{display:inline-block;background:#f3f0ff;border-radius:4px;margin:1px 0}
 .etitle{flex:1;min-width:0;border:1.5px solid var(--line2);border-radius:11px;padding:9px 12px;font:inherit;font-size:14px;outline:none;background:#f8fbff}
 .etitle:focus{border-color:var(--sky2);background:#fff}
 label.btn{cursor:pointer;display:inline-flex;align-items:center}
-.esel{font:inherit;font-size:13px;max-width:220px;border:1px solid var(--line2);background:rgba(255,255,255,.85) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364748b' fill='none' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center;border-radius:11px;padding:7px 28px 7px 12px;color:var(--ink2);appearance:none;-webkit-appearance:none;cursor:pointer;text-overflow:ellipsis}
-.esel:hover{border-color:var(--sky2)}
+.esel{display:inline-flex;align-items:center;gap:8px;max-width:240px}
+.esel span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.esel svg{flex:none;color:var(--muted);transition:transform .2s}
+.esel.open svg{transform:rotate(180deg)}
+.menu-pop{animation:drop .16s cubic-bezier(.2,.8,.2,1);transform-origin:top right}
+@keyframes drop{from{opacity:0;transform:translateY(-4px) scale(.98)}}
+.epop{left:0;right:auto;min-width:300px;max-width:360px;max-height:70vh;overflow:auto;transform-origin:top left}
+.eitem{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:8px 10px;border-radius:10px;font-size:13.5px;color:var(--ink2)}
+.eitem:hover,.eitem:focus-visible{background:#f0f8ff;outline:none}
+.eitem.on{background:var(--skysoft);color:var(--skyink)}
+.eitem .k{font-size:11px;color:var(--faint);width:14px;flex:none;font-variant-numeric:tabular-nums}
+.eitem .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.eitem .kind{font-size:10px;font-weight:600;padding:2px 6px;border-radius:99px;background:#ede9fe;color:#6d28d9}
+.eitem .bar{width:42px;height:5px;border-radius:99px;background:#e6eff9;overflow:hidden;flex:none}
+.eitem .bar i{display:block;height:100%;background:var(--sky2)}
+.eitem .p{font-size:11px;color:var(--faint);width:30px;text-align:right;font-variant-numeric:tabular-nums}
+.epop .act{display:flex;gap:6px;padding:6px 4px 2px}
+.epop .act .btn{flex:1;justify-content:center;display:inline-flex}
+.ehead{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600;padding:6px 10px 4px}
 @media(max-width:1100px){#btnEssay{display:none}.esel{max-width:160px}}
 .libitem .pct{font-size:11px;color:var(--faint);padding-right:8px}
 .libitem{display:flex;align-items:center;border:1px solid var(--line2);border-radius:10px;overflow:hidden;font-size:12.5px;background:#fff}
@@ -299,6 +335,29 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .tt td{padding:7px 10px;border-top:1px solid var(--line2);text-align:center;color:var(--ink2)}
 .tt td.nw{color:var(--skyink);font-weight:700;text-decoration:underline;text-decoration-color:var(--sky2);text-underline-offset:3px}
 @media(max-width:700px){.fc,.tt{grid-template-columns:1fr}}
+.rubric{font-family:var(--serif);font-size:16.5px;line-height:1.75;color:var(--ink)}
+.rubric p{margin:0 0 10px}
+.rubric .rk{background:linear-gradient(transparent 55%,#bae6fd 55%);font-weight:500}
+.rubric .rv{font-family:var(--sans);font-size:.78em;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--skyink);background:#fff;border:1px solid var(--sky2);border-radius:5px;padding:0 4px}
+.doc{font-size:14.5px;line-height:1.7;color:var(--ink2)}
+.doc h1,.doc h2,.doc h3{color:var(--ink);letter-spacing:-.01em;margin:18px 0 6px}
+.doc h1{font-size:20px}.doc h2{font-size:17px}.doc h3{font-size:15px}
+.doc p{margin:0 0 10px}
+.doc ul,.doc ol{margin:4px 0 12px;padding-left:22px}
+.doc li{margin:3px 0}
+.doc table{border-collapse:collapse;margin:10px 0;font-size:13px;width:100%}
+.doc td,.doc th{border:1px solid var(--line2);padding:6px 8px;vertical-align:top;text-align:left}
+.doc blockquote{margin:8px 0;padding:6px 14px;border-left:3px solid var(--sky2);font-family:var(--serif);font-style:italic}
+.doc.ex{padding:0;overflow:hidden}
+.doc.ex summary{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;list-style:none}
+.doc.ex summary::-webkit-details-marker{display:none}
+.doc.ex[open] summary{border-bottom:1px solid var(--line2)}
+.doc.ex>:not(summary){margin-left:24px;margin-right:24px}
+.doc.ex>:last-child{margin-bottom:22px}
+.doc.ex .piece{font-family:var(--serif);font-size:16px;line-height:1.75;color:var(--ink)}
+.exn{width:32px;height:32px;border-radius:10px;background:var(--skysoft);color:var(--skyink);font-weight:700;display:grid;place-items:center;flex:none}
+.ext{flex:1;display:flex;flex-direction:column}
+.ext small{color:var(--faint);font-size:12px}
 .gsec h2{margin:0 0 4px;font-size:18px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
 .gsec h2 .tag{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:99px;font-weight:700}
 .tag.new{background:#fef3c7;color:#b45309}
@@ -416,7 +475,8 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 <div class="mem-only"><div class="topbar"><div class="tb-fill" id="tbFill"></div></div><div class="toppct" id="topPct">0% memorised</div></div>
 <div class="spacer"></div>
 <div class="mem-only">
-<select class="esel" id="essaySel" title="Switch essay (Alt+1…9)"></select>
+<div class="menu" id="essMenu"><button class="btn esel" id="essBtn" title="Switch essay (Alt+1…9)"><span id="essName"></span><svg width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+<div class="menu-pop epop" id="essPop" hidden></div></div>
 <button class="btn primary" id="btnUpload">+ Upload essay</button>
 <button class="btn" id="btnEssay" title="Manage essays">Essays</button>
 <button class="btn" id="btnStart">Choose start</button>
@@ -457,13 +517,13 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 </section>
 <section class="panel" data-panel="settings" data-name="Settings">
 <div class="ph"><h4>Settings</h4><button class="x" title="Hide">✕</button></div>
-<div class="set"><span>Clear delay</span><span><input type="range" id="sDelay" min="0.5" max="4" step="0.25"> <output id="oDelay"></output></span></div>
-<div class="set"><span>Pass mark</span><span><input type="range" id="sStrict" min="60" max="100" step="1"> <output id="oStrict"></output></span></div>
-<div class="set"><span>Max chunk</span><span><input type="range" id="sPhrase" min="2" max="7" step="1"> <output id="oPhrase"></output></span></div>
-<div class="set"><span>Essay checkpoints</span><input type="checkbox" id="sEssay"></div>
-<div class="set"><span>Hide prompt on type</span><input type="checkbox" id="sHide"></div>
-<div class="set"><span>Background motion</span><input type="checkbox" id="sMotion"></div>
-<div class="set"><span>Recall from</span><select id="sScope"><option value="start">My start point</option><option value="begin">Essay beginning</option></select></div>
+<div class="set"><span>Clear delay</span><span class="rng"><input type="range" id="sDelay" min="0.5" max="4" step="0.25"><output id="oDelay"></output></span></div>
+<div class="set"><span>Pass mark</span><span class="rng"><input type="range" id="sStrict" min="60" max="100" step="1"><output id="oStrict"></output></span></div>
+<div class="set"><span>Max chunk</span><span class="rng"><input type="range" id="sPhrase" min="2" max="7" step="1"><output id="oPhrase"></output></span></div>
+<label class="set"><span>Essay checkpoints</span><input type="checkbox" class="sw" id="sEssay"></label>
+<label class="set"><span>Hide prompt on type</span><input type="checkbox" class="sw" id="sHide"></label>
+<label class="set"><span>Background motion</span><input type="checkbox" class="sw" id="sMotion"></label>
+<div class="set stack"><span>Recall from</span><div class="seg" id="sScope"><button data-v="start">My start point</button><button data-v="begin">Essay beginning</button></div></div>
 <div class="set"><span></span><button class="btn small" id="btnReset">Reset progress</button></div>
 </section>
 </div>
@@ -542,6 +602,7 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 <div class="lib" id="lib"></div>
 <div class="erow"><input id="essayTitle" class="etitle" placeholder="Title (e.g. Mod A · Hamlet + Dickinson)" maxlength="60">
 <label class="btn small" title="Load a .txt or .md file">Upload file<input type="file" id="essayFile" accept=".txt,.md,text/plain" hidden></label></div>
+<label class="ck"><input type="checkbox" id="essayKind"> <span><b>This is not an essay</b> (imaginative, discursive or reflective piece). It’s split by headings, paragraphs and lines instead of topic sentences and quotes; a Reflection section is still analysed like an essay.</span></label>
 <textarea id="essayIn" class="essay-in" placeholder="Paste your essay here. Leave a blank line (or a line break) between paragraphs."></textarea>
 <div class="ana-head"><span id="anaStats" class="ana-stats"></span><span class="spacer"></span>
 <span class="legend2"><span class="rt ts">Topic sentence</span><span class="rt lead">Lead-in</span><span class="rt quote">Quote</span><span class="rt an">Analysis</span></span></div>
@@ -549,6 +610,7 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 <div class="sheet-foot"><button class="btn small" id="bExport" title="Download all essays + progress as a file">Back up</button><label class="btn small" title="Restore from a backup file">Restore<input type="file" id="bImport" accept=".json,application/json" hidden></label><span class="spacer"></span><button class="btn" id="bNew">New blank</button><button class="btn primary" id="bUseEssay">Save &amp; memorise</button></div>
 </div>
 </div>
+<script type="application/json" id="docs">{"ex":[]}</script>
 <div class="pet" id="pet"><button class="px" id="petX" title="Hide Don (bring back from Panels)">✕</button><canvas id="petCv" width="32" height="24" title="Don the falcon · click for a cookie"></canvas><div class="bub" id="petBub"></div></div>
 <script>
 const RAW = `Leadership is rarely found where we expect it, and democracy has long underestimated the wisdom of the back row. Bart Simpson, a ten-year-old from Springfield Elementary, exposes the paradox that the very qualities which earn detention are precisely those a nation requires in a crisis. His permanent record is long, but so is the Constitution, and nobody calls that a weakness. In an age of committee meetings and carefully focus-grouped slogans, Bart offers decisiveness, creativity and a skateboard. Read against a political culture exhausted by beige candidates, his record of mischief reveals a leader who understands power, labour and diplomacy better than most adults, and his candidacy suggests that the presidency might finally be fun again. Taken together, his rebellion, his hidden labour, his economics and his diplomacy make the strongest case yet for a ten-year-old in the Oval Office.
@@ -659,17 +721,66 @@ para.split(/\s+/).filter(Boolean).forEach(tok=>tok.split(/(?<=[-–—])/).forEa
 return out;
 }
 const tokens=text=>items(text).filter(i=>i.norm).map(i=>i.norm);
-function parseEssay(text){
-const clean=text.replace(/\r/g,'').trim();
+/* Markdown / docx-export clean-up: keeps line structure, drops images, rules, emphasis markers and escapes. */
+function mdClean(t){
+return t.replace(/\r/g,'').replace(/!\[[^\]]*\]\([^)]*\)/g,'').replace(/^\[image\d*\]:.*$/gim,'')
+.replace(/^\s*(-{3,}|\*{3,}|_{3,})\s*$/gm,'').replace(/\\([\[\]\-*_()#.!>~`|])/g,'$1')
+.replace(/~~/g,'').replace(/^\s*[*+-]\s+/gm,'').replace(/^#{1,6}\s+/gm,'').replace(/\*\*([^*]+?)\*\*/g,'$1').replace(/(^|[^*\w])\*([^*\n]+?)\*(?!\w)/g,'$1$2').replace(/\*\*/g,'')
+.replace(/[ \t]+$/gm,'').replace(/\n{3,}/g,'\n\n').trim();
+}
+const HEAD_RX=/^(?:#{1,6}\s|\*\*[^*]+\*\*\s*$)/;
+function looksHeading(raw,clean){
+if(HEAD_RX.test(raw.trim()))return true;
+const w=clean.split(/\s+/).length;
+return w<=7&&!/[.!?”"’,;:]$/.test(clean)&&!/^[“"‘]/.test(clean);
+}
+function looksCreative(text){
+const lines=text.replace(/\r/g,'').split(/\n/).map(l=>l.trim()).filter(Boolean);
+const heads=lines.filter(l=>looksHeading(l,mdClean(l))).length;
+return /^\W*(reflection|rationale)\b/im.test(mdClean(text))||heads>=3||lines.filter(l=>l.split(/\s+/).length<=6).length/lines.length>.35;
+}
+/* Essays: topic sentence / quote / analysis units (detectStructure).
+Creative pieces: headings and short poetic lines become their own units; full-piece recalls land at the
+end of each section or every ~120 words; any "Reflection" section is analysed like an essay. */
+function parseEssay(text,kind){
+let paras=[],meta=[];
+if(kind==='creative'){
+const rawBlocks=text.replace(/\r/g,'').split(/\n\s*\n+/);
+let mode='creative';
+for(const rb of rawBlocks){
+const rawLines=rb.split('\n').filter(l=>l.trim()),lines=rawLines.map(mdClean).filter(Boolean);
+if(!lines.length)continue;
+if(lines.length===1&&looksHeading(rawLines[0],lines[0])){
+paras.push([lines[0]]);meta.push('heading');
+if(/reflection|rationale/i.test(lines[0]))mode='essay';
+continue;
+}
+if(mode==='essay'){const ss=splitSentences(lines.join(' ').replace(/\s+/g,' '));if(ss.length){paras.push(ss);meta.push('essay')}continue}
+const shortLines=lines.length>1&&lines.every(l=>l.split(/\s+/).length<=16);
+const ss=shortLines?lines.flatMap(l=>splitSentences(l)):splitSentences(lines.join(' ').replace(/\s+/g,' '));
+if(ss.length){paras.push(ss);meta.push(shortLines?'lines':'prose')}
+}
+}else{
+const clean=mdClean(text);
 const blocks=(/\n\s*\n/.test(clean)?clean.split(/\n\s*\n+/):clean.split(/\n+/)).map(p=>p.replace(/\s+/g,' ').trim()).filter(Boolean);
-const paras=blocks.map(splitSentences).filter(ss=>ss.length);
-const sents=[],pstart=[];
+paras=blocks.map(splitSentences).filter(ss=>ss.length);meta=paras.map(()=>'essay');
+}
+const sents=[],pstart=[];let since=0;
 paras.forEach((ss,p)=>{
-pstart[p]=sents.length;
+pstart[p]=sents.length;const m=meta[p],nextHead=meta[p+1]==='heading'||p===paras.length-1;
+if(m==='essay'){
 const{roles,unitEnd}=detectStructure(ss);
-ss.forEach((t,s)=>sents.push({p,s,text:t,wc:tokens(t).length,role:roles[s],unitEnd:unitEnd[s]}));
+ss.forEach((t,s)=>sents.push({p,s,text:t,wc:tokens(t).length,role:roles[s],unitEnd:unitEnd[s],cp:roles[s]==='ts'||unitEnd[s]||s===ss.length-1}));
+since=0;return;
+}
+ss.forEach((t,s)=>{
+const wc=tokens(t).length;since+=wc;
+const last=s===ss.length-1,cp=m!=='heading'&&last&&(since>=120||nextHead);
+if(cp)since=0;
+sents.push({p,s,text:t,wc,role:m==='heading'?'heading':m==='lines'?'line':'prose',unitEnd:cp,cp});
 });
-return{paras,sents,pstart,total:sents.reduce((a,x)=>a+x.wc,0)};
+});
+return{paras,sents,pstart,total:sents.reduce((a,x)=>a+x.wc,0),kind:kind||'essay'};
 }
 let PARAS=[],SENTS=[],PSTART=[],TOTALW=1;
 /* ---------- fuzzy alignment ---------- */
@@ -717,11 +828,12 @@ let LIB=ls.get('lib')||[];
 let ACTIVE=ls.get('active')||'sample';
 let S=null;
 const essayText=id=>id==='sample'?RAW:(LIB.find(e=>e.id===id)||{}).text;
+const essayKind=id=>id==='sample'?'essay':(LIB.find(e=>e.id===id)||{}).kind||'essay';
 const save=()=>{if(S)S.nS=SENTS.length;ls.set('state.'+ACTIVE,S);ls.set('settings',SET);ls.set('active',ACTIVE)};
 function loadEssay(id){
 let text=essayText(id);if(!text){id='sample';text=RAW}
 ACTIVE=id;
-({paras:PARAS,sents:SENTS,pstart:PSTART,total:TOTALW}=parseEssay(text));
+({paras:PARAS,sents:SENTS,pstart:PSTART,total:TOTALW}=parseEssay(text,essayKind(id)));
 TOTALW=TOTALW||1;
 const st=ls.get('state.'+id),d=DEFSTATE();
 S=st?{...d,...st,stats:{...d.stats,...st.stats}}:d;
@@ -734,8 +846,8 @@ const newLive=()=>({keys:0,bs:0,ins:[],gaps:[],hes:0,longest:0,samples:[],peak:0
 const $=id=>document.getElementById(id);
 const ta=$('ta'),typebox=$('typebox'),typedEl=$('typed'),mark=$('mark'),caret=$('caret'),prompt=$('prompt'),foot=$('foot');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const ROLE={ts:'Topic sentence',quote:'Quote',analysis:'Analysis',lead:'Lead-in',context:'Point'};
-const RCLS={ts:'ts',quote:'quote',analysis:'an',lead:'lead',context:'context'};
+const ROLE={ts:'Topic sentence',quote:'Quote',analysis:'Analysis',lead:'Lead-in',context:'Point',heading:'Heading',line:'Line',prose:'Prose'};
+const RCLS={ts:'ts',quote:'quote',analysis:'an',lead:'lead',context:'context',heading:'ts',line:'lead',prose:'context'};
 function rangeText(a,b){
 const out=[];let cur=-1;
 for(let g=a;g<=b;g++){const x=SENTS[g];if(x.p!==cur){out.push([]);cur=x.p}out[out.length-1].push(x.text)}
@@ -745,10 +857,12 @@ function buildQueue(g){
 const x=SENTS[g],ph=chunkSentence(x.text,SET.phrase),q=[];
 ph.forEach((_,k)=>q.push({type:'build',k:k+1,n:ph.length,shown:ph.slice(0,k+1),text:ph.slice(0,k+1).join(' '),a:g,b:g}));
 const floor=SET.scope==='start'?Math.min(S.startG,g):0;
-const pa=Math.max(PSTART[x.p],floor),last=x.s===PARAS[x.p].length-1,pt=rangeText(pa,g);
+const pa=Math.max(PSTART[x.p],floor),last=x.s===PARAS[x.p].length-1,pt=rangeText(pa,g),solo=PARAS[x.p].length===1;
+if(!solo){
 if(last){q.push({type:'para',rep:1,text:pt,a:pa,b:g});q.push({type:'para',rep:2,text:pt,a:pa,b:g})}
 else q.push({type:'para',text:pt,a:pa,b:g});
-if(SET.essay&&(x.role==='ts'||x.unitEnd||last))q.push({type:'essay',text:rangeText(floor,g),a:floor,b:g});
+}
+if(SET.essay&&x.cp)q.push({type:'essay',text:rangeText(floor,g),a:floor,b:g});
 const out=[];
 for(const t of q){
 const prev=out[out.length-1];
@@ -1088,10 +1202,10 @@ document.body.classList.toggle('focus',!!SET.focus);
 $('pet').classList.toggle('hidden',SET.hidden.includes('pet'));
 Game.set(!!SET.gamify);
 $('btnFocus').classList.toggle('on',!!SET.focus);
-$('panelMenu').innerHTML=PANELS.map(p=>`<label><input type="checkbox" data-p="${p.dataset.panel}" ${SET.hidden.includes(p.dataset.panel)?'':'checked'}> ${p.dataset.name}</label>`).join('')+
-`<label><input type="checkbox" data-p="pet" ${SET.hidden.includes('pet')?'':'checked'}> Don the falcon</label>`+
-`<hr><label><input type="checkbox" id="mGame" ${SET.gamify?'checked':''}> 🎮 Gamify (retro platformer)</label>`+
-`<hr><label><input type="checkbox" id="mFocus" ${SET.focus?'checked':''}> Focus mode (hide all)</label>`;
+const T=(attr,on,name)=>`<label><span>${name}</span><input type="checkbox" class="sw" ${attr} ${on?'checked':''}></label>`;
+$('panelMenu').innerHTML=`<div class="ehead">Panels</div>`+PANELS.map(p=>T(`data-p="${p.dataset.panel}"`,!SET.hidden.includes(p.dataset.panel),p.dataset.name)).join('')+
+T('data-p="pet"',!SET.hidden.includes('pet'),'Don the falcon')+
+`<hr><div class="ehead">Modes</div>`+T('id="mGame"',SET.gamify,'🎮 Gamify (retro platformer)')+T('id="mFocus"',SET.focus,'Focus mode (hide all)');
 requestAnimationFrame(()=>{placeCaret();drawSpark()});
 save();
 }
@@ -1126,9 +1240,10 @@ let anaT=0;
 function renderAnalysis(){
 const txt=$('essayIn').value;
 if(!txt.trim()){$('ana').innerHTML='';$('anaStats').textContent='';return}
-const m=parseEssay(txt),units=m.sents.filter(x=>x.unitEnd&&x.role!=='ts').length,quotes=m.sents.filter(x=>x.role==='quote').length;
+const kind=$('essayKind').checked?'creative':'essay';
+const m=parseEssay(txt,kind),units=m.sents.filter(x=>x.cp).length,quotes=m.sents.filter(x=>x.role==='quote').length;
 const pl=(n,w)=>`${n} ${w}${n===1?'':'s'}`;
-$('anaStats').textContent=[pl(m.paras.length,'paragraph'),pl(m.sents.length,'sentence'),pl(quotes,'quote'),pl(units,'analysis unit'),pl(m.total,'word')].join(' · ');
+$('anaStats').textContent=[pl(m.paras.length,kind==='creative'?'block':'paragraph'),pl(m.sents.length,'sentence'),kind==='creative'?pl(m.sents.filter(x=>x.role==='heading').length,'heading'):pl(quotes,'quote'),pl(units,'full-piece checkpoint'),pl(m.total,'word')].join(' · ');
 $('ana').innerHTML=m.paras.map((ss,p)=>{
 let html='',open=false;
 ss.forEach((t,s)=>{
@@ -1152,8 +1267,23 @@ const st=id===ACTIVE?S:ls.get('state.'+id);if(!st||!st.learned)return 0;
 const n=st.learned.filter(Boolean).length,m=id===ACTIVE?SENTS.length:Math.max(n,(st.nS||1));return Math.round(n/Math.max(1,m)*100);
 }
 function renderSwitcher(){
-$('essaySel').innerHTML=allEssays().map((e,i)=>`<option value="${e.id}" ${e.id===ACTIVE?'selected':''}>${i<9?(i+1)+'. ':''}${esc(e.title)}</option>`).join('');
+$('essName').textContent=essayTitle(ACTIVE);
+$('essPop').innerHTML=`<div class="ehead">Your essays · Alt+1…9</div>`+allEssays().map((e,i)=>{const p=pctOf(e.id);
+return `<button class="eitem ${e.id===ACTIVE?'on':''}" data-sw="${e.id}"><span class="k">${i<9?i+1:''}</span><span class="t">${esc(e.title)}</span>${essayKind(e.id)==='creative'?'<span class="kind">creative</span>':''}<span class="bar"><i style="width:${p}%"></i></span><span class="p">${p}%</span></button>`}).join('')+
+`<hr><div class="act"><button class="btn small primary" data-act="up">+ Upload</button><button class="btn small" data-act="manage">Manage</button></div>`;
 }
+$('essBtn').onclick=e=>{e.stopPropagation();renderSwitcher();const p=$('essPop');p.hidden=!p.hidden;$('essBtn').classList.toggle('open',!p.hidden);$('panelMenu').hidden=true;if(!p.hidden)(p.querySelector('.eitem.on')||p.querySelector('.eitem')).focus()};
+$('essPop').addEventListener('click',e=>{
+e.stopPropagation();const b=e.target.closest('[data-sw],[data-act]');if(!b)return;
+$('essPop').hidden=true;$('essBtn').classList.remove('open');
+if(b.dataset.sw)switchEssay(b.dataset.sw);else if(b.dataset.act==='up')openEssay(null);else openEssay();
+});
+$('essPop').addEventListener('keydown',e=>{
+const it=[...$('essPop').querySelectorAll('.eitem')],i=it.indexOf(document.activeElement);
+if(e.key==='ArrowDown'){e.preventDefault();(it[i+1]||it[0]).focus()}else if(e.key==='ArrowUp'){e.preventDefault();(it[i-1]||it[it.length-1]).focus()}
+else if(e.key==='Escape'){$('essPop').hidden=true;$('essBtn').classList.remove('open');$('essBtn').focus()}
+});
+document.addEventListener('click',()=>{$('essPop').hidden=true;$('essBtn').classList.remove('open')});
 function renderLib(){
 $('lib').innerHTML=allEssays().map(e=>`<span class="libitem ${e.id===editId||(!editId&&e.id===ACTIVE&&$('essayIn').value)?'on':''}"><button data-edit="${e.id}" title="Edit">${esc(e.title)}</button><span class="pct">${pctOf(e.id)}%</span>${e.id==='sample'?'':`<button class="x" data-del="${e.id}" title="Delete">×</button>`}</span>`).join('');
 }
@@ -1162,7 +1292,9 @@ editId=id===undefined?ACTIVE:id;
 const fresh=editId===null;
 $('essayH').textContent=fresh?'Upload an essay':'Your essays';
 $('essayTitle').value=fresh?'':(editId==='sample'?'':essayTitle(editId));
-$('essayIn').value=fresh?'':(essayText(editId)||'').replace(/\n(?!\n)/g,'\n\n');
+const src=fresh?'':(essayText(editId)||'');
+$('essayIn').value=essayKind(editId)==='creative'?src:src.replace(/\n(?!\n)/g,'\n\n');
+$('essayKind').checked=!fresh&&essayKind(editId)==='creative';$('essayKind').dataset.touched=fresh?'':'1';$('essayKind').parentElement.classList.remove('auto');
 $('bUseEssay').textContent=editId==='sample'?'Save as my copy':'Save & memorise';
 renderLib();renderAnalysis();$('essayModal').hidden=false;
 setTimeout(()=>(fresh?$('essayTitle'):$('essayIn')).focus(),50);
@@ -1175,12 +1307,16 @@ toast(`Switched to “${essayTitle(id)}”`);
 if(!S.started)openModal();
 }
 function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2000)}
-$('essaySel').onchange=e=>switchEssay(e.target.value);
 document.addEventListener('keydown',e=>{if(e.altKey&&/^[1-9]$/.test(e.key)){const t=allEssays()[+e.key-1];if(t){e.preventDefault();switchEssay(t.id)}}});
-$('essayIn').addEventListener('input',()=>{clearTimeout(anaT);anaT=setTimeout(renderAnalysis,180)});
+function autoKind(){ // suggest creative mode for pasted/uploaded pieces unless the user chose themselves
+const ck=$('essayKind');if(ck.dataset.touched)return;
+const c=looksCreative($('essayIn').value);ck.checked=c;ck.parentElement.classList.toggle('auto',c);
+}
+$('essayKind').onchange=()=>{$('essayKind').dataset.touched='1';$('essayKind').parentElement.classList.remove('auto');renderAnalysis()};
+$('essayIn').addEventListener('input',()=>{clearTimeout(anaT);anaT=setTimeout(()=>{autoKind();renderAnalysis()},180)});
 $('essayFile').onchange=async e=>{
 const f=e.target.files[0];if(!f)return;
-$('essayIn').value=(await f.text()).replace(/\r/g,'');
+$('essayIn').value=(await f.text()).replace(/\r/g,'');autoKind();
 if(!$('essayTitle').value)$('essayTitle').value=f.name.replace(/\.[^.]+$/,'');
 renderAnalysis();e.target.value='';
 };
@@ -1198,13 +1334,13 @@ renderSwitcher();openEssay(ACTIVE);
 $('bNew').onclick=()=>openEssay(null);
 $('bUseEssay').onclick=()=>{
 const txt=$('essayIn').value.trim();if(!txt){$('essayIn').focus();return}
-const title=($('essayTitle').value.trim()||titleOf(txt)).slice(0,60);
+const title=($('essayTitle').value.trim()||titleOf(mdClean(txt))).slice(0,60),kind=$('essayKind').checked?'creative':'essay';
 let id=editId;
 if(!id||id==='sample'){
-id='e'+Date.now().toString(36);LIB.unshift({id,title,text:txt,updated:Date.now()});
+id='e'+Date.now().toString(36);LIB.unshift({id,title,text:txt,kind,updated:Date.now()});
 }else{
 const e=LIB.find(x=>x.id===id);
-if(e){if(e.text.replace(/\s+/g,' ')!==txt.replace(/\s+/g,' ')){ls.del('state.'+id);if(id===ACTIVE)ACTIVE='__reload'}e.text=txt;e.title=title;e.updated=Date.now()}
+if(e){if(e.text.replace(/\s+/g,' ')!==txt.replace(/\s+/g,' ')||(e.kind||'essay')!==kind){ls.del('state.'+id);if(id===ACTIVE)ACTIVE='__reload'}e.text=txt;e.title=title;e.kind=kind;e.updated=Date.now()}
 }
 ls.set('lib',LIB);renderSwitcher();
 if(ACTIVE==='__reload'){ACTIVE=id;loadEssay(id);loadTask();closeEssay();if(!S.started)openModal()}
@@ -1232,13 +1368,15 @@ $('btnEssay').onclick=()=>openEssay();
 $('btnUpload').onclick=()=>openEssay(null);
 /* ---------- settings ---------- */
 function bindSettings(){
-const R=(id,key,fmt,rebuild)=>{const el=$(id),o=$('o'+id.slice(1));el.value=SET[key];o.textContent=fmt(SET[key]);
-el.oninput=()=>{SET[key]=+el.value;o.textContent=fmt(SET[key]);save()};
+const fill=el=>el.style.setProperty('--p',((el.value-el.min)/(el.max-el.min)*100)+'%');
+const R=(id,key,fmt,rebuild)=>{const el=$(id),o=$('o'+id.slice(1));el.value=SET[key];o.textContent=fmt(SET[key]);fill(el);
+el.oninput=()=>{SET[key]=+el.value;o.textContent=fmt(SET[key]);fill(el);save()};
 if(rebuild)el.onchange=()=>{S.ti=0;if(phase!=='done')loadTask()}};
 R('sDelay','delay',v=>v+'s');R('sStrict','strict',v=>v+'%');R('sPhrase','phrase',v=>v+'w',true);
 const C=(id,key)=>{const el=$(id);el.checked=SET[key];el.onchange=()=>{SET[key]=el.checked;save();if(key==='essay'){S.ti=0;if(phase!=='done')loadTask()}else if(key==='hide'&&phase==='type')renderPrompt()}};
 C('sEssay','essay');C('sHide','hide');C('sMotion','motion');
-$('sScope').value=SET.scope;$('sScope').onchange=e=>{SET.scope=e.target.value;S.ti=0;save();if(phase!=='done')loadTask()};
+const seg=()=>$('sScope').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===SET.scope));seg();
+$('sScope').onclick=e=>{const b=e.target.closest('button');if(!b||b.dataset.v===SET.scope)return;SET.scope=b.dataset.v;seg();S.ti=0;save();if(phase!=='done')loadTask()};
 $('btnReset').onclick=()=>{if(confirm('Reset progress and stats for this essay?')){S=DEFSTATE();save();loadTask();openModal()}};
 }
 /* ---------- background: drifting aurora + particles + keystroke ripples ---------- */
@@ -1382,6 +1520,18 @@ ${m.fmt?`<div class="fmt">${m.fmt.map(([a,b])=>`<div><b>${a}</b><span>${b}</span
 <div class="rlab">NESA rubric terms · exact wording</div><div class="chips">${m.chips.map(c=>`<span>${c}</span>`).join('')}</div>
 <div class="rlab">NESA verbs</div><div class="chips verbs">${m.verbs.map(c=>`<span>${c}</span>`).join('')}</div>
 <div class="glinks">${m.links.map(([t,u,p])=>`<a class="btn ${p?'primary':''}" href="${u}" target="_blank" rel="noopener">${t}</a>`).join('')}</div></section>`;
+const rub=ls.get('rubric.'+SET.gsec);
+if(rub&&!rubricEditing){
+let html=esc(rub);
+[...m.chips].sort((a,b)=>b.length-a.length).forEach(c=>{html=html.split(esc(c)).join(`<b class="rk">${esc(c)}</b>`)});
+m.verbs.forEach(v=>{html=html.replace(new RegExp(`\\b(${v}\\w*)\\b`,'gi'),'<span class="rv">$1</span>')});
+h+=`<section class="gsec"><h2>The NESA rubric <span class="tag hot">official</span></h2><div class="rubric">${html.replace(/\n+/g,'</p><p>').replace(/^/,'<p>')}</p></div>
+<div class="glinks"><button class="btn small" id="bRubEdit">Edit</button><span class="src" style="align-self:center">Saved in this browser · verbs and key terms highlighted</span></div></section>`;
+}else{
+h+=`<section class="gsec"><h2>Your NESA rubric <span class="tag hot">paste once</span></h2><p class="lead">Paste the official rubric for this module (from the NESA syllabus or the “Full NESA rubric” link above). It’s saved in this browser and shown here word for word, with NESA verbs and key terms highlighted.</p>
+<textarea id="rubIn" class="essay-in" style="min-height:120px" placeholder="Paste the full rubric text…">${esc(rub||'')}</textarea>
+<div class="glinks"><button class="btn primary small" id="bRubSave">Save rubric</button>${rub?'<button class="btn small" id="bRubCancel">Cancel</button>':''}</div></section>`;
+}
 h+=`<section class="gsec"><h2>${m.newTitle} <span class="tag new">2027</span></h2><p class="lead">${m.newLead}</p>
 ${m.samples?m.samples.map(([q,s])=>`<div class="sample">${q}<small>${s}</small></div>`).join(''):''}
 ${m.fresh.map(it=>ideaHtml(it,++n,'newi')).join('')}</section>`;
@@ -1407,12 +1557,36 @@ return `<section class="gsec ghero"><div class="kick">Practice paper</div><h1>Wr
 <p class="src" style="margin-top:12px">Tip: print a few copies and do full timed responses by hand. Your handwriting speed in the exam is the real limit.</p></div></div></section>`;
 }
 function bookletBlob(){const b=atob(BOOKLET_B64),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new Blob([u],{type:'application/pdf'})}
-const GNAV=[['common','Common Module','Texts & Human Experiences'],['modA','Module A','Textual Conversations'],['modB','Module B','Critical Study of Literature'],['modC','Module C','The Craft of Writing'],['tips','Exam tips','PEPSS/PECIL, SAQ, themes, Mod C'],['booklet','Writing booklet','Download the PDF']];
+const GNAV=[['common','Common Module','Texts & Human Experiences'],['modA','Module A','Textual Conversations'],['modB','Module B','Critical Study of Literature'],['modC','Module C','The Craft of Writing'],['tips','Exam tips','PEPSS/PECIL, SAQ, themes, Mod C'],['adapt','Adaptation guide','SAQ, phrases, every module'],['exemplars','Mod C exemplars','Read them, or memorise one'],['booklet','Writing booklet','Download the PDF']];
+let rubricEditing=false;
+const DOCS=JSON.parse(document.getElementById('docs').textContent);
+function adaptHtml(){
+return `<section class="gsec ghero"><div class="kick">Study notes</div><h1>Adaptation guide</h1><p>How to adapt your responses on the day, plus short-answer structure, top techniques, starting phrases, IQTVE sub-phrases and notes for every module.</p>
+<div class="glinks"><a class="btn primary" href="${THSC}" target="_blank" rel="noopener">Past trial papers ↗</a></div></section>
+<section class="gsec doc">${DOCS.adapt.html}</section>`;
+}
+function exemplarsHtml(){
+return `<section class="gsec ghero"><div class="kick">Module C</div><h1>Mod C exemplars</h1><p>Imaginative and discursive pieces with their reflections. Open one to read it, or press <b>Memorise</b> to add it to your essays in creative mode: split by headings, paragraphs and lines, with the reflection analysed like an essay.</p></section>
+${DOCS.ex.map((d,i)=>`<details class="gsec doc ex"><summary><span class="exn">${i+1}</span><span class="ext"><b>${esc(d.title)}</b><small>${esc(d.form)} · ${d.words} words</small></span><button class="btn primary small" data-mem="${i}">Memorise</button></summary>${d.html}</details>`).join('')}`;
+}
+function bindExemplars(){
+document.querySelectorAll('[data-mem]').forEach(b=>b.onclick=e=>{
+e.preventDefault();e.stopPropagation();
+const d=DOCS.ex[+b.dataset.mem];
+let e2=LIB.find(x=>x.src===d.title);
+if(!e2){e2={id:'e'+Date.now().toString(36),title:d.title,text:d.text,kind:'creative',src:d.title,updated:Date.now()};LIB.unshift(e2);ls.set('lib',LIB)}
+renderSwitcher();setView('mem');switchEssay(e2.id);
+});
+}
 function renderGuide(){
 $('gnav').innerHTML=GNAV.map(([id,a,b])=>`<button data-g="${id}" class="${SET.gsec===id?'on':''}">${a}<small>${b}</small></button>`).join('');
 const g=SET.gsec;
-$('gmain').innerHTML=g==='tips'?TIPS:g==='booklet'?bookletHtml():renderModule(GUIDE[g]||GUIDE.common);
+$('gmain').innerHTML=g==='tips'?TIPS:g==='booklet'?bookletHtml():g==='adapt'?adaptHtml():g==='exemplars'?exemplarsHtml():renderModule(GUIDE[g]||GUIDE.common);
 requestAnimationFrame(()=>document.querySelectorAll('.bf').forEach(el=>el.style.width=el.dataset.w+'%'));
+if($('bRubEdit'))$('bRubEdit').onclick=()=>{rubricEditing=true;renderGuide()};
+if($('bRubSave'))$('bRubSave').onclick=()=>{const v=$('rubIn').value.trim();if(v)ls.set('rubric.'+g,v);else ls.del('rubric.'+g);rubricEditing=false;renderGuide()};
+if($('bRubCancel'))$('bRubCancel').onclick=()=>{rubricEditing=false;renderGuide()};
+if(g==='exemplars')bindExemplars();
 if(g==='booklet'){
 $('bDl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(bookletBlob());a.download='English-Advanced-Writing-Booklet.pdf';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)};
 $('bOpen').onclick=()=>window.open(URL.createObjectURL(bookletBlob()),'_blank');
