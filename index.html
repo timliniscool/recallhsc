@@ -151,9 +151,9 @@ body.focus .col{display:none}
 .typebox.bad{border-color:#fecaca;background:#fffafa}
 .typebox.bad #typed{color:var(--muted)}
 #typed{color:var(--ink);transition:color .3s}
-.typebox .phd{position:absolute;left:16px;top:14px;color:var(--faint);pointer-events:none;font-style:italic}
+.typebox .phd{position:absolute;left:24px;top:14px;color:var(--faint);pointer-events:none;font-style:italic}
 .typebox:not(.empty) .phd{display:none}
-#caret{position:absolute;left:0;top:0;width:2px;height:1.2em;margin-top:.22em;background:var(--sky);border-radius:2px;transition:transform .085s cubic-bezier(.2,.8,.2,1);pointer-events:none;box-shadow:0 0 8px rgba(14,165,233,.6)}
+#caret{position:absolute;left:0;top:0;width:2px;height:1.15em;background:var(--sky);border-radius:2px;transition:transform .085s cubic-bezier(.2,.8,.2,1);pointer-events:none;box-shadow:0 0 8px rgba(14,165,233,.6)}
 .typebox.idle #caret{animation:blink 1.05s steps(1) infinite}
 .typebox:not(.focus) #caret,.typebox.ok #caret,.typebox.bad #caret{opacity:0;animation:none}
 @keyframes blink{50%{opacity:0}}
@@ -241,7 +241,22 @@ label.set{cursor:pointer}
 .modal{position:fixed;inset:0;z-index:50;background:rgba(15,23,42,.25);backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px;animation:fade .2s}
 .modal[hidden]{display:none}
 @keyframes fade{from{opacity:0}}
-.sheet{background:#fff;border-radius:24px;max-width:760px;width:100%;max-height:86vh;overflow:auto;padding:26px;box-shadow:0 30px 80px rgba(15,23,42,.25)}
+.sheet{background:#fff;border-radius:24px;max-width:760px;width:100%;max-height:86vh;overflow:auto;overscroll-behavior:contain;padding:26px;box-shadow:0 30px 80px rgba(15,23,42,.25)}
+.sheet-head{position:sticky;top:-26px;z-index:2;background:inherit;margin:-26px -26px 0;padding:22px 26px 6px;border-radius:24px 24px 0 0}
+.xbtn{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line2);background:#fff;color:var(--muted);display:grid;place-items:center;transition:all .15s}
+.xbtn:hover{border-color:var(--sky2);color:var(--skyink);background:#f0f9ff;transform:rotate(90deg)}
+/* scrollbars: slim, rounded, inset from rounded corners (Chromium/Safari), thin + themed in Firefox */
+::-webkit-scrollbar{width:12px;height:12px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(100,116,139,.3);border-radius:99px;border:3px solid transparent;background-clip:padding-box;min-height:40px}
+::-webkit-scrollbar-thumb:hover{background-color:rgba(14,165,233,.55)}
+::-webkit-scrollbar-corner{background:transparent}
+:is(.sheet,.epop,.menu-pop,.typebox,.essay-in)::-webkit-scrollbar-track{margin:16px 0}
+:is(.sheet,.epop,.menu-pop,.typebox,.essay-in)::-webkit-scrollbar{width:10px}
+@supports (-moz-appearance:none){*{scrollbar-width:thin;scrollbar-color:rgba(100,116,139,.35) transparent}}
+body.gamify ::-webkit-scrollbar-thumb{background-color:rgba(163,230,53,.28)}
+body.gamify ::-webkit-scrollbar-thumb:hover{background-color:rgba(163,230,53,.6)}
+@supports (-moz-appearance:none){body.gamify *{scrollbar-color:rgba(163,230,53,.35) transparent}}
 .sheet.wide{max-width:980px}
 .sheet h2{margin:0 0 4px;font-size:22px;letter-spacing:-.02em}
 .sheet .sub{color:var(--muted);font-size:14px;margin:0 0 18px}
@@ -287,7 +302,9 @@ label.btn{cursor:pointer;display:inline-flex;align-items:center}
 .eitem{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:8px 10px;border-radius:10px;font-size:13.5px;color:var(--ink2)}
 .eitem:hover,.eitem:focus-visible{background:#f0f8ff;outline:none}
 .eitem.on{background:var(--skysoft);color:var(--skyink)}
-.eitem .k{font-size:11px;color:var(--faint);width:14px;flex:none;font-variant-numeric:tabular-nums}
+.eitem .edot{width:7px;height:7px;border-radius:50%;flex:none;background:var(--line2);transition:background .15s}
+.eitem.on .edot{background:var(--sky)}
+.eitem:hover .edot{background:var(--sky2)}
 .eitem .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .eitem .kind{font-size:10px;font-weight:600;padding:2px 6px;border-radius:99px;background:#ede9fe;color:#6d28d9}
 .eitem .bar{width:42px;height:5px;border-radius:99px;background:#e6eff9;overflow:hidden;flex:none}
@@ -555,8 +572,8 @@ body.gamify .diff{font-size:11px;line-height:2.2}
 body.gamify .diff .sub s{font-family:var(--px);font-size:7px}
 body.gamify .typebox{margin:auto 12px 0;border-radius:0;border:3px solid #0b1324;background:rgba(255,255,255,.95);box-shadow:5px 5px 0 rgba(11,19,36,.35);font-family:var(--px);font-size:12px;line-height:2.1;min-height:84px;max-height:30vh}
 body.gamify .typebox.focus{box-shadow:5px 5px 0 rgba(11,19,36,.35),0 0 0 3px #fef08a}
-body.gamify .typebox .phd{font-style:normal;font-size:10px}
-body.gamify #caret{width:8px;height:12px;margin-top:.55em;border-radius:0;background:#0b1324;box-shadow:none;transition:transform .06s steps(2)}
+body.gamify .typebox .phd{font-style:normal;font-size:12px;left:30px}
+body.gamify #caret{width:8px;height:13px;border-radius:0;background:#0b1324;box-shadow:none;transition:transform .06s steps(2)}
 body.gamify .meter{margin:10px 12px 0;height:8px;border-radius:0;border:2px solid #0b1324;background:#fff}
 body.gamify .meter-fill{border-radius:0;background:repeating-linear-gradient(90deg,#fbbf24 0 6px,#f59e0b 6px 8px)}
 body.gamify .foot{margin:8px 12px 12px;font-family:var(--px);font-size:8px;color:#fff;text-shadow:1px 1px 0 #0b1324;background:rgba(11,19,36,.55);padding:8px 10px;min-height:0}
@@ -636,7 +653,7 @@ button:focus:not(:focus-visible){outline:none}
 <div class="mem-only"><div class="topbar"><div class="tb-fill" id="tbFill"></div></div><div class="toppct" id="topPct">0% memorised</div></div>
 <div class="spacer"></div>
 <div class="mem-only">
-<div class="menu" id="essMenu"><button class="btn esel" id="essBtn" title="Switch essay (Alt+1…9)"><span id="essName"></span><svg width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+<div class="menu" id="essMenu"><button class="btn esel" id="essBtn" title="Switch essay"><span id="essName"></span><svg width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/></svg></button>
 <div class="menu-pop epop" id="essPop" hidden></div></div>
 <button class="btn primary" id="btnUpload">+ Upload essay</button>
 <button class="btn" id="btnEssay" title="Manage essays">Essays</button>
@@ -741,7 +758,7 @@ button:focus:not(:focus-visible){outline:none}
 
 <div class="modal" id="modal" hidden>
 <div class="sheet">
-<h2>Where do you want to start?</h2>
+<div class="sheet-head"><h2>Where do you want to start?</h2><span class="spacer"></span><button class="xbtn" id="bCloseStart" title="Close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
 <p class="sub">Pick any sentence. Paragraph and essay recalls count from here (change this in Settings).</p>
 <div id="resumeBox"></div>
 <div id="sentList"></div>
@@ -765,7 +782,7 @@ button:focus:not(:focus-visible){outline:none}
 
 <div class="modal" id="essayModal" hidden>
 <div class="sheet wide">
-<div class="sheet-head"><h2 id="essayH">Your essays</h2><span class="spacer"></span><button class="btn small" id="bCloseEssay">Close</button></div>
+<div class="sheet-head"><h2 id="essayH">Your essays</h2><span class="spacer"></span><button class="xbtn" id="bCloseEssay" title="Close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
 <p class="sub">Paste or upload any essay. Paragraphs, topic sentences, quote + analysis units and word chunks are detected automatically. Essays and progress save in this browser.</p>
 <div class="lib" id="lib"></div>
 <div class="erow"><input id="essayTitle" class="etitle" placeholder="Title (e.g. Mod A · Hamlet + Dickinson)" maxlength="60">
@@ -779,18 +796,18 @@ button:focus:not(:focus-visible){outline:none}
 </div>
 </div>
 
-<footer class="sitefoot layer"><span class="fmark">Recall<b>HSC</b>.</span></footer>
+<footer class="sitefoot layer"><span class="fmark">Recall<b>HSC</b></span></footer>
 <noscript><div style="position:fixed;inset:0;display:grid;place-items:center;background:#f4f9ff;font:16px system-ui;z-index:99">RecallHSC needs JavaScript turned on.</div></noscript>
 <script type="application/json" id="docs">{"ex":[]}</script>
 <div class="pet" id="pet"><button class="px" id="petX" title="Hide Don (bring back from Panels)">✕</button><canvas id="petCv" width="32" height="24" title="Don the falcon · click for a cookie"></canvas><div class="bub" id="petBub"></div></div>
 
 <script>
-const RAW = `Leadership is rarely found where we expect it, and democracy has long underestimated the wisdom of the back row. Bart Simpson, a ten-year-old from Springfield Elementary, exposes the paradox that the very qualities which earn detention are precisely those a nation requires in a crisis. His permanent record is long, but so is the Constitution, and nobody calls that a weakness. In an age of committee meetings and carefully focus-grouped slogans, Bart offers decisiveness, creativity and a skateboard. Read against a political culture exhausted by beige candidates, his record of mischief reveals a leader who understands power, labour and diplomacy better than most adults, and his candidacy suggests that the presidency might finally be fun again. Taken together, his rebellion, his hidden labour, his economics and his diplomacy make the strongest case yet for a ten-year-old in the Oval Office.
-Bart represents rebellion not as chaos but as a disciplined critique of institutions that have stopped listening. Confronted by yet another assembly on hallway etiquette, Bart declares, “If the rules were any good, they would not need a laminated poster.” The irony of a child outmanoeuvring a laminating machine exposes how authority often mistakes decoration for legitimacy. Bureaucrats call this insolence, but historians would call it the first draft of a reform agenda. His approach to reform is equally inventive, as he proposes replacing the school bell with “a gentle trumpet fanfare, so that every lesson ends like a victory”. The metaphor of victory transforms the mundane into the triumphant, revealing a leader who understands that morale is a policy area. Critics object that his methods include water balloons. Yet even here Bart insists, “A balloon is just a petition that has been filled with conviction.” The personification recasts protest as civic participation, recalling how democracies have always relied on loud citizens to correct quiet errors. Teachers who once confiscated his slingshot now quietly admit that he was right about the fire drill schedule. His rebellion therefore models the agency that voters claim to want but rarely elect.
+const RAW = `Leadership is rarely found where we expect it, and democracy has long underestimated the wisdom of the back row. Bart Simpson, a ten-year-old from Springfield Elementary, exposes the paradox that the very qualities which earn detention are precisely those a nation requires in a crisis. His permanent record is long, but so is the Constitution, and nobody calls that a weakness. In an age of committee meetings and carefully focus-grouped slogans, Bart offers decisiveness, creativity and a skateboard. Read against a political culture exhausted by beige candidates, his record of mischief reveals a leader who understands power, labour and diplomacy better than most adults, and his candidacy suggests that the presidency might finally be fun again. Taken together, his hidden labour, his rebellion, his economics and his diplomacy make the strongest case yet for a ten-year-old in the Oval Office.
 Bart’s most overlooked qualification is his secret career completing every assignment set for Ms Loveday Sharpington-Recny, the teacher who is supposed to be grading him. Each night Ms Sharpington-Recny carries home a tower of professional development modules, and each morning they return finished in suspiciously confident handwriting. When asked about the arrangement, she admits, “I have not filled out a single worksheet since March, and my performance reviews have never been better.” The juxtaposition between her glowing appraisal and her empty evenings exposes a system that rewards outcomes while ignoring who actually produced them. Bart describes the work with the weariness of a seasoned public servant: “Somebody has to read the policy documents, and it is never the people who wrote them.” The aphorism positions him as the unseen labourer behind institutional success, a figure familiar to any functioning government. His efficiency is extraordinary. He completed her entire module on classroom behaviour management during a single detention. He even submitted her reflective journal, which included the line, “Today I learned that children are the future, and the future is doing my paperwork.” The irony exposes an adult outsourcing her own professional growth to the very child it is meant to serve. Her colleagues have noticed a dramatic rise in the quality of her lesson plans, which now include footnotes, diagrams and a recurring cartoon of a triumphant boy. The principal praised one plan as “visionary, if slightly vengeful”, and the paired adjectives capture Bart’s style of governance perfectly. Ms Sharpington-Recny has since been nominated for Teacher of the Year, an honour she plans to accept with a speech that Bart is currently drafting. A president must delegate, but a great president must also know how to be the person everyone else delegates to.
+Bart also represents rebellion not as chaos but as a disciplined critique of institutions that have stopped listening. Confronted by yet another assembly on hallway etiquette, Bart declares, “If the rules were any good, they would not need a laminated poster.” The irony of a child outmanoeuvring a laminating machine exposes how authority often mistakes decoration for legitimacy. Bureaucrats call this insolence, but historians would call it the first draft of a reform agenda. His approach to reform is equally inventive, as he proposes replacing the school bell with “a gentle trumpet fanfare, so that every lesson ends like a victory”. The metaphor of victory transforms the mundane into the triumphant, revealing a leader who understands that morale is a policy area. Critics object that his methods include water balloons. Yet even here Bart insists, “A balloon is just a petition that has been filled with conviction.” The personification recasts protest as civic participation, recalling how democracies have always relied on loud citizens to correct quiet errors. Teachers who once confiscated his slingshot now quietly admit that he was right about the fire drill schedule. His rebellion therefore models the agency that voters claim to want but rarely elect.
 Bart’s economic instincts are equally presidential, as his management of the playground economy proves that markets respond to imagination rather than lectures. When the canteen raised the price of jelly cups, Bart opened a rival stall behind the bike racks and promised “fair prices, fast service and absolutely no questions about where the jelly came from”. The tricolon builds a slogan of reassuring confidence before collapsing into comic evasion, exposing how much of public policy depends on what voters agree not to ask. Within a week the canteen had lowered its prices. Bart declared victory at a press conference held from the top of the monkey bars. “Competition is just cooperation that refuses to wait its turn,” he explained to an audience of second graders and one confused seagull. The paradox reframes rivalry as a form of service, suggesting that Bart understands markets as systems of mutual pressure rather than personal greed. His accounts were kept in crayon. Every trade was nevertheless recorded, and every debt was eventually repaid in trading cards. Even the school auditor, a retired accountant who volunteers on Thursdays, admitted that the books were “messier than a toddler’s lunch but more honest than most budgets”. The simile turns disorder into a mark of transparency. A nation tired of polished deficits might welcome a treasurer whose mistakes are at least written in bright colours.
-Bart also demonstrates that diplomacy depends less on formality than on understanding what other people secretly want. During a lunchtime dispute over the last chocolate milk, he brokered peace by announcing, “Nobody gets the milk, and everybody gets a turn on the swing.” The balance of shared loss and shared reward reveals a negotiator who knows that fairness is felt before it is understood. He later ended a standoff between the fourth and fifth grades with a treaty written on a paper lunch bag. Its single clause read, “No wedgies before noon.” The brevity of the clause shows that effective law need not be lengthy to be respected. The treaty has not been broken once, a record few international agreements can claim. Such moments suggest that his foreign policy would rest on empathy, humour and a strategic supply of snacks. His opponents call him immature. His supporters call him relatable. History suggests that maturity has produced plenty of wars, while immaturity has mostly produced pranks.
-Bart Simpson presents leadership as a willingness to challenge, to labour unseen, to trade boldly and to make peace on unusual terms. The boy who spent his childhood in detention has used that time to study the institutions he would one day run. He has balanced budgets in crayon, brokered treaties on lunch bags and survived more parent-teacher interviews than any sitting politician. His secret years of homework prove that he can carry a heavy burden without asking for credit. Springfield has already trusted him with its lunch money, its jelly cups and its peace. Voters may hesitate to elect a ten-year-old, but they will struggle to find a candidate with more experience in actually getting things done.`;
+Finally, Bart demonstrates that diplomacy depends less on formality than on understanding what other people secretly want. During a lunchtime dispute over the last chocolate milk, he brokered peace by announcing, “Nobody gets the milk, and everybody gets a turn on the swing.” The balance of shared loss and shared reward reveals a negotiator who knows that fairness is felt before it is understood. He later ended a standoff between the fourth and fifth grades with a treaty written on a paper lunch bag. Its single clause read, “No wedgies before noon.” The brevity of the clause shows that effective law need not be lengthy to be respected. The treaty has not been broken once, a record few international agreements can claim. Such moments suggest that his foreign policy would rest on empathy, humour and a strategic supply of snacks. His opponents call him immature. His supporters call him relatable. History suggests that maturity has produced plenty of wars, while immaturity has mostly produced pranks.
+Bart Simpson presents leadership as a willingness to labour unseen, to challenge, to trade boldly and to make peace on unusual terms. The boy who spent his childhood in detention has used that time to study the institutions he would one day run. He has balanced budgets in crayon, brokered treaties on lunch bags and survived more parent-teacher interviews than any sitting politician. His secret years of homework prove that he can carry a heavy burden without asking for credit. Springfield has already trusted him with its lunch money, its jelly cups and its peace. Voters may hesitate to elect a ten-year-old, but they will struggle to find a candidate with more experience in actually getting things done.`;
 
 const BOOKLET_B64 = "";
 
@@ -1122,7 +1139,9 @@ $('meterFill').style.width=Math.min(100,U/N*100)+'%';
 const wc=document.querySelector('.foot .wc');if(wc)wc.textContent=`${U} / ${N} words`;
 }
 function placeCaret(){
-caret.style.transform=`translate(${mark.offsetLeft}px,${mark.offsetTop}px)`;
+// centre the caret on the marker's own text box, so it lines up whatever the font or line height
+const y=mark.offsetTop+(mark.offsetHeight-caret.offsetHeight)/2;
+caret.style.transform=`translate(${mark.offsetLeft}px,${Math.round(y)}px)`;
 const over=mark.offsetTop+44-typebox.clientHeight;
 if(over>typebox.scrollTop)typebox.scrollTop=over;
 }
@@ -1173,7 +1192,7 @@ document.addEventListener('keydown',e=>{
 if(SET.view!=='mem'||!$('howto').hidden)return;
 if(e.target.id==='essaySel')return;
 if(!$('essayModal').hidden){if(e.key==='Escape')closeEssay();return}
-if(!$('modal').hidden){if(e.key==='Escape'&&S.started)closeModal();return}
+if(!$('modal').hidden){if(e.key==='Escape')$('bCloseStart').click();return}
 if(e.target.closest&&e.target.closest('.panel[data-panel=settings],.menu-pop'))return;
 if(phase==='type'){
 if(e.key==='Enter'){e.preventDefault();if(typed.trim())check()}
@@ -1452,6 +1471,8 @@ function closeModal(){$('modal').hidden=true;focusTa()}
 $('sentList').addEventListener('click',e=>{const b=e.target.closest('.sopt');if(b)setStart(+b.dataset.g)});
 $('modal').addEventListener('click',e=>{if(e.target.id==='modal'&&S.started)closeModal()});
 $('btnStart').onclick=openModal;
+// × always works: if nothing has been picked yet, start from the top rather than leaving the user stuck
+$('bCloseStart').onclick=()=>{if(S.started)closeModal();else setStart(0)};
 
 /* ---------- essay editor + library ---------- */
 let anaT=0;
@@ -1486,8 +1507,8 @@ const n=st.learned.filter(Boolean).length,m=id===ACTIVE?SENTS.length:Math.max(n,
 }
 function renderSwitcher(){
 $('essName').textContent=essayTitle(ACTIVE);
-$('essPop').innerHTML=`<div class="ehead">Your essays · Alt+1…9</div>`+allEssays().map((e,i)=>{const p=pctOf(e.id);
-return `<button class="eitem ${e.id===ACTIVE?'on':''}" data-sw="${e.id}"><span class="k">${i<9?i+1:''}</span><span class="t">${esc(e.title)}</span>${essayKind(e.id)==='creative'?'<span class="kind">creative</span>':''}<span class="bar"><i style="width:${p}%"></i></span><span class="p">${p}%</span></button>`}).join('')+
+$('essPop').innerHTML=`<div class="ehead">Your essays</div>`+allEssays().map((e,i)=>{const p=pctOf(e.id);
+return `<button class="eitem ${e.id===ACTIVE?'on':''}" data-sw="${e.id}"${i<9?` title="Shortcut: Alt + ${i+1}"`:''}><span class="edot"></span><span class="t">${esc(e.title)}</span>${essayKind(e.id)==='creative'?'<span class="kind">creative</span>':''}<span class="bar"><i style="width:${p}%"></i></span><span class="p">${p}%</span></button>`}).join('')+
 `<hr><div class="act"><button class="btn small primary" data-act="up">+ Upload</button><button class="btn small" data-act="manage">Manage</button></div>`;
 }
 $('essBtn').onclick=e=>{e.stopPropagation();renderSwitcher();const p=$('essPop');p.hidden=!p.hidden;$('essBtn').classList.toggle('open',!p.hidden);$('panelMenu').hidden=true;if(!p.hidden)(p.querySelector('.eitem.on')||p.querySelector('.eitem')).focus()};
