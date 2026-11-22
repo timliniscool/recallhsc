@@ -324,6 +324,29 @@ label.btn{cursor:pointer;display:inline-flex;align-items:center}
 .libitem button.x{color:var(--faint);padding:6px 8px;border-left:1px solid var(--line2)}
 .libitem button.x:hover{color:var(--bad)}
 .done-wrap{text-align:center;padding:20px 0}
+/* ---------- mobile top bar: two tidy rows ---------- */
+#moreWrap,.ico-m{display:none}
+.mitem{display:block;width:100%;text-align:left;border:0;background:none;padding:9px 12px;border-radius:10px;font-size:14px;color:var(--ink2)}
+.mitem:hover{background:var(--hover)}
+body.guide .mem-item{display:none}
+@media(max-width:640px){
+.top{flex-wrap:wrap;gap:8px;padding:10px 12px 10px;row-gap:8px}
+.brand{font-size:0;gap:0}
+.tabs{flex:none}.tab{padding:7px 11px;font-size:13px}
+#btnEssay,#btnStart,#btnFocus,#btnHelp{display:none!important}
+#moreWrap{display:block;order:6}
+#panelsWrap{order:5}
+#btnPanels .lbl,#btnUpload .lbl{display:none}
+.ico-m{display:block}
+#btnPanels,#btnMore{width:38px;height:36px;padding:0;display:grid;place-items:center}
+#essMenu{order:10;flex:1 1 calc(100% - 56px);min-width:0}
+#btnUpload{order:11;width:40px;height:38px;padding:0;font-size:20px;font-weight:600;line-height:1;display:grid;place-items:center}
+.esel{max-width:none!important;width:100%;height:38px;justify-content:space-between}
+.epop{min-width:0;width:calc(100vw - 24px);max-width:none}
+.menu-pop{max-width:calc(100vw - 24px)}
+body.guide #essMenu,body.guide #btnUpload{display:none}
+}
+@media(pointer:coarse){.khint{display:none}}
 /* essay library */
 .sheet.mgsheet{max-width:640px}
 .mgcount{font-size:12px;font-weight:600;color:var(--muted);background:var(--track);padding:2px 9px;border-radius:99px}
@@ -739,14 +762,22 @@ button:focus:not(:focus-visible){outline:none}
 <div class="mem-only">
 <div class="menu" id="essMenu"><button class="btn esel" id="essBtn" title="Switch essay"><span id="essName"></span><svg width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"/></svg></button>
 <div class="menu-pop epop" id="essPop" hidden></div></div>
-<button class="btn primary" id="btnUpload">+ Upload essay</button>
+<button class="btn primary" id="btnUpload" aria-label="Upload essay">+<span class="lbl"> Upload essay</span></button>
 <button class="btn" id="btnEssay" title="Manage essays">Essays</button>
 <button class="btn" id="btnStart">Choose start</button>
 <button class="btn" id="btnFocus" title="Hide every panel">Focus</button>
-<div class="menu"><button class="btn" id="btnPanels">Panels ▾</button>
+<div class="menu" id="panelsWrap"><button class="btn" id="btnPanels" aria-label="Panels and modes"><svg class="ico-m" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg><span class="lbl">Panels ▾</span></button>
 <div class="menu-pop" id="panelMenu" hidden></div></div>
 </div>
 <button class="btn" id="btnHelp" title="How it works">?</button>
+<div class="menu" id="moreWrap"><button class="btn" id="btnMore" aria-label="More"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+<div class="menu-pop" id="moreMenu" hidden>
+<button class="mitem mem-item" data-more="manage">Manage essays</button>
+<button class="mitem mem-item" data-more="start">Choose start</button>
+<button class="mitem mem-item" data-more="upload">Upload essay</button>
+<hr class="mem-item">
+<button class="mitem" data-more="help">How it works</button>
+</div></div>
 </header>
 
 <!-- ================= MEMORISE ================= -->
@@ -1256,7 +1287,7 @@ if(over>typebox.scrollTop)typebox.scrollTop=over;
 }
 function renderFoot(extra){
 if(phase==='type'){
-foot.innerHTML=`<span class="wc"></span><span class="spacer"></span><span><kbd>Enter</kbd> check · <kbd>Ctrl</kbd>+<kbd>H</kbd> peek</span>`;
+foot.innerHTML=`<span class="wc"></span><span class="spacer"></span><span class="khint"><kbd>Enter</kbd> check · <kbd>Ctrl</kbd>+<kbd>H</kbd> peek</span>`;
 renderTyped();
 }else foot.innerHTML=extra;
 }
@@ -1566,6 +1597,10 @@ applyPanels();
 });
 document.addEventListener('click',()=>{$('panelMenu').hidden=true});
 $('btnFocus').onclick=()=>{SET.focus=!SET.focus;applyPanels();focusTa()};
+$('btnMore').onclick=e=>{e.stopPropagation();const m=$('moreMenu');m.hidden=!m.hidden;$('panelMenu').hidden=true;$('essPop').hidden=true};
+$('moreMenu').addEventListener('click',e=>{const b=e.target.closest('[data-more]');if(!b)return;$('moreMenu').hidden=true;
+({manage:()=>openEssay(),start:openModal,upload:openUpload,help:showHowto})[b.dataset.more]()});
+document.addEventListener('click',()=>{$('moreMenu').hidden=true});
 $('petX').onclick=()=>{SET.hidden.push('pet');applyPanels()};
 
 /* ---------- start modal ---------- */
@@ -2112,6 +2147,21 @@ fly:['visiting mularovski','visiting pauly.com.au','going to C block swimming po
 back:['back!','I’m back. did you miss me','mularovski says hi','pauly.com.au was down. classic','the pool was freezing','I brought crumbs'],
 swim:['laps at C block pool','swimming carnival training arc','goggles on, focus on','backstroke is just lying down with extra steps','chlorine smell = peak motivation'],
 hello:['hi','hi! I’m Don. I study maths & eat cookies','falcon pride','ypt warrior confirmed',`${tod} I’m Don, your study falcon`,'type away, I’ll be down here','Don reporting for cookie duty']};
+const MORE={
+eat:['this cookie has a strong thesis','oatmeal raisin? in THIS economy?','crumb-based learning strategy','I’m on cookie #3. emotionally, #12','a balanced diet is a cookie in each wing','this one is a lived experience','I’d write an essay on this cookie. 20/20','the cookie represents individual and collective joy','nom. that’s the whole analysis','cookies are my love language','technically I’m stress eating','chewy outside, existential inside','this cookie challenges my assumptions','cookie in, wisdom out','choc chip resonates, raisin dissonates','one cookie for each body paragraph','fuel for Paper 2','I traded my pencil for this cookie','canteen cookie hits different','nom nom… sorry, what were we memorising'],
+study:['∑ (cookies) from n=1 to ∞ diverges','e^(iπ) + 1 = 0, cookie + 1 = happiness','integration by cookies','d/dx (study) = vibes','sin, cos, tan, snack','matrix multiplication? no thanks, cookie multiplication','solving quadratics like they owe me money','complex numbers are just numbers with feelings','probability of a Band 6: rising','mean, median, cookie','completing the square of the cookie jar','vectors are just arrows with confidence','graphing my snack intake. exponential','this triangle is acute. like me','Ext 2 maths is a lived experience','the chain rule but it’s a cookie chain','proof by induction: if I eat one cookie, I eat k+1','statistics say you should keep going','rationalising the denominator and my life choices','my calculator is in sleep mode. like me at 3pm'],
+pass:['falcon pride!','fly falcon fly!','that’s a perfect landing','you just ate that sentence','ok scholar','LET’S GO','nailed it, no notes','the markers felt that','memory unlocked','you’re in the zone','HSC who? you’re ready','that was clean','gold star from Don','I’m telling everyone at the pool','straight into long-term memory','smooth like a fresh exercise book','built different','you could teach this','that’s the stuff','Ms Sharpington-Recny would be proud'],
+fail:['don’t stress, birds fall out of trees too','that one’s slippery','look again, you’ve got this','learning is just failing in style','one word off, that’s basically right','your brain is warming up','rome wasn’t memorised in a day','take a breath, then go','even Shakespeare had drafts','the sentence is scared of you','that’s data, not defeat','reset, refocus, retype','we go again','almost! read it once more','the falcon believes in second attempts'],
+sleep:['zz… ypt warrior… zz…','zz… mularovski… zz…','zz… dreaming of C block pool…','zz… the quotes are chasing me…','zz… ten more minutes… then study…','zz… band 6… band 6…'],
+pet:['you found my favourite spot','10/10 would be patted again','I’ll study harder for you','feathers: ruffled. heart: full','you’re officially my study buddy','cookie points +1','skree skree!','I’m blushing under these feathers','ok fine, one more cookie','that’s the good stuff','I feel seen','is this what humans call support'],
+para:['paragraph secured!','a whole paragraph. who are you','paragraph done. hydrate','that paragraph is yours now','paragraph complete. falcon pride','one paragraph closer to the castle'],
+checkpoint:['the whole essay?! from memory?!','essay checkpoint: smashed','that’s exam-ready right there','you’re basically a walking essay','my feathers are standing up','the markers aren’t ready'],
+fast:['speed demon','your keyboard needs a rest','is that a world record','falcon speed unlocked','slow down, you’ll overtake me','are you even reading or just vibing'],
+long:['stretch break? your wings will thank you','been a while. grab some water','go look at something far away for 20 seconds','snack break is a valid study strategy','your posture is giving question mark','5 minute break, then back to greatness'],
+idle:['going to C block swimming pool','falcon pride','fly falcon fly','hi','visiting mularovski','visiting pauly.com.au','ypt warrior confirmed','anyone seen my goggles','the quad is too loud today','who left a pie in the common room','I heard there’s a test on Friday. I heard wrong. I hope','period 5 maths is a test of character','the library printer jammed again','I tried to sign out of PE. denied','lunch line is 40 minutes long. worth it','house points for typing? I’d win','ypt timer running. respect','sports carnival tomorrow, I’m flying','assembly ran overtime again','I left my calculator in C block','the vending machine took my coin','I’m saving my energy for the swimming carnival','is it a mufti day? asking for a falcon','rain means the quad is closed. sad','studying is just remembering on purpose','one essay at a time','small steps, big Band 6','consistency > cramming','today’s goal: one paragraph. easy','you’re doing better than you think','future you is cheering','quotes are just friends you haven’t memorised yet','tip: say your topic sentence out loud','tip: chunk it, then link it','tip: rest is part of studying','did you drink water today','I believe in you. also cookies','HSC is a marathon. I’m a falcon. we fly','reminder: you’ve got this','*does a little hop*','*preens feathers thoughtfully*','*stares at a pigeon judgementally*','*practises dramatic wing reveal*','*hums the school song badly*','*flaps once for motivation*'],
+hello:['hello hello','back for more? love that','the study falcon has arrived','Don here, cookies ready','welcome back, scholar','let’s lock in','ready when you are']
+};
+for(const k in MORE)LINES[k]=(LINES[k]||[]).concat(MORE[k]);
 let sessionStart=performance.now(),longSaid=0;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 function say(t,force){const now=performance.now();if(!force&&now-lastSay<14000)return;lastSay=now;bub.textContent=t;bub.classList.add('show');clearTimeout(bubT);bubT=setTimeout(()=>bub.classList.remove('show'),3400)}
