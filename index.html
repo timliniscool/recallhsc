@@ -321,6 +321,32 @@ label.btn{cursor:pointer;display:inline-flex;align-items:center}
 .libitem button.x{color:var(--faint);padding:6px 8px;border-left:1px solid var(--line2)}
 .libitem button.x:hover{color:var(--bad)}
 .done-wrap{text-align:center;padding:20px 0}
+/* upload panel */
+.sheet.upsheet{max-width:620px}
+#upTitle{display:block;width:100%}
+.uplab{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600;margin:16px 0 6px}
+.drop{position:relative;border:1.5px dashed #bfd9ef;border-radius:16px;background:#f8fbff;transition:border-color .2s,background .2s}
+.drop.over{border-color:var(--sky);background:#eef8ff}
+.drop:focus-within{border-style:solid;border-color:var(--sky2);background:#fff;box-shadow:0 0 0 4px rgba(56,189,248,.14)}
+.drop textarea{display:block;width:100%;min-height:210px;max-height:46vh;border:0;background:transparent;resize:vertical;padding:14px 16px;font-family:var(--serif);font-size:15.5px;line-height:1.6;color:var(--ink);outline:none;border-radius:16px}
+.drophint{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;pointer-events:none;color:var(--muted);font-size:13px;text-align:center}
+.drophint svg{color:var(--sky2);margin-bottom:4px}
+.drophint b{color:var(--ink2);font-weight:600}
+.drophint .link{pointer-events:auto;color:var(--skyink);text-decoration:underline;cursor:pointer}
+.drop.has .drophint{display:none}
+.drop textarea::placeholder{color:transparent}
+.up-seg{max-width:320px}
+.uphelp{margin:8px 0 0;font-size:12.5px;color:var(--muted)}
+.uphelp .auto{color:var(--skyink);font-weight:600}
+.upsum{margin-top:14px;font-size:13px;color:var(--ink2);min-height:18px;font-variant-numeric:tabular-nums}
+.upsum span+span::before{content:"·";margin:0 7px;color:var(--faint)}
+.upprev{margin-top:10px;border:1px solid var(--line2);border-radius:12px;padding:0 14px}
+.upprev summary{cursor:pointer;padding:10px 0;font-size:13px;color:var(--skyink);font-weight:500}
+.upprev[open]{padding-bottom:10px}
+.upprev .ana{max-height:34vh;overflow:auto;padding-right:4px}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+body.gamify .drop{background:#10161d;border-color:#26313d}
+body.gamify .drop textarea{color:var(--ink)}
 .sheet.howto{max-width:460px;padding:28px 28px 24px;animation:pop .35s cubic-bezier(.2,.8,.2,1)}
 .hico{margin-bottom:12px}.hico .logo{display:block;width:38px;height:38px;border-radius:12px}.hico .logo::after{left:11px;top:9px;height:20px}
 .steps{margin:12px 0 0;padding-left:20px;font-size:14px;line-height:1.55;color:var(--ink2)}
@@ -622,7 +648,13 @@ body.gamify .bar .bf{background:linear-gradient(90deg,#4d7c0f,var(--sky))}
 body.gamify .dot{background:#1a222c}body.gamify .dot.l{background:var(--sky)}
 body.gamify .page{background:#e5e7eb!important}
 body.gamify .q.cur{background:var(--sky);color:#0b1324}
-body.gamify .card{box-shadow:0 0 0 4px #a3e635,0 0 0 8px #0b1324,0 0 60px rgba(163,230,53,.25)}
+body.gamify .card{box-shadow:0 0 0 4px #a3e635,0 0 0 8px #0b1324,0 0 60px rgba(163,230,53,.25);
+/* the game's dialog boxes are white, so text inside the card stays dark whatever the site theme */
+--ink:#0b1324;--ink2:#1e293b;--muted:#334155;--faint:#475569;--skyink:#3f6212;--sky:#4d7c0f;--sky2:#65a30d}
+body.gamify .typebox .phd{color:#64748b}
+body.gamify .typebox.bad #typed{color:#475569}
+body.gamify .typebox.ok #typed{color:#166534}
+body.gamify .diff .ins{color:#64748b}
 /* ---------- footer + focus ---------- */
 .sitefoot{text-align:center;padding:10px 20px 34px;margin-top:-80px}
 .fmark{font-size:15px;font-weight:700;letter-spacing:-.02em;color:var(--faint)}
@@ -780,6 +812,25 @@ button:focus:not(:focus-visible){outline:none}
 </div>
 </div>
 
+<div class="modal" id="upModal" hidden>
+<div class="sheet upsheet">
+<div class="sheet-head"><h2>Upload an essay</h2><span class="spacer"></span><button class="xbtn" id="upX" title="Close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+<label class="uplab" for="upTitle">Title</label>
+<input id="upTitle" class="etitle" placeholder="e.g. Mod A · Hamlet + Dickinson" maxlength="60" autocomplete="off">
+<div class="uplab">Text</div>
+<div class="drop" id="upDrop">
+<textarea id="upText" placeholder="Paste your essay here…"></textarea>
+<div class="drophint" id="upHint"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg><b>Paste text, or drop a .txt / .md file</b><span>or <label class="link">browse<input type="file" id="upFile" accept=".txt,.md,text/plain" hidden></label></span></div>
+</div>
+<div class="uplab">Type</div>
+<div class="seg up-seg" id="upKind"><button data-v="essay" class="on">Essay</button><button data-v="creative">Creative piece</button></div>
+<p class="uphelp" id="upHelp">Split into topic sentences and quote + analysis units.</p>
+<div class="upsum" id="upSum"></div>
+<details class="upprev" id="upPrevWrap"><summary>Preview how it will be split</summary><div class="ana" id="upPrev"></div></details>
+<div class="sheet-foot"><button class="btn" id="upCancel">Cancel</button><span class="spacer"></span><button class="btn primary" id="upAdd" disabled>Add essay</button></div>
+</div>
+</div>
+
 <div class="modal" id="essayModal" hidden>
 <div class="sheet wide">
 <div class="sheet-head"><h2 id="essayH">Your essays</h2><span class="spacer"></span><button class="xbtn" id="bCloseEssay" title="Close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
@@ -792,7 +843,7 @@ button:focus:not(:focus-visible){outline:none}
 <div class="ana-head"><span id="anaStats" class="ana-stats"></span><span class="spacer"></span>
 <span class="legend2"><span class="rt ts">Topic sentence</span><span class="rt lead">Lead-in</span><span class="rt quote">Quote</span><span class="rt an">Analysis</span></span></div>
 <div class="ana" id="ana"></div>
-<div class="sheet-foot"><button class="btn small" id="bExport" title="Download all essays + progress as a file">Back up</button><label class="btn small" title="Restore from a backup file">Restore<input type="file" id="bImport" accept=".json,application/json" hidden></label><span class="spacer"></span><button class="btn" id="bNew">New blank</button><button class="btn primary" id="bUseEssay">Save &amp; memorise</button></div>
+<div class="sheet-foot"><button class="btn small" id="bExport" title="Download all essays + progress as a file">Back up</button><label class="btn small" title="Restore from a backup file">Restore<input type="file" id="bImport" accept=".json,application/json" hidden></label><span class="spacer"></span><button class="btn" id="bNew">+ Upload new</button><button class="btn primary" id="bUseEssay">Save &amp; memorise</button></div>
 </div>
 </div>
 
@@ -1103,7 +1154,7 @@ typebox.classList.remove('ok','bad');
 renderHead();renderPrompt();renderTyped();renderFoot();renderQueue();renderSide();renderLive();Game.task(task);
 focusTa();save();
 }
-function focusTa(){if($('modal').hidden&&$('essayModal').hidden&&$('howto').hidden&&SET.view==='mem')ta.focus({preventScroll:true})}
+function focusTa(){if($('upModal').hidden&&$('modal').hidden&&$('essayModal').hidden&&$('howto').hidden&&SET.view==='mem')ta.focus({preventScroll:true})}
 function renderHead(){
 const x=SENTS[S.g],chip=$('chip');
 chip.className='chip'+(task.type==='para'?' para':task.type==='essay'?' essay':'');
@@ -1191,6 +1242,7 @@ $('card').addEventListener('click',e=>{if(!e.target.closest('button'))focusTa()}
 document.addEventListener('keydown',e=>{
 if(SET.view!=='mem'||!$('howto').hidden)return;
 if(e.target.id==='essaySel')return;
+if(!$('upModal').hidden)return;
 if(!$('essayModal').hidden){if(e.key==='Escape')closeEssay();return}
 if(!$('modal').hidden){if(e.key==='Escape')$('bCloseStart').click();return}
 if(e.target.closest&&e.target.closest('.panel[data-panel=settings],.menu-pop'))return;
@@ -1358,7 +1410,7 @@ foot.innerHTML=`<span class="spacer"></span><button class="btn primary small" id
 $('bEnd').onclick=fn;renderSide();save();
 }
 const showDone=()=>endScreen('Essay complete 🎉','You worked through every sentence. Pick a starting point to go again.','Choose a start',openModal);
-const showEmpty=()=>endScreen('No essay yet','Paste an essay to get started.','Paste essay',openEssay);
+const showEmpty=()=>endScreen('No essay yet','Paste an essay to get started.','Upload essay',openUpload);
 
 /* ---------- side panels ---------- */
 function fmtTime(s){s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}h ${m}m`:`${m}m ${s%60}s`}
@@ -1515,7 +1567,7 @@ $('essBtn').onclick=e=>{e.stopPropagation();renderSwitcher();const p=$('essPop')
 $('essPop').addEventListener('click',e=>{
 e.stopPropagation();const b=e.target.closest('[data-sw],[data-act]');if(!b)return;
 $('essPop').hidden=true;$('essBtn').classList.remove('open');
-if(b.dataset.sw)switchEssay(b.dataset.sw);else if(b.dataset.act==='up')openEssay(null);else openEssay();
+if(b.dataset.sw)switchEssay(b.dataset.sw);else if(b.dataset.act==='up')openUpload();else openEssay();
 });
 $('essPop').addEventListener('keydown',e=>{
 const it=[...$('essPop').querySelectorAll('.eitem')],i=it.indexOf(document.activeElement);
@@ -1570,7 +1622,7 @@ if(id===ACTIVE){loadEssay('sample');loadTask()}
 renderSwitcher();openEssay(ACTIVE);
 }
 });
-$('bNew').onclick=()=>openEssay(null);
+$('bNew').onclick=openUpload;
 $('bUseEssay').onclick=()=>{
 const txt=$('essayIn').value.trim();if(!txt){$('essayIn').focus();return}
 const title=($('essayTitle').value.trim()||titleOf(mdClean(txt))).slice(0,60),kind=$('essayKind').checked?'creative':'essay';
@@ -1606,7 +1658,65 @@ ls.set('lib',LIB);renderSwitcher();loadEssay(ACTIVE);loadTask();openEssay(ACTIVE
 $('bCloseEssay').onclick=closeEssay;
 $('essayModal').addEventListener('click',e=>{if(e.target.id==='essayModal')closeEssay()});
 $('btnEssay').onclick=()=>openEssay();
-$('btnUpload').onclick=()=>openEssay(null);
+$('btnUpload').onclick=openUpload;
+
+/* ---------- upload panel (separate from managing essays) ---------- */
+const UP={kind:'essay',touched:false,t:0};
+function openUpload(){
+$('essayModal').hidden=true;
+$('upTitle').value='';$('upText').value='';UP.kind='essay';UP.touched=false;
+upSync();$('upModal').hidden=false;setTimeout(()=>$('upTitle').focus(),50);
+}
+function closeUpload(){$('upModal').hidden=true;focusTa()}
+function upSetKind(k,auto){
+UP.kind=k;$('upKind').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===k));
+$('upHelp').innerHTML=(k==='creative'?'Split by headings, paragraphs and lines; a Reflection section is still analysed like an essay.':'Split into topic sentences and quote + analysis units.')+(auto?' <span class="auto">Detected automatically.</span>':'');
+}
+function upSync(){
+const txt=$('upText').value;
+$('upDrop').classList.toggle('has',!!txt);
+if(!UP.touched)upSetKind(txt.trim()&&looksCreative(txt)?'creative':'essay',!!txt.trim()&&looksCreative(txt));
+$('upAdd').disabled=!txt.trim();
+if(!txt.trim()){$('upSum').innerHTML='';$('upPrev').innerHTML='';$('upPrevWrap').hidden=true;return}
+const m=parseEssay(txt,UP.kind),pl=(n,w)=>`<span>${n.toLocaleString()} ${w}${n===1?'':'s'}</span>`;
+$('upSum').innerHTML=pl(m.paras.length,UP.kind==='creative'?'block':'paragraph')+pl(m.sents.length,'sentence')+pl(m.total,'word')+(UP.kind==='essay'?pl(m.sents.filter(x=>x.role==='quote').length,'quote'):'');
+$('upPrevWrap').hidden=false;
+if($('upPrevWrap').open)upPreview(m);
+}
+function upPreview(m){
+m=m||parseEssay($('upText').value,UP.kind);
+$('upPrev').innerHTML=m.paras.map((ss,p)=>{
+let html='',open=false;
+ss.forEach((t,s)=>{const x=m.sents[m.pstart[p]+s];if(!open){html+='<span class="unit">';open=true}
+html+=`<span class="s ${x.role}" title="${ROLE[x.role]}">${chunkSentence(t,SET.phrase).map(c=>`<span class="ch">${esc(c)}</span>`).join('')}</span> `;
+if(x.unitEnd){html+='</span>';open=false}});
+if(open)html+='</span>';
+return `<div class="ap"><h6>${UP.kind==='creative'?'Block':'Paragraph'} ${p+1}</h6>${html}</div>`;
+}).join('');
+}
+async function upLoadFile(f){
+if(!f)return;
+if(f.size>2e6){toast('That file is too big for an essay');return}
+$('upText').value=(await f.text()).replace(/\r/g,'');
+if(!$('upTitle').value.trim())$('upTitle').value=f.name.replace(/\.[^.]+$/,'').slice(0,60);
+upSync();
+}
+$('upText').addEventListener('input',()=>{clearTimeout(UP.t);UP.t=setTimeout(upSync,150)});
+$('upKind').onclick=e=>{const b=e.target.closest('button');if(!b)return;UP.touched=true;upSetKind(b.dataset.v,false);upSync()};
+$('upPrevWrap').addEventListener('toggle',()=>{if($('upPrevWrap').open)upPreview()});
+$('upFile').onchange=e=>{upLoadFile(e.target.files[0]);e.target.value=''};
+['dragenter','dragover'].forEach(ev=>$('upDrop').addEventListener(ev,e=>{e.preventDefault();$('upDrop').classList.add('over')}));
+['dragleave','drop'].forEach(ev=>$('upDrop').addEventListener(ev,e=>{e.preventDefault();$('upDrop').classList.remove('over')}));
+$('upDrop').addEventListener('drop',e=>upLoadFile(e.dataTransfer.files[0]));
+$('upX').onclick=closeUpload;$('upCancel').onclick=closeUpload;
+$('upModal').addEventListener('click',e=>{if(e.target.id==='upModal')closeUpload()});
+$('upModal').addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();closeUpload()}});
+$('upAdd').onclick=()=>{
+const txt=$('upText').value.trim();if(!txt)return;
+const id='e'+Date.now().toString(36);
+LIB.unshift({id,title:($('upTitle').value.trim()||titleOf(mdClean(txt))).slice(0,60),text:txt,kind:UP.kind,updated:Date.now()});
+ls.set('lib',LIB);$('upModal').hidden=true;renderSwitcher();switchEssay(id);
+};
 
 /* ---------- settings ---------- */
 function bindSettings(){
