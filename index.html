@@ -688,8 +688,13 @@ body.gamify .xbtn{background:var(--surface);border-color:var(--track)}
 body.gamify .menu-pop label{color:var(--ink2)}
 body.gamify .ehead,body.gamify .gnh,body.gamify .rlab{color:#8b9bb0}
 body.gamify .toast{background:#ecfccb;color:#0b1324}
-body.gamify .sw::after{background:#e5e7eb}
+/* switches: clearly off (grey track, outlined) vs clearly on (lime track) */
+body.gamify .sw{background:#2b3747;box-shadow:inset 0 0 0 1px #3d4b5c}
+body.gamify .sw::after{background:#cbd5e1;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+body.gamify .sw:checked{background:#a3e635;box-shadow:inset 0 0 0 1px #bef264,0 0 10px rgba(163,230,53,.35)}
 body.gamify .sw:checked::after{background:#0b1324}
+body.gamify .seg{background:#10161d;box-shadow:inset 0 0 0 1px #1f2a36}
+body.gamify .seg button.on{background:#1f2a36;color:var(--sky2)}
 body.gamify::before{background-image:radial-gradient(rgba(163,230,53,.14) 1px,transparent 1.2px)}
 body.gamify .top{background:rgba(6,8,11,.78);border-bottom-color:rgba(163,230,53,.18)}
 body.gamify .brand{font-family:'Press Start 2P',monospace;font-size:12px;letter-spacing:0}
@@ -706,7 +711,7 @@ body.gamify :is(.menu-pop,.sheet,.sheet-foot){background:#0e1319;border-color:#1
 body.gamify .eitem:hover,body.gamify .eitem:focus-visible,body.gamify .menu-pop label:hover{background:#151c25}
 body.gamify .modal{background:rgba(0,0,0,.6)}
 body.gamify :is(.panel,.gsec,.gnav){border-color:rgba(163,230,53,.12)}
-body.gamify :is(.k,.q,.etitle,.essay-in,.ck,.libitem,.sopt,.card2,.mk,.theme,.tier,.defs div,.fmt div,.phr span,.wgrid span,.plan>div,.seq3>div,.qset,.tpl,.fc .node,.tt table,.years span,.checks span,.toc a,.verbs6 span,.chips.verbs span,.stat3 div,.reflect,.fig,.sample,.ana .ap,.stat,.empty-prof,.page,.seg,.sw,.bar .bt){background:#10161d!important;border-color:#1f2a36!important;color:var(--ink2)}
+body.gamify :is(.k,.q,.etitle,.essay-in,.ck,.libitem,.sopt,.card2,.mk,.theme,.tier,.defs div,.fmt div,.phr span,.wgrid span,.plan>div,.seq3>div,.qset,.tpl,.fc .node,.tt table,.years span,.checks span,.toc a,.verbs6 span,.chips.verbs span,.stat3 div,.reflect,.fig,.sample,.ana .ap,.stat,.empty-prof,.page,.bar .bt){background:#10161d!important;border-color:#1f2a36!important;color:var(--ink2)}
 body.gamify .tier.t1,body.gamify .callout,body.gamify .callout.big,body.gamify .fc .node.key{background:linear-gradient(135deg,rgba(163,230,53,.1),#10161d)!important;border-color:rgba(163,230,53,.3)!important}
 body.gamify .gnav button.on{background:#1a222c;color:var(--sky2);box-shadow:inset 0 0 0 1px rgba(163,230,53,.3)}
 body.gamify .gnav button:hover{background:#151c25}
@@ -715,7 +720,6 @@ body.gamify .rubric,body.gamify .outc,body.gamify .doc.ex .piece,body.gamify .qs
 body.gamify .rk{background:rgba(163,230,53,.2);color:#ecfccb}
 body.gamify .prompt mark{color:#0b1324}
 body.gamify .chips span,body.gamify .badge,body.gamify .rt.ts,body.gamify .exn,body.gamify .idea .num,body.gamify .flow{background:rgba(163,230,53,.14);color:var(--sky2)}
-body.gamify .sw:checked{background:var(--sky)}
 body.gamify .set input[type=range]{background:linear-gradient(var(--sky),var(--sky)) 0 50%/var(--p) 4px no-repeat,linear-gradient(#26313d,#26313d) 0 50%/100% 4px no-repeat}
 body.gamify .set input[type=range]::-webkit-slider-thumb{background:#0e1319}
 body.gamify .bar .bf{background:linear-gradient(90deg,#4d7c0f,var(--sky))}
