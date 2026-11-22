@@ -535,7 +535,8 @@ body.gamify .ctx .rt{display:none}
 body.gamify .chip{white-space:nowrap}
 body.gamify .chip,body.gamify .rt{font-family:var(--px);font-size:9px;border-radius:0;background:#0b1324;color:#fef08a;box-shadow:3px 3px 0 rgba(11,19,36,.35);padding:6px 8px;letter-spacing:0;text-transform:none}
 body.gamify .ctx{font-family:var(--px);font-size:9px;color:#0b1324;text-shadow:1px 1px 0 rgba(255,255,255,.7)}
-body.gamify .card-head .btn{font-family:var(--px);font-size:8px;border-radius:0;border:2px solid #0b1324;box-shadow:2px 2px 0 #0b1324;padding:6px 8px;background:#fff}
+body.gamify .card-head .btn{font-family:var(--px);font-size:8px;border-radius:0;border:2px solid #0b1324;box-shadow:2px 2px 0 #0b1324;padding:6px 8px;background:#fff;color:#0b1324}
+body.gamify .card-head .btn:hover{background:#ecfccb;color:#0b1324;border-color:#0b1324}
 body.gamify .card-head .btn:active{transform:translate(2px,2px);box-shadow:none}
 body.gamify .prompt{margin:0 12px;background:#fff;border:3px solid #0b1324;box-shadow:5px 5px 0 rgba(11,19,36,.35);font-family:var(--px);font-size:12px;line-height:2.1;padding:12px 14px;min-height:0;color:#0b1324}
 body.gamify .prompt mark{background:#fef08a;color:#0b1324;border-radius:0}
@@ -562,6 +563,43 @@ body.gamify .toast{font-family:var(--px);font-size:9px;border-radius:0}
 body.gamify .q{font-family:var(--px);font-size:8px;border-radius:0}
 body.gamify .card.flash-ok{box-shadow:0 0 0 4px #a3e635,0 0 0 8px #0b1324,0 24px 60px rgba(14,116,190,.25)}
 body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24px 60px rgba(14,116,190,.25)}
+/* ---------- gamify: whole-site arcade theme (black + lime) ---------- */
+body.gamify{--bg:#06080b;--glass:rgba(14,18,24,.86);--glass2:rgba(14,18,24,.92);--ink:#eef2f6;--ink2:#cbd5e1;--muted:#94a3b8;--faint:#64748b;
+--line:rgba(163,230,53,.16);--line2:#1e2833;--sky:#a3e635;--sky2:#bef264;--skysoft:rgba(163,230,53,.12);--skyink:#d9f99d;--warnsoft:rgba(245,158,11,.14);--badsoft:rgba(239,68,68,.14);
+--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 40px rgba(0,0,0,.45);color-scheme:dark}
+body.gamify::before{background-image:radial-gradient(rgba(163,230,53,.14) 1px,transparent 1.2px)}
+body.gamify .top{background:rgba(6,8,11,.78);border-bottom-color:rgba(163,230,53,.18)}
+body.gamify .brand{font-family:'Press Start 2P',monospace;font-size:12px;letter-spacing:0}
+body.gamify .brand .hsc{margin-left:-6px}
+body.gamify .logo{background:linear-gradient(135deg,#bef264,#65a30d);box-shadow:0 0 14px rgba(163,230,53,.45);border-radius:3px}
+body.gamify .tabs{background:#10151c}
+body.gamify .tab.on{background:#1a222c;color:var(--sky2);box-shadow:inset 0 0 0 1px rgba(163,230,53,.35)}
+body.gamify .btn{background:#10151c;border-color:#26313d;color:var(--ink2)}
+body.gamify .btn:hover{background:#151c25;border-color:var(--sky);color:var(--sky2)}
+body.gamify .btn.primary{background:var(--sky);border-color:var(--sky);color:#0b1324;box-shadow:0 0 18px rgba(163,230,53,.35)}
+body.gamify .btn.primary:hover{background:#bef264;color:#0b1324}
+body.gamify .btn.on{background:rgba(163,230,53,.14);border-color:var(--sky);color:var(--sky2)}
+body.gamify :is(.menu-pop,.sheet,.sheet-foot){background:#0e1319;border-color:#1e2833;color:var(--ink2)}
+body.gamify .eitem:hover,body.gamify .eitem:focus-visible,body.gamify .menu-pop label:hover{background:#151c25}
+body.gamify .modal{background:rgba(0,0,0,.6)}
+body.gamify :is(.panel,.gsec,.gnav){border-color:rgba(163,230,53,.12)}
+body.gamify :is(.k,.q,.etitle,.essay-in,.ck,.libitem,.sopt,.card2,.mk,.theme,.tier,.defs div,.fmt div,.phr span,.wgrid span,.plan>div,.seq3>div,.qset,.tpl,.fc .node,.tt table,.years span,.checks span,.toc a,.verbs6 span,.chips.verbs span,.stat3 div,.reflect,.fig,.sample,.ana .ap,.stat,.empty-prof,.page,.seg,.sw,.bar .bt){background:#10161d!important;border-color:#1f2a36!important;color:var(--ink2)}
+body.gamify .tier.t1,body.gamify .callout,body.gamify .callout.big,body.gamify .fc .node.key{background:linear-gradient(135deg,rgba(163,230,53,.1),#10161d)!important;border-color:rgba(163,230,53,.3)!important}
+body.gamify .gnav button.on{background:#1a222c;color:var(--sky2);box-shadow:inset 0 0 0 1px rgba(163,230,53,.3)}
+body.gamify .gnav button:hover{background:#151c25}
+body.gamify :is(h1,h2,h3,h4,.theme h4,.idea h3,.seq3 b,.dl dt){color:var(--ink)}
+body.gamify .rubric,body.gamify .outc,body.gamify .doc.ex .piece,body.gamify .qset ol,body.gamify .tpl,body.gamify q{color:var(--ink)}
+body.gamify .rk{background:rgba(163,230,53,.2);color:#ecfccb}
+body.gamify .prompt mark{color:#0b1324}
+body.gamify .chips span,body.gamify .badge,body.gamify .rt.ts,body.gamify .exn,body.gamify .idea .num,body.gamify .flow{background:rgba(163,230,53,.14);color:var(--sky2)}
+body.gamify .sw:checked{background:var(--sky)}
+body.gamify .set input[type=range]{background:linear-gradient(var(--sky),var(--sky)) 0 50%/var(--p) 4px no-repeat,linear-gradient(#26313d,#26313d) 0 50%/100% 4px no-repeat}
+body.gamify .set input[type=range]::-webkit-slider-thumb{background:#0e1319}
+body.gamify .bar .bf{background:linear-gradient(90deg,#4d7c0f,var(--sky))}
+body.gamify .dot{background:#1a222c}body.gamify .dot.l{background:var(--sky)}
+body.gamify .page{background:#e5e7eb!important}
+body.gamify .q.cur{background:var(--sky);color:#0b1324}
+body.gamify .card{box-shadow:0 0 0 4px #a3e635,0 0 0 8px #0b1324,0 0 60px rgba(163,230,53,.25)}
 /* ---------- pet falcon ---------- */
 .pet{position:fixed;left:14px;bottom:12px;z-index:40;display:flex;align-items:flex-end;gap:4px;pointer-events:none;animation:petIn .7s cubic-bezier(.2,1.4,.4,1) both;animation-delay:.6s}
 @keyframes petIn{from{transform:translateY(110px);opacity:0}}
@@ -1334,11 +1372,12 @@ document.querySelector('.mem').dataset.cols=cols;
 document.body.classList.toggle('focus',!!SET.focus);
 $('pet').classList.toggle('hidden',SET.hidden.includes('pet'));
 Game.set(!!SET.gamify);
+if(window.bgPulse)bgPulse(-999,-999,'0,0,0',.01); // forces one background redraw so the theme swaps even with motion off
 $('btnFocus').classList.toggle('on',!!SET.focus);
 const T=(attr,on,name)=>`<label><span>${name}</span><input type="checkbox" class="sw" ${attr} ${on?'checked':''}></label>`;
 $('panelMenu').innerHTML=`<div class="ehead">Panels</div>`+PANELS.map(p=>T(`data-p="${p.dataset.panel}"`,!SET.hidden.includes(p.dataset.panel),p.dataset.name)).join('')+
 T('data-p="pet"',!SET.hidden.includes('pet'),'Don the falcon')+
-`<hr><div class="ehead">Modes</div>`+T('id="mGame"',SET.gamify,'🎮 Gamify (retro platformer)')+T('id="mFocus"',SET.focus,'Focus mode (hide all)');
+`<hr><div class="ehead">Modes</div>`+T('id="mGame"',SET.gamify,'Gamify (retro platformer)')+T('id="mFocus"',SET.focus,'Focus mode (hide all)');
 requestAnimationFrame(()=>{placeCaret();drawSpark()});
 save();
 }
@@ -1348,7 +1387,12 @@ $('panelMenu').addEventListener('click',e=>e.stopPropagation());
 $('panelMenu').addEventListener('change',e=>{
 const t=e.target;
 if(t.id==='mFocus')SET.focus=t.checked;
-else if(t.id==='mGame'){SET.gamify=t.checked;requestAnimationFrame(()=>{placeCaret();focusTa()})}
+else if(t.id==='mGame'){
+SET.gamify=t.checked;
+if(SET.gamify){SET.preGame=[...SET.hidden];SET.hidden=[...PANELS.map(p=>p.dataset.panel),'pet']}
+else if(SET.preGame){SET.hidden=SET.preGame;delete SET.preGame}
+requestAnimationFrame(()=>{placeCaret();focusTa()});
+}
 else{const id=t.dataset.p;SET.hidden=SET.hidden.filter(x=>x!==id);if(!t.checked)SET.hidden.push(id);if(t.checked)SET.focus=false}
 applyPanels();
 });
@@ -1537,21 +1581,23 @@ if(document.hidden)return;
 const busy=rip.length||sparks.length;
 if(!SET.motion&&!busy){if(still)return;still=true}else still=false;
 if(t-lastF<(busy?16:33))return;lastF=t; // 30fps when calm, 60fps while ripples are animating
-const s=SET.motion?t/1000:0;
-bx.fillStyle='#f3f8ff';bx.fillRect(0,0,BW,BH);
-for(const b of blobs){
+const s=SET.motion?t/1000:0,dark=document.body.classList.contains('gamify');
+const DARKC=['101,163,13','163,230,53','124,58,237','21,128,61','34,197,94'];
+bx.fillStyle=dark?'#06080b':'#f3f8ff';bx.fillRect(0,0,BW,BH);
+for(const[bi,b] of blobs.entries()){
 const cx=(b.ox+Math.sin(s*b.sx+b.ox*9)*.16)*BW,cy=(b.oy+Math.cos(s*b.sy+b.oy*7)*.16)*BH,R=b.r*Math.max(BW,BH);
-const g=bx.createRadialGradient(cx,cy,0,cx,cy,R);g.addColorStop(0,`rgba(${b.c},${b.a})`);g.addColorStop(1,`rgba(${b.c},0)`);
+const col=dark?DARKC[bi]:b.c,al=dark?b.a*.45:b.a;
+const g=bx.createRadialGradient(cx,cy,0,cx,cy,R);g.addColorStop(0,`rgba(${col},${al})`);g.addColorStop(1,`rgba(${col},0)`);
 bx.fillStyle=g;bx.fillRect(0,0,BW,BH);
 }
 x.imageSmoothingEnabled=true;x.drawImage(bc,0,0,W,H);
 // slow contour rings
 x.save();x.translate(W*.78,H*.3);x.rotate(s*.02);
-for(let i=1;i<9;i++){x.beginPath();x.ellipse(0,0,i*70+Math.sin(s*.4+i)*6,i*52+Math.cos(s*.3+i)*6,0,0,7);x.strokeStyle=`rgba(14,116,190,${.07-i*.006})`;x.lineWidth=1;x.stroke()}
+for(let i=1;i<9;i++){x.beginPath();x.ellipse(0,0,i*70+Math.sin(s*.4+i)*6,i*52+Math.cos(s*.3+i)*6,0,0,7);x.strokeStyle=dark?`rgba(163,230,53,${.08-i*.007})`:`rgba(14,116,190,${.07-i*.006})`;x.lineWidth=1;x.stroke()}
 x.restore();
 for(const p of parts){
 if(SET.motion){p.y-=p.v*16;if(p.y<-.02){p.y=1.02;p.x=Math.random()}}
-x.beginPath();x.arc(p.x*W+Math.sin(s*.3+p.p)*14,p.y*H,p.r,0,7);x.fillStyle=`rgba(14,165,233,${p.a})`;x.fill();
+x.beginPath();x.arc(p.x*W+Math.sin(s*.3+p.p)*14,p.y*H,p.r,0,7);x.fillStyle=dark?`rgba(190,242,100,${p.a})`:`rgba(14,165,233,${p.a})`;x.fill();
 }
 for(let i=rip.length-1;i>=0;i--){const r=rip[i];r.t+=1/60;const rad=r.t*(r.big?520:260),al=r.a*(1-r.t/(r.big?1.4:1));if(al<=0){rip.splice(i,1);continue}
 x.beginPath();x.arc(r.x,r.y,rad,0,7);x.strokeStyle=`rgba(${r.c},${al})`;x.lineWidth=r.big?2:1.2;x.stroke()}
