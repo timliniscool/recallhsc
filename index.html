@@ -337,8 +337,10 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 @media(max-width:700px){.fc,.tt{grid-template-columns:1fr}}
 .rubric{font-family:var(--serif);font-size:16.5px;line-height:1.75;color:var(--ink)}
 .rubric p{margin:0 0 10px}
-.rubric .rk{background:linear-gradient(transparent 55%,#bae6fd 55%);font-weight:500}
-.rubric .rv{font-family:var(--sans);font-size:.78em;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--skyink);background:#fff;border:1px solid var(--sky2);border-radius:5px;padding:0 4px}
+.rk{background:#d6f0ff;color:var(--ink);border-radius:3px;padding:0 2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.outc{margin:6px 0 4px;padding-left:20px;font-family:var(--serif);font-size:15.5px;line-height:1.75;color:var(--ink)}
+.outc li{margin:3px 0}
+.rnote{margin-top:16px;padding:12px 14px;border:1px solid var(--line2);border-left:3px solid var(--sky);border-radius:12px;background:#f8fbff;font-family:var(--serif);font-style:italic;font-size:14.5px;line-height:1.65;color:var(--ink2)}
 .doc{font-size:14.5px;line-height:1.7;color:var(--ink2)}
 .doc h1,.doc h2,.doc h3{color:var(--ink);letter-spacing:-.01em;margin:18px 0 6px}
 .doc h1{font-size:20px}.doc h2{font-size:17px}.doc h3{font-size:15px}
@@ -819,7 +821,7 @@ const NS='essayRecall2.';
 const ls={get(k){try{return JSON.parse(localStorage.getItem(NS+k))}catch(e){return null}},set(k,v){try{localStorage.setItem(NS+k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(NS+k)}catch(e){}}};
 const hashId=s=>{let h=5381;for(let i=0;i<s.length;i++)h=(h*33^s.charCodeAt(i))>>>0;return'e'+h.toString(36)};
 const titleOf=t=>{const w=t.trim().split(/\s+/).slice(0,6).join(' ');return w.length>42?w.slice(0,42)+'…':w+'…'};
-const DEFSET={delay:2,strict:88,phrase:4,essay:true,hide:true,scope:'start',motion:true,hidden:[],focus:false,view:'mem',gsec:'common'};
+const DEFSET={delay:2,strict:88,phrase:4,essay:true,hide:true,scope:'start',motion:true,hidden:['settings','deep','map'],focus:false,view:'mem',gsec:'common'};
 const DEFSTATS=()=>({att:0,pass:0,words:0,chars:0,time:0,accSum:0,keys:0,bs:0,wpmSum:0,wpmN:0,bestWpm:0,bestBurst:0,flawless:0,rhythmSum:0,rhythmN:0,hes:0,longestPause:0,
 missed:{},typos:{},fails:{},slipSum:0,slipN:0,recAtt:0,recPass:0,bldAtt:0,bldPass:0,hours:{},cps:0,hist:[],retries:0,tasks:0,firstLetter:0,firstLetterN:0,taskMs:{build:[0,0],para:[0,0],essay:[0,0]}});
 const DEFSTATE=()=>({startG:0,g:0,ti:0,learned:[],started:false,stats:DEFSTATS()});
@@ -1432,9 +1434,21 @@ const GUIDE={
 common:{nav:'Common Module',small:'Texts & Human Experiences',kick:'Paper 1 · Standard & Advanced',title:'Texts and Human Experiences',
 blurb:'How texts capture what it is like to be human, for one person and for groups, and how reading them should shift what you assume about people. The 2027 rubric adds named kinds of experience, a focus on identity, culture, acceptance and growth, and the pull between agency and conformity.',
 fmt:[['Section I · 20 marks','Short answers on unseen texts. At least three questions are shared by both courses.'],['Section II · 20 marks','One essay on your prescribed text. Same question for Standard and Advanced.'],['1 h 30 min','Plus 10 minutes reading time for the whole of Paper 1.']],
-links:[['Past trial papers ↗',THSC,1],['Full NESA rubric ↗','https://artofsmart.com.au/hsc-english/texts-and-human-experiences/']],
+links:[['Past trial papers ↗',THSC,1],['Trial stats source ↗','https://artofsmart.com.au/hsc-english/texts-and-human-experiences/']],
 verbs:['deepen','examine','explore','represent','invite','challenge','consider','reflect'],
-chips:['individual and collective human experiences','emotions and qualities','emotional, intellectual, physical, cultural and lived experiences','identity, culture, acceptance and growth','see the world differently','challenge assumptions','the tension between agency and conformity','the paradoxes of motivation and behaviour','critical and creative responses','reflect personally'],
+rubric:`Students deepen their understanding of how texts represent individual and collective human experiences. They examine how texts represent emotions and qualities related to these experiences. By responding to a range of texts, students explore how texts provide insight into emotional, intellectual, physical, cultural and lived experiences. They explore the ways texts represent identity, culture, acceptance and growth, invite the reader to see the world differently, and challenge assumptions. Students explore how texts can represent the tension between agency and conformity in our human experience, while examining the paradoxes of motivation and behaviour. Through critical and creative responses to texts, students consider the ways that texts encourage them to reflect personally and challenge their assumptions about the nature of human experience.`,
+chips:['individual and collective human experiences','represent emotions and qualities','emotional, intellectual, physical, cultural and lived experiences','identity, culture, acceptance and growth','see the world differently, and challenge assumptions','represent the tension between agency and conformity','examining the paradoxes of motivation and behaviour','reflect personally and challenge their assumptions'],
+outcomes:[['Understanding',[
+['The language, forms and features of texts that ','shape meaning for different audiences and purposes',' in familiar and unfamiliar texts'],
+['The language, forms and features of texts that ','shape a range of perspectives, personal and public worlds,',' and ','diverse human experiences',''],
+['The ','aesthetic qualities of texts',' and the ','power of language',' to ','express personal ideas and experiences',''],
+['Language used for ','making connections, questioning, affirming, challenging and speculating',' about texts'],
+['The evaluative language and metalanguage used to make ','informed judgements',' about texts and express personal perspectives']]],
+['Responding',[
+['Develop ','creative, informed and sustained interpretations of texts,',' supported by close textual analysis'],
+['','Compose',' creative and critical texts that ','affirm or challenge ideas, values and perspectives',' represented in a range of texts'],
+['','Compose texts using structures, language features and stylistic elements for specific audiences,',' to reinterpret ideas and perspectives.']]]],
+note:'Within the Texts and human experiences representation is central to students’ understanding and exploration of meaning. Textual representation reinforces or challenges values and attitudes, constructing meaning within texts through the depiction of people or ideas. Ultimately, representation provides ‘ways of seeing the world’ and positions the reader to respond to the text. Representation is done through the creation of storyworlds.',
 newTitle:'New in the 2027 rubric: barely tested so far',
 newLead:'These ideas are named for the first time. Trials have hardly touched them, so expect schools to write questions on them now.',
 fresh:[
@@ -1453,9 +1467,10 @@ old:[{t:'Storytelling',p:'Who tells the story, what’s left out, the order of e
 src:SRC_THE},
 modA:{nav:'Module A',small:'Textual Conversations',kick:'Paper 2 · Advanced',title:'Textual Conversations',
 blurb:'A comparative study of two prescribed texts: where they echo each other (resonances), where they pull apart (dissonances), and how each composer is shaped by other texts, contexts and values. The 2027 rubric moves context and form to the front.',
-links:[['Full NESA rubric ↗','https://artofsmart.com.au/hsc-english/advanced/textual-conversations/']],
+links:[['Trial stats source ↗','https://artofsmart.com.au/hsc-english/advanced/textual-conversations/']],
 verbs:['explore','reveal','identify','interpret','analyse','evaluate','compare','understand'],
-chips:['resonances and dissonances','within and between texts','textual features, conventions, contexts, values and purposes','TWO prescribed texts','influenced by other texts, contexts and values','common or disparate issues, values, assumptions or perspectives','imaginatively, interpretively and critically','individual and common textual features, concepts, ideas and values'],
+rubric:`Students explore the ways in which the comparative study of texts can reveal resonances and dissonances within and between texts. Students identify, interpret, analyse and evaluate the textual features, conventions, contexts, values and purposes of TWO prescribed texts. By comparing TWO texts, students understand how authors are influenced by other texts, contexts and values, and how these shape meaning. Through their comparative study, they explore common or disparate issues, values, assumptions or perspectives, and the ways these are depicted. By responding imaginatively, interpretively and critically to the comparative study, students explore and evaluate individual and common textual features, concepts, ideas and values.`,
+chips:['resonances and dissonances within and between texts','identify, interpret, analyse and evaluate','textual features, conventions, contexts, values and purposes','how authors are influenced by other texts, contexts and values','how these shape meaning','common or disparate issues, values, assumptions or perspectives','the ways these are depicted','imaginatively, interpretively and critically','individual and common textual features, concepts, ideas and values'],
 newTitle:'New weight in the 2027 rubric',newLead:'Module A has no brand-new ideas, but these two get much more emphasis, and NESA’s 2027 sample paper leans on them.',
 samples:[['Analyse how each text’s context shapes your understanding of the conversation between them.','NESA 2027 sample · Example A, any pair · 20 marks (paraphrased)'],['How has comparing the pair deepened your understanding of shared or differing perspectives on identity?','NESA 2027 sample · Example B, pair-specific · 20 marks (paraphrased)']],
 fresh:[
@@ -1470,9 +1485,10 @@ old:[{t:'Reimagining and reframing',p:'How the later text keeps, changes or answ
 src:'Counts cover 75 essay questions from 144 English Advanced trial papers (43 schools), plus every HSC paper 2019–2025, as coded by Art of Smart Insights.'},
 modB:{nav:'Module B',small:'Critical Study of Literature',kick:'Paper 2 · Advanced',title:'Critical Study of Literature',
 blurb:'A close study of one substantial text as a whole: its construction, content and language, what makes it distinctive, what it means, why it lasts, and what it has given to culture. You need your own informed view, tested against other readings.',
-links:[['Full NESA rubric ↗','https://artofsmart.com.au/hsc-english/advanced/critical-study-of-literature/']],
+links:[['Trial stats source ↗','https://artofsmart.com.au/hsc-english/advanced/critical-study-of-literature/']],
 verbs:['develop','understand','appreciate','analyse','evaluate','investigate','explore','strengthen'],
-chips:['detailed analytical and critical knowledge','a substantial literary text','the text in its entirety','distinctive qualities, notions of meaning, and significance','construction, content and language','informed personal perspectives','cultural contribution','context of the text’s composition and reception','the perspectives of others'],
+rubric:`Students develop detailed analytical and critical knowledge of a substantial literary text. Through increasingly informed personal responses to the text in its entirety, students understand and appreciate the text’s distinctive qualities, notions of meaning, and significance. Students study ONE prescribed text, focusing on an analysis of the text’s construction, content and language. This enables students to develop informed personal perspectives of the text as well as an understanding of its cultural contribution, basing their judgements on evidence drawn from their critical reading. They evaluate the context of the text’s composition and reception, investigate and evaluate the perspectives of others, and explore the ideas in the text, further strengthening their personal perspectives.`,
+chips:['detailed analytical and critical knowledge','increasingly informed personal responses to the text in its entirety','distinctive qualities, notions of meaning, and significance','construction, content and language','informed personal perspectives','cultural contribution','evidence drawn from their critical reading','the context of the text’s composition and reception','the perspectives of others','explore the ideas in the text'],
 newTitle:'New in the 2027 rubric: barely tested so far',newLead:'Two ideas are completely new, and one has been renamed. Expect trial writers to target them.',
 samples:[['To what extent does your text use distinctive features to shape meaning?','NESA 2027 sample · Example A, any text · 20 marks (paraphrased)'],['A two-idea statement (“a representation of X and Y”): how far does it match your understanding of the text?','NESA 2027 sample · Examples B and C, text-specific · 20 marks (paraphrased)']],
 fresh:[
@@ -1489,9 +1505,10 @@ src:'Counts cover 79 essay questions from 144 English Advanced trial papers (43 
 modC:{nav:'Module C',small:'The Craft of Writing',kick:'Paper 2 · Advanced',title:'The Craft of Writing',
 blurb:'Your own sustained, cohesive writing for different purposes and audiences, modelled on quality past and contemporary texts, usually followed by a reflection on your choices. From 2027 there are no prescribed texts, and reflective writing joins the list of forms.',
 fmt:[['Section III · 20 marks','One task, often a piece plus a reflection on it.'],['≈ 12 + 8 marks','Average trial split between piece and reflection when both are set.'],['No set texts','From 2027. Paper 2 is 2 hours plus 5 minutes reading.']],
-links:[['Full NESA rubric ↗','https://artofsmart.com.au/hsc-english/advanced/the-craft-of-writing/']],
+links:[['Trial stats source ↗','https://artofsmart.com.au/hsc-english/advanced/the-craft-of-writing/']],
 verbs:['strengthen','extend','reflect','apply','evaluate','generate','explore','experiment','consider','refine'],
-chips:['accomplished writers','a range of purposes and audiences','power and precision','quality texts of the past as well as recognised contemporary works','structure, language and form','sustained and cohesive compositions','express insights, evoke emotion, shape perspective or share aesthetic vision','drafting and revising','allusion, imagery, narrative voice, characterisation and tone','context, purpose and audience','imaginative, discursive, persuasive and reflective texts'],
+rubric:`Students strengthen and extend their knowledge and skills as accomplished writers. They write for a range of purposes and audiences, using language to convey ideas with power and precision. Through the study of quality texts of the past as well as recognised contemporary works, students reflect on the process of writing and apply their knowledge of structure, language and form to create their own sustained and cohesive compositions. These provide models and stimulus for the development of their own complex ideas and written expression. They evaluate how writers use language critically, creatively and imaginatively for a range of purposes, including to express insights, evoke emotion, shape perspective or share aesthetic vision. Students generate and explore various concepts through discussion and speculation. Through drafting and revising, they experiment with figurative, rhetorical and linguistic devices, including allusion, imagery, narrative voice, characterisation and tone. Students consider context, purpose and audience to deliberately shape meaning in their own compositions. They apply the conventions of spelling, punctuation and grammar appropriately in critical, creative and imaginative writing. Students also reflect on the processes of writing to develop their knowledge of textual forms and features in their own sustained and cohesive compositions. Students refine and strengthen their own skills in composing highly crafted, imaginative, discursive, persuasive and reflective texts.`,
+chips:['accomplished writers','a range of purposes and audiences','power and precision','quality texts of the past as well as recognised contemporary works','reflect on the process of writing','structure, language and form','sustained and cohesive compositions','complex ideas and written expression','critically, creatively and imaginatively','express insights, evoke emotion, shape perspective or share aesthetic vision','discussion and speculation','drafting and revising','figurative, rhetorical and linguistic devices','allusion, imagery, narrative voice, characterisation and tone','context, purpose and audience','deliberately shape meaning','conventions of spelling, punctuation and grammar','textual forms and features','highly crafted, imaginative, discursive, persuasive and reflective texts'],
 newTitle:'New in the 2027 rubric: barely tested so far',newLead:'One new form, and a change to what the reflection is about.',
 samples:[['(a) Continue a literary extract as imaginative, discursive or persuasive writing that evokes a particular emotion.','NESA 2027 sample · Part (a) · 10 marks (paraphrased)'],['(b) Evaluate how your language in (a) evokes that emotional response.','NESA 2027 sample · Part (b) · 10 marks (paraphrased)']],
 fresh:[
@@ -1517,21 +1534,16 @@ ${it.stat?`<div class="note">${it.stat}</div>`:''}${it.note?`<div class="note">$
 function renderModule(m){
 let n=0,h=`<section class="gsec ghero"><div class="kick">${m.kick}</div><h1>${m.title}</h1><p>${m.blurb}</p>
 ${m.fmt?`<div class="fmt">${m.fmt.map(([a,b])=>`<div><b>${a}</b><span>${b}</span></div>`).join('')}</div>`:''}
-<div class="rlab">NESA rubric terms · exact wording</div><div class="chips">${m.chips.map(c=>`<span>${c}</span>`).join('')}</div>
 <div class="rlab">NESA verbs</div><div class="chips verbs">${m.verbs.map(c=>`<span>${c}</span>`).join('')}</div>
 <div class="glinks">${m.links.map(([t,u,p])=>`<a class="btn ${p?'primary':''}" href="${u}" target="_blank" rel="noopener">${t}</a>`).join('')}</div></section>`;
-const rub=ls.get('rubric.'+SET.gsec);
-if(rub&&!rubricEditing){
-let html=esc(rub);
-[...m.chips].sort((a,b)=>b.length-a.length).forEach(c=>{html=html.split(esc(c)).join(`<b class="rk">${esc(c)}</b>`)});
-m.verbs.forEach(v=>{html=html.replace(new RegExp(`\\b(${v}\\w*)\\b`,'gi'),'<span class="rv">$1</span>')});
-h+=`<section class="gsec"><h2>The NESA rubric <span class="tag hot">official</span></h2><div class="rubric">${html.replace(/\n+/g,'</p><p>').replace(/^/,'<p>')}</p></div>
-<div class="glinks"><button class="btn small" id="bRubEdit">Edit</button><span class="src" style="align-self:center">Saved in this browser · verbs and key terms highlighted</span></div></section>`;
-}else{
-h+=`<section class="gsec"><h2>Your NESA rubric <span class="tag hot">paste once</span></h2><p class="lead">Paste the official rubric for this module (from the NESA syllabus or the “Full NESA rubric” link above). It’s saved in this browser and shown here word for word, with NESA verbs and key terms highlighted.</p>
-<textarea id="rubIn" class="essay-in" style="min-height:120px" placeholder="Paste the full rubric text…">${esc(rub||'')}</textarea>
-<div class="glinks"><button class="btn primary small" id="bRubSave">Save rubric</button>${rub?'<button class="btn small" id="bRubCancel">Cancel</button>':''}</div></section>`;
-}
+let rub=esc(m.rubric);
+[...m.chips].sort((a,b)=>b.length-a.length).forEach(c=>{rub=rub.split(esc(c)).join(`<mark class="rk">${esc(c)}</mark>`)});
+const seg=parts=>parts.map((p,i)=>i%2?`<mark class="rk">${esc(p)}</mark>`:esc(p)).join('');
+h+=`<section class="gsec"><h2>The NESA rubric <span class="tag hot">exact wording</span></h2>
+<div class="rubric"><p>${rub}</p></div>
+${m.outcomes?m.outcomes.map(([t,list])=>`<div class="rlab">${t}</div><ul class="outc">${list.map(l=>`<li>${seg(l)}</li>`).join('')}</ul>`).join(''):''}
+${m.note?`<div class="rnote">${esc(m.note)}</div>`:''}
+<div class="rlab">Key terms to use in your responses</div><div class="chips">${m.chips.map(c=>`<span>${esc(c)}</span>`).join('')}</div></section>`;
 h+=`<section class="gsec"><h2>${m.newTitle} <span class="tag new">2027</span></h2><p class="lead">${m.newLead}</p>
 ${m.samples?m.samples.map(([q,s])=>`<div class="sample">${q}<small>${s}</small></div>`).join(''):''}
 ${m.fresh.map(it=>ideaHtml(it,++n,'newi')).join('')}</section>`;
@@ -1558,7 +1570,6 @@ return `<section class="gsec ghero"><div class="kick">Practice paper</div><h1>Wr
 }
 function bookletBlob(){const b=atob(BOOKLET_B64),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new Blob([u],{type:'application/pdf'})}
 const GNAV=[['common','Common Module','Texts & Human Experiences'],['modA','Module A','Textual Conversations'],['modB','Module B','Critical Study of Literature'],['modC','Module C','The Craft of Writing'],['tips','Exam tips','PEPSS/PECIL, SAQ, themes, Mod C'],['adapt','Adaptation guide','SAQ, phrases, every module'],['exemplars','Mod C exemplars','Read them, or memorise one'],['booklet','Writing booklet','Download the PDF']];
-let rubricEditing=false;
 const DOCS=JSON.parse(document.getElementById('docs').textContent);
 function adaptHtml(){
 return `<section class="gsec ghero"><div class="kick">Study notes</div><h1>Adaptation guide</h1><p>How to adapt your responses on the day, plus short-answer structure, top techniques, starting phrases, IQTVE sub-phrases and notes for every module.</p>
@@ -1583,9 +1594,6 @@ $('gnav').innerHTML=GNAV.map(([id,a,b])=>`<button data-g="${id}" class="${SET.gs
 const g=SET.gsec;
 $('gmain').innerHTML=g==='tips'?TIPS:g==='booklet'?bookletHtml():g==='adapt'?adaptHtml():g==='exemplars'?exemplarsHtml():renderModule(GUIDE[g]||GUIDE.common);
 requestAnimationFrame(()=>document.querySelectorAll('.bf').forEach(el=>el.style.width=el.dataset.w+'%'));
-if($('bRubEdit'))$('bRubEdit').onclick=()=>{rubricEditing=true;renderGuide()};
-if($('bRubSave'))$('bRubSave').onclick=()=>{const v=$('rubIn').value.trim();if(v)ls.set('rubric.'+g,v);else ls.del('rubric.'+g);rubricEditing=false;renderGuide()};
-if($('bRubCancel'))$('bRubCancel').onclick=()=>{rubricEditing=false;renderGuide()};
 if(g==='exemplars')bindExemplars();
 if(g==='booklet'){
 $('bDl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(bookletBlob());a.download='English-Advanced-Writing-Booklet.pdf';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)};
