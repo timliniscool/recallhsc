@@ -2141,10 +2141,10 @@ para:['paragraph locked in!','that whole paragraph? in your brain now','one para
 checkpoint:['full essay checkpoint cleared. legend','that’s a lot of words from memory','your hippocampus is flexing','the essay fears you now'],
 fast:['whoa, fingers on fire','slow down, I can’t read that fast','speedrun any%','are you a falcon too?'],
 long:['you’ve been at it a while. water?','stretch your wings for a sec','quick break? I’ll hold your spot','posture check! sit like a proud falcon'],
-idle:['hi','falcon pride','fly falcon fly','ypt warrior confirmed','going to C block swimming pool later','visiting mularovski after this','have you checked pauly.com.au today','falcons don’t do Band 5','the quad is my natural habitat','I’d skip the queue at the canteen. I can fly','sports house? falcon house','I’ve been in the library since 7am (for the wifi)','one day I’ll understand Hamlet','my study playlist is just bird noises','I peaked at the swimming carnival','proud to be a falcon','peregrine mindset','fun fact: peregrines are the fastest animal alive','did you know HSC markers like clear topic sentences','reminder: NESA verbs matter','tip: say the human experience out loud. explicitly.','I’m guarding the cookie jar. no reason','hmm, what’s the paradox of motivation and behaviour… *eats cookie*','I can count to π','my essay would be about cookies','if you’re stuck, try the first word','Don’s rule: one more sentence, then a cookie'],
+idle:['hi','falcon pride','fly falcon fly','ypt warrior confirmed','going to C block swimming pool later','visiting mularovski after this','falcons don’t do Band 5','the quad is my natural habitat','I’d skip the queue at the canteen. I can fly','sports house? falcon house','I’ve been in the library since 7am (for the wifi)','one day I’ll understand Hamlet','my study playlist is just bird noises','I peaked at the swimming carnival','proud to be a falcon','peregrine mindset','fun fact: peregrines are the fastest animal alive','did you know HSC markers like clear topic sentences','reminder: NESA verbs matter','tip: say the human experience out loud. explicitly.','I’m guarding the cookie jar. no reason','hmm, what’s the paradox of motivation and behaviour… *eats cookie*','I can count to π','my essay would be about cookies','if you’re stuck, try the first word','Don’s rule: one more sentence, then a cookie'],
 scroll:['doomscrolling… just one more reel','ok this is the last video','why is my screen time 9 hours','*scrolls past 40 study tips without studying*','the algorithm knows I like cookies','wait this falcon on my fyp is me','checking the group chat. 214 messages. about nothing','liking memes instead of memorising quotes'],
-fly:['visiting mularovski','visiting pauly.com.au','going to C block swimming pool','fly falcon fly','brb, canteen run','off to the library (for the aircon)','quick lap of the quad','delivering a cookie to a friend'],
-back:['back!','I’m back. did you miss me','mularovski says hi','pauly.com.au was down. classic','the pool was freezing','I brought crumbs'],
+fly:['visiting mularovski','going to C block swimming pool','fly falcon fly','brb, canteen run','off to the library (for the aircon)','quick lap of the quad','delivering a cookie to a friend'],
+back:['back!','I’m back. did you miss me','mularovski says hi','the pool was freezing','I brought crumbs'],
 swim:['laps at C block pool','swimming carnival training arc','goggles on, focus on','backstroke is just lying down with extra steps','chlorine smell = peak motivation'],
 hello:['hi','hi! I’m Don. I study maths & eat cookies','falcon pride','ypt warrior confirmed',`${tod} I’m Don, your study falcon`,'type away, I’ll be down here','Don reporting for cookie duty']};
 const MORE={
@@ -2158,7 +2158,7 @@ para:['paragraph secured!','a whole paragraph. who are you','paragraph done. hyd
 checkpoint:['the whole essay?! from memory?!','essay checkpoint: smashed','that’s exam-ready right there','you’re basically a walking essay','my feathers are standing up','the markers aren’t ready'],
 fast:['speed demon','your keyboard needs a rest','is that a world record','falcon speed unlocked','slow down, you’ll overtake me','are you even reading or just vibing'],
 long:['stretch break? your wings will thank you','been a while. grab some water','go look at something far away for 20 seconds','snack break is a valid study strategy','your posture is giving question mark','5 minute break, then back to greatness'],
-idle:['going to C block swimming pool','falcon pride','fly falcon fly','hi','visiting mularovski','visiting pauly.com.au','ypt warrior confirmed','anyone seen my goggles','the quad is too loud today','who left a pie in the common room','I heard there’s a test on Friday. I heard wrong. I hope','period 5 maths is a test of character','the library printer jammed again','I tried to sign out of PE. denied','lunch line is 40 minutes long. worth it','house points for typing? I’d win','ypt timer running. respect','sports carnival tomorrow, I’m flying','assembly ran overtime again','I left my calculator in C block','the vending machine took my coin','I’m saving my energy for the swimming carnival','is it a mufti day? asking for a falcon','rain means the quad is closed. sad','studying is just remembering on purpose','one essay at a time','small steps, big Band 6','consistency > cramming','today’s goal: one paragraph. easy','you’re doing better than you think','future you is cheering','quotes are just friends you haven’t memorised yet','tip: say your topic sentence out loud','tip: chunk it, then link it','tip: rest is part of studying','did you drink water today','I believe in you. also cookies','HSC is a marathon. I’m a falcon. we fly','reminder: you’ve got this','*does a little hop*','*preens feathers thoughtfully*','*stares at a pigeon judgementally*','*practises dramatic wing reveal*','*hums the school song badly*','*flaps once for motivation*'],
+idle:['going to C block swimming pool','falcon pride','fly falcon fly','hi','visiting mularovski','ypt warrior confirmed','anyone seen my goggles','the quad is too loud today','who left a pie in the common room','I heard there’s a test on Friday. I heard wrong. I hope','period 5 maths is a test of character','the library printer jammed again','I tried to sign out of PE. denied','lunch line is 40 minutes long. worth it','house points for typing? I’d win','ypt timer running. respect','sports carnival tomorrow, I’m flying','assembly ran overtime again','I left my calculator in C block','the vending machine took my coin','I’m saving my energy for the swimming carnival','is it a mufti day? asking for a falcon','rain means the quad is closed. sad','studying is just remembering on purpose','one essay at a time','small steps, big Band 6','consistency > cramming','today’s goal: one paragraph. easy','you’re doing better than you think','future you is cheering','quotes are just friends you haven’t memorised yet','tip: say your topic sentence out loud','tip: chunk it, then link it','tip: rest is part of studying','did you drink water today','I believe in you. also cookies','HSC is a marathon. I’m a falcon. we fly','reminder: you’ve got this','*does a little hop*','*preens feathers thoughtfully*','*stares at a pigeon judgementally*','*practises dramatic wing reveal*','*hums the school song badly*','*flaps once for motivation*'],
 hello:['hello hello','back for more? love that','the study falcon has arrived','Don here, cookies ready','welcome back, scholar','let’s lock in','ready when you are']
 };
 for(const k in MORE)LINES[k]=(LINES[k]||[]).concat(MORE[k]);
@@ -2264,16 +2264,56 @@ let on=false,W=320,H=180,SC=3,camY=0,raf=0,last=0,t0=performance.now();
 let prog=0,shownProg=0,jump=null,rain=0,shake=0,target='step',coins=[],fx=[],birds=[],donFly=null,face=1,walkT=0;
 const G=()=>S.game||(S.game={level:0,coins:0});
 // ---- sprites -------------------------------------------------------
-const PAL={K:'#0b1324',H:'#141821',S:'#f2c6a0',s:'#d9a77f',G:'#cbd5e1',W:'#f8fafc',w:'#dbe3ec',T:'#7f1d1d',P:'#4b5563',B:'#1e3a5f',b:'#2c4f7c',O:'#111827',E:'#0b1324'};
-const KID={
-idle:['...HHHH.....','..HHHHHHH...','.HHHHHHHHH..','.HHSSSSHHH..','.HSGEGSGEG..','..SSSSSSS...','..SSSKKSS...','...SSSSS....','..BWWTWWW...','.BBWWTWWWS..','.BBWWTWWWS..','.BBwWTWWW...','..BPPPPPP...','...PP..PP...','...PP..PP...','...OO..OO...'],
-walk1:null,walk2:null,jump:null};
-KID.walk1=KID.idle.slice(0,13).concat(['..PP....PP..','.PP......PP.','.OO......OO.']);
-KID.walk2=KID.idle.slice(0,13).concat(['....PPPP....','....PP.PP...','....OO.OO...']);
-KID.jump=['...HHHH.....','..HHHHHHH...','.HHHHHHHHH..','.HHSSSSHHH..','.HSGEGSGEG..','..SSSSSSS...','..SSSKKSS..S','...SSSSS..S.','..BWWTWWWS..','.BBWWTWWW...','.BBWWTWWW...','.BBwWTWWW...','..BPPPPPP...','..PP...PP...','.OO.....OO..','............'];
-function spr(rows,X,Y,flip){
-for(let j=0;j<rows.length;j++){const r=rows[j];for(let i=0;i<r.length;i++){const c=r[i];if(c==='.')continue;x.fillStyle=PAL[c];x.fillRect(Math.round(flip?X+r.length-1-i:X+i),Math.round(Y+j),1,1)}}
+// Student sprite, modelled on the reference photo: messy black hair, gold round glasses, big smile,
+// collared white shirt, long maroon tie, black belt, grey trousers, navy backpack + straps. 14×22, faces right.
+const PAL={H:'#101218',h:'#2b303c',S:'#f1c39c',s:'#d39f78',G:'#c9a43a',E:'#1a1d26',M:'#7a2c2c',m:'#fff4ec',W:'#f8fafc',w:'#cdd6e1',
+T:'#7f1d1d',t:'#5a1212',N:'#22304f',n:'#151f36',B:'#0f131c',P:'#4b5563',p:'#363f4d',O:'#0a0d14',D:'#9aa3ae'};
+const HEAD=[ // 9 rows
+'...H.HH.H.....',
+'..HHHHHHHH....',
+'.HHhHHHHhHH...',
+'.HHHSHHSHHH...',
+'.HHSSSSSSSH...',
+'.HGEGSSGEGs...',
+'..SSSSSSSSs...',
+'..SMmmmMSs....',
+'...SSSSSs.....'];
+const BLINK='.HGGGSSGGGs...';
+const TORSO=[ // 7 rows, front arm drawn separately
+'..N.WwWWW.....',
+'.NNNWTTWW.....',
+'.NNnWTTWWN....',
+'.NNNNTTWNW....',
+'.NNnWTTWWW....',
+'.NNNWWTWWW....',
+'..NBBBBBBB....'];
+const LEGS={ // 6 rows each
+idle:['...PPPPPP.....','...PPP.PP.....','...PPP.PP.....','...PPP.PP.....','...ppp.pp.....','..OOOO.OOO....'],
+a:   ['...PPPPPP.....','...PPP.PPP....','..PPP...PPP...','.PPP.....PP...','.ppp.....pp...','OOOO.....OOO..'],
+b:   ['...PPPPPP.....','....PPPPP.....','....PPPP......','....PPPP......','....pppp......','...OOOOO......'],
+c:   ['...PPPPPP.....','...PPP.PP.....','...PP...PPP...','..PPP....PP...','..ppp....pp...','.OOOO....OOO..'],
+jump:['...PPPPPP.....','...PPPPPPPP...','..PPP...PPPP..','..PPP....pOO..','..ppp.........','.OOOO.........'],
+crouch:['..PPPPPPPP....','..PPP..PPP....','.PPP....PPP...','.ppp....ppp...','OOOO....OOOO..']};
+const ARMS={ // [x,y,colour] relative to torso top
+idle:[[9,1,'W'],[9,2,'W'],[9,3,'W'],[9,4,'w'],[9,5,'w'],[9,6,'S']],
+fwd:[[9,1,'W'],[10,2,'W'],[10,3,'W'],[11,4,'w'],[11,5,'S']],
+back:[[8,1,'W'],[8,2,'W'],[7,3,'W'],[7,4,'w'],[6,5,'S']],
+up:[[9,1,'W'],[10,0,'W'],[10,-1,'W'],[11,-2,'w'],[11,-3,'S']],
+slump:[[9,2,'W'],[9,3,'W'],[9,4,'w'],[9,5,'w'],[9,6,'w'],[9,7,'S']]};
+function px1(X,Y,i,j,c,flip){x.fillStyle=PAL[c];x.fillRect(Math.round(flip?X+13-i:X+i),Math.round(Y+j),1,1)}
+function rows(R,X,Y,flip){for(let j=0;j<R.length;j++){const r=R[j];for(let i=0;i<r.length;i++)if(r[i]!=='.')px1(X,Y,i,j,r[i],flip)}}
+/* pose: legs key, arm key, body bob (px, negative = up), head bob, blink, hair flick */
+function drawKid(X,Y,pose,flip){
+const legs=LEGS[pose.legs],drop=6-legs.length; // crouch has 5 leg rows, so the body sinks 1px
+const by=Y+pose.bob+drop,hy=by+(pose.head||0);
+rows(legs,X,Y+16+drop,flip); // feet always land on the bottom row
+rows(TORSO,X,by+9,flip);
+ARMS[pose.arm].forEach(([i,j,c])=>px1(X,by+9,i,j,c,flip));
+const head=HEAD.slice();if(pose.blink)head[5]=BLINK;
+rows(head,X,hy,flip);
+if(pose.flick){px1(X,hy,4,-1,'H',flip);px1(X,hy,9,-1,'H',flip)}
 }
+let blinkT=0,landT=0,breathT=0;
 function platform(px,py,w,kind){
 px=Math.round(px);py=Math.round(py);
 for(let i=0;i<w;i++){
@@ -2318,7 +2358,7 @@ if(i===0)return{x:0,y:0,w:W,kind:'ground'};
 const kind=i===lv+1?target:(i<=lv&&(G().marks||{})[i])||'step';
 const w=PW[kind]||56;return{x:platX(i)-w/2,y:platY(i),w,kind};
 }
-const standPos=(i,p)=>{const P=platInfo(i);const span=Math.max(8,P.w-22);return{x:P.x+6+p*span,y:P.y-16}};
+const standPos=(i,p)=>{const P=platInfo(i);const span=Math.max(8,P.w-24);return{x:P.x+5+p*span,y:P.y-22}};
 // ---- sky -------------------------------------------------------------
 const KEYS=[[0,'#38bdf8','#e0f2fe'],[.38,'#7dd3fc','#f0f9ff'],[.5,'#fb923c','#fde68a'],[.58,'#7c3aed','#f472b6'],[.66,'#0b1033','#1e3a8a'],[.9,'#0b1033','#312e81'],[.96,'#a78bfa','#fde68a'],[1,'#38bdf8','#e0f2fe']];
 const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
@@ -2339,10 +2379,15 @@ const sec=(now-t0)/1000,ph=(sec/240+.12)%1,night=ph>.6&&ph<.95?Math.min(1,Math.m
 const lv=G().level;
 // player position
 let pos;
+let jphase=null;
 if(jump){
-const k=Math.min(1,(now-jump.t)/jump.d),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
-pos={x:jump.a.x+(jump.b.x-jump.a.x)*e,y:jump.a.y+(jump.b.y-jump.a.y)*k-Math.sin(Math.PI*k)*jump.h};
-if(k>=1){jump=null;shownProg=0}
+// 0–0.14: crouch (anticipation) · 0.14–1: airborne arc
+const raw=Math.min(1,(now-jump.t)/jump.d);
+if(raw<.14){pos=jump.a;jphase='crouch'}
+else{const k=(raw-.14)/.86,e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+pos={x:jump.a.x+(jump.b.x-jump.a.x)*e,y:jump.a.y+(jump.b.y-jump.a.y)*k-Math.sin(Math.PI*k)*jump.h};jphase=k<.5?'rise':'fall'}
+if(raw>=1){jump=null;shownProg=0;landT=now;
+for(let i=0;i<10;i++)fx.push({x:pos.x+7+(Math.random()-.5)*10,y:pos.y+21,vx:(Math.random()-.5)*1.4,vy:-Math.random()*.6,a:.9,c:'#cbd5e1'})}
 }else{shownProg+=(prog-shownProg)*.18;pos=standPos(lv,shownProg)}
 const wantCam=pos.y-H*.62;camY+=(wantCam-camY)*.08;
 const cy=Math.round(camY);
@@ -2385,10 +2430,21 @@ coins=coins.filter(c=>c.a>0);
 // fireworks / sparkles
 fx.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.03;p.a-=.015;x.fillStyle=p.c;x.globalAlpha=Math.max(0,p.a);x.fillRect(Math.round(p.x),Math.round(p.y-cy),1,1);x.globalAlpha=1});fx=fx.filter(p=>p.a>0);
 // player
-const moving=Math.abs(prog-shownProg)>.002;if(moving)walkT+=.25;
-const frame=jump?KID.jump:moving?(Math.floor(walkT)%2?KID.walk1:KID.walk2):KID.idle;
+const moving=!jump&&Math.abs(prog-shownProg)>.002;if(moving)walkT+=.3;
+if(blinkT>0)blinkT--;else if(Math.random()<.012)blinkT=4;
+breathT+=1;
+let pose;
+const landing=now-landT<160,sad=rain>0;
+if(jphase==='crouch')pose={legs:'crouch',arm:'back',bob:1,head:1};
+else if(jphase==='rise')pose={legs:'jump',arm:'up',bob:-1,flick:true};
+else if(jphase==='fall')pose={legs:'jump',arm:'up',bob:0,flick:true};
+else if(landing)pose={legs:'crouch',arm:'idle',bob:1,head:1,flick:true};
+else if(moving){const f=Math.floor(walkT)%4;pose={legs:['a','b','c','b'][f],arm:['fwd','idle','back','idle'][f],bob:f%2?-1:0,flick:f===1}}
+else if(sad)pose={legs:'idle',arm:'slump',bob:0,head:1};
+else pose={legs:'idle',arm:'idle',bob:Math.floor(breathT/18)%2?0:-1}; // gentle breathing
+pose.blink=blinkT>0||sad;
 const sh=shake>0?Math.round(Math.sin(now/30)*1.5):0;if(shake>0)shake--;
-spr(frame,Math.round(pos.x)+sh,Math.round(pos.y-cy),face<0);
+drawKid(Math.round(pos.x)+sh,Math.round(pos.y-cy),pose,face<0);
 // rain cloud after a miss
 if(rain>0){rain--;const rx=Math.round(pos.x)-6,ry=Math.round(pos.y-cy)-14;cloud(rx,ry,.7,'#64748b');x.fillStyle='#38bdf8';for(let k=0;k<4;k++){const yy=(Math.floor(sec*20)+k*3)%9;x.fillRect(rx+3+k*4,ry+5+yy,1,2)}}
 const hudTxt=`LV ${lv}  ${G().coins}`;if(hudEl.textContent!==hudTxt)hudEl.textContent=hudTxt;
@@ -2407,7 +2463,7 @@ pass(t,okWords){
 const g=G(),from=standPos(g.level,shownProg);
 g.marks=g.marks||{};g.marks[g.level+1]=target;g.level++;g.coins+=okWords;
 const to=standPos(g.level,0);
-jump={a:from,b:to,t:performance.now(),d:650,h:22};
+jump={a:from,b:to,t:performance.now(),d:760,h:24};
 const n=Math.min(18,Math.max(3,Math.round(okWords/3)));
 for(let i=0;i<n;i++)coins.push({x:from.x+4+(Math.random()-.5)*20,y:from.y-4-Math.random()*16,a:1.2,p:Math.random()*4});
 if(target!=='step'){const P=platInfo(g.level),cols=target==='castle'?['#f59e0b','#f472b6','#38bdf8','#a3e635','#fff']:['#38bdf8','#fff'];
