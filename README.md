@@ -1,6 +1,6 @@
-# Recall: essay memoriser
+# RecallHSC
 
-A single-page app for memorising HSC essays by typing them, chunk by chunk.
+A single-page app for memorising HSC English essays by typing them, chunk by chunk.
 
 - **Chunk drills**: type a short, meaning-based chunk, then it grows a chunk at a time until the sentence is done.
 - **Recall ladder**: paragraph-so-far after every sentence, the whole essay at each topic sentence and quote + analysis unit, and every paragraph twice at the end.
@@ -13,4 +13,4 @@ A single-page app for memorising HSC essays by typing them, chunk by chunk.
 
 Everything is saved in your browser's localStorage. Use **Essays → Back up / Restore** to move between devices.
 
-Open `index.html`, or visit the GitHub Pages site.
+Live site: https://timliniscool.github.io/recallhsc/

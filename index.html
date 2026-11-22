@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Essay Recall</title>
+<title>RecallHSC</title>
+<meta name="description" content="RecallHSC: memorise HSC English essays by typing them, chunk by chunk, with NESA rubrics, trial-question stats and exam tips.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230ea5e9'/%3E%3Crect x='10' y='8' width='3' height='16' rx='1.5' fill='white'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@500&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
@@ -21,9 +23,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);min-height:10
 body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(rgba(14,116,190,.16) 1px,transparent 1.2px);background-size:26px 26px;-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 0%,transparent 75%);mask-image:radial-gradient(ellipse at 50% 40%,#000 0%,transparent 75%)}
 .layer{position:relative;z-index:1}
 button{font:inherit;cursor:pointer}
+
 /* ---------- top bar ---------- */
 .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:12px 22px;background:rgba(255,255,255,.6);backdrop-filter:blur(18px) saturate(1.4);border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.02em;font-size:17px}
+.brand .hsc{color:var(--sky);font-weight:800;margin-left:-8px}
 .logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--sky2),var(--sky));box-shadow:0 4px 12px rgba(14,165,233,.35);position:relative}
 .logo::after{content:"";position:absolute;left:7px;top:6px;width:2px;height:14px;background:#fff;border-radius:2px;animation:blink 1.1s steps(1) infinite}
 .tabs{display:flex;background:rgba(224,242,254,.7);border-radius:12px;padding:3px;gap:2px}
@@ -53,6 +57,7 @@ body.guide .mem-only{display:none}
 .menu-pop label:hover{background:#f3f9ff}
 .menu-pop input{accent-color:var(--sky)}
 .menu-pop hr{border:0;border-top:1px solid var(--line2);margin:6px 0}
+
 /* ---------- memorise layout ---------- */
 /* Wide (16:9 laptops/desktops): L | card | R.  Tablet landscape / small laptop: card | stacked side column.
 Tablet portrait: card on top, two panel columns below.  Phone: one column. */
@@ -85,6 +90,7 @@ body.focus .col{display:none}
 }
 @media(max-height:820px) and (min-width:900px){.prompt{font-size:20px;min-height:70px}.typebox{min-height:96px;max-height:38vh}.card{padding:18px 22px 14px}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
 .panel{background:var(--glass);backdrop-filter:blur(18px) saturate(1.3);border:1px solid rgba(255,255,255,.7);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 16px 14px;animation:pop .35s cubic-bezier(.2,.8,.2,1)}
 .panel.hide{display:none}
 @keyframes pop{from{opacity:0;transform:translateY(6px) scale(.99)}}
@@ -95,6 +101,7 @@ body.focus .col{display:none}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
 .live-dot.on{background:var(--ok);box-shadow:0 0 0 0 rgba(16,185,129,.5);animation:ping 1.4s infinite}
 @keyframes ping{70%{box-shadow:0 0 0 7px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+
 .card{background:var(--glass2);backdrop-filter:blur(22px) saturate(1.4);border:1px solid rgba(255,255,255,.85);border-radius:24px;box-shadow:0 2px 4px rgba(15,23,42,.03),0 30px 80px rgba(14,116,190,.16);padding:22px 26px 18px;position:relative;transition:box-shadow .3s}
 .card.flash-ok{box-shadow:0 0 0 2px rgba(16,185,129,.35),0 30px 80px rgba(16,185,129,.18)}
 .card.flash-bad{box-shadow:0 0 0 2px rgba(239,68,68,.25),0 30px 80px rgba(239,68,68,.12)}
@@ -108,6 +115,7 @@ body.focus .col{display:none}
 .rt.lead{background:#ede9fe;color:#6d28d9}
 .rt.quote{background:var(--warnsoft);color:#b45309}
 .rt.an,.rt.context{background:#f1f5f9;color:var(--muted)}
+
 .prompt{font-family:var(--serif);font-size:22px;line-height:1.6;color:var(--ink);min-height:92px;padding:2px 2px 18px;transition:opacity .35s ease,filter .35s ease,transform .35s ease}
 .prompt.veil{opacity:0;filter:blur(8px);transform:translateY(-4px);pointer-events:none}
 .prompt.enter{animation:enter .4s cubic-bezier(.2,.8,.2,1)}
@@ -129,6 +137,7 @@ body.focus .col{display:none}
 .diff .br{display:block;height:.7em}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:12px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
 .typebox{position:relative;font-family:var(--serif);font-size:20px;line-height:1.65;min-height:120px;max-height:46vh;overflow-y:auto;padding:14px 16px;border-radius:16px;background:rgba(248,251,255,.8);border:1.5px solid var(--line2);white-space:pre-wrap;word-wrap:break-word;cursor:text;transition:border-color .2s,background .3s,box-shadow .2s;scroll-behavior:smooth}
 .typebox.focus{border-color:var(--sky2);background:#fff;box-shadow:0 0 0 4px rgba(56,189,248,.14)}
 .typebox.ok{border-color:var(--ok);background:#f3fdf8}
@@ -160,6 +169,7 @@ body.focus .hud{display:flex}
 .q:hover{border-color:var(--sky2)}
 .q.done{background:var(--skysoft);border-color:transparent;color:var(--skyink)}
 .q.cur{background:var(--sky);border-color:var(--sky);color:#fff;font-weight:600}
+
 /* ---------- side panels ---------- */
 .ringwrap{display:flex;align-items:center;gap:16px}
 .ring{position:relative;width:112px;height:112px;flex:none}
@@ -218,6 +228,7 @@ label.set{cursor:pointer}
 .seg{display:grid;grid-template-columns:1fr 1fr;background:#eaf3fc;border-radius:10px;padding:3px;gap:3px}
 .seg button{border:0;background:none;border-radius:8px;padding:6px 8px;font-size:12px;color:var(--muted);transition:all .15s}
 .seg button.on{background:#fff;color:var(--skyink);font-weight:600;box-shadow:0 1px 4px rgba(14,116,190,.15)}
+
 /* ---------- modals ---------- */
 .modal{position:fixed;inset:0;z-index:50;background:rgba(15,23,42,.25);backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px;animation:fade .2s}
 .modal[hidden]{display:none}
@@ -292,6 +303,7 @@ label.btn{cursor:pointer;display:inline-flex;align-items:center}
 .steps li::marker{color:var(--sky);font-weight:700}
 #btnHelp{width:32px;padding:7px 0;text-align:center}
 .done-wrap h2{font-size:28px;margin:0 0 6px;letter-spacing:-.02em}
+
 /* ---------- guide ---------- */
 .gwrap{max-width:1180px;margin:0 auto;padding:26px 20px 80px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:24px;align-items:start}
 @media(max-width:900px){.gwrap{grid-template-columns:1fr}}
@@ -471,8 +483,9 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 </head>
 <body>
 <canvas id="bg"></canvas>
+
 <header class="top">
-<div class="brand"><span class="logo"></span>Recall</div>
+<div class="brand"><span class="logo"></span>Recall<b class="hsc">HSC</b></div>
 <div class="tabs"><button class="tab on" data-view="mem">Memorise</button><button class="tab" data-view="guide">Rubric guide</button></div>
 <div class="mem-only"><div class="topbar"><div class="tb-fill" id="tbFill"></div></div><div class="toppct" id="topPct">0% memorised</div></div>
 <div class="spacer"></div>
@@ -488,6 +501,7 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 </div>
 <button class="btn" id="btnHelp" title="How it works">?</button>
 </header>
+
 <!-- ================= MEMORISE ================= -->
 <main id="viewMem" class="layer">
 <div class="mem">
@@ -529,6 +543,7 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 <div class="set"><span></span><button class="btn small" id="btnReset">Reset progress</button></div>
 </section>
 </div>
+
 <section class="center">
 <div class="card" id="card">
 <canvas id="game" aria-hidden="true"></canvas>
@@ -550,6 +565,7 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 <div class="hud" id="hud"></div>
 <div class="queue" id="queue"></div>
 </section>
+
 <div class="col" id="colR">
 <section class="panel" data-panel="deep" data-name="Deep stats">
 <div class="ph"><h4>Deep stats</h4><button class="x" title="Hide">✕</button></div>
@@ -568,6 +584,7 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 </div>
 </div>
 </main>
+
 <!-- ================= GUIDE ================= -->
 <main id="viewGuide" class="layer">
 <div class="gwrap">
@@ -575,6 +592,7 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 <div class="gmain" id="gmain"></div>
 </div>
 </main>
+
 <div class="modal" id="modal" hidden>
 <div class="sheet">
 <h2>Where do you want to start?</h2>
@@ -583,10 +601,11 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 <div id="sentList"></div>
 </div>
 </div>
+
 <div class="modal" id="howto" hidden>
 <div class="sheet howto">
 <div class="hico"><span class="logo"></span></div>
-<h2>How Recall works</h2>
+<h2>How RecallHSC works</h2>
 <ol class="steps">
 <li><b>Pick an essay</b> from the top bar, or <b>+ Upload</b> your own. Paragraphs, topic sentences and quotes are found automatically.</li>
 <li><b>Type each chunk</b> you see. It hides as you type, then grows a chunk at a time until the sentence is done.</li>
@@ -597,6 +616,7 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 <button class="btn primary" id="bHowto" style="width:100%;justify-content:center;padding:10px">Got it, let’s go</button>
 </div>
 </div>
+
 <div class="modal" id="essayModal" hidden>
 <div class="sheet wide">
 <div class="sheet-head"><h2 id="essayH">Your essays</h2><span class="spacer"></span><button class="btn small" id="bCloseEssay">Close</button></div>
@@ -612,8 +632,10 @@ body.gamify .card.flash-bad{box-shadow:0 0 0 4px #fca5a5,0 0 0 8px #0b1324,0 24p
 <div class="sheet-foot"><button class="btn small" id="bExport" title="Download all essays + progress as a file">Back up</button><label class="btn small" title="Restore from a backup file">Restore<input type="file" id="bImport" accept=".json,application/json" hidden></label><span class="spacer"></span><button class="btn" id="bNew">New blank</button><button class="btn primary" id="bUseEssay">Save &amp; memorise</button></div>
 </div>
 </div>
+
 <script type="application/json" id="docs">{"ex":[]}</script>
 <div class="pet" id="pet"><button class="px" id="petX" title="Hide Don (bring back from Panels)">✕</button><canvas id="petCv" width="32" height="24" title="Don the falcon · click for a cookie"></canvas><div class="bub" id="petBub"></div></div>
+
 <script>
 const RAW = `Leadership is rarely found where we expect it, and democracy has long underestimated the wisdom of the back row. Bart Simpson, a ten-year-old from Springfield Elementary, exposes the paradox that the very qualities which earn detention are precisely those a nation requires in a crisis. His permanent record is long, but so is the Constitution, and nobody calls that a weakness. In an age of committee meetings and carefully focus-grouped slogans, Bart offers decisiveness, creativity and a skateboard. Read against a political culture exhausted by beige candidates, his record of mischief reveals a leader who understands power, labour and diplomacy better than most adults, and his candidacy suggests that the presidency might finally be fun again. Taken together, his rebellion, his hidden labour, his economics and his diplomacy make the strongest case yet for a ten-year-old in the Oval Office.
 Bart represents rebellion not as chaos but as a disciplined critique of institutions that have stopped listening. Confronted by yet another assembly on hallway etiquette, Bart declares, “If the rules were any good, they would not need a laminated poster.” The irony of a child outmanoeuvring a laminating machine exposes how authority often mistakes decoration for legitimacy. Bureaucrats call this insolence, but historians would call it the first draft of a reform agenda. His approach to reform is equally inventive, as he proposes replacing the school bell with “a gentle trumpet fanfare, so that every lesson ends like a victory”. The metaphor of victory transforms the mundane into the triumphant, revealing a leader who understands that morale is a policy area. Critics object that his methods include water balloons. Yet even here Bart insists, “A balloon is just a petition that has been filled with conviction.” The personification recasts protest as civic participation, recalling how democracies have always relied on loud citizens to correct quiet errors. Teachers who once confiscated his slingshot now quietly admit that he was right about the fire drill schedule. His rebellion therefore models the agency that voters claim to want but rarely elect.
@@ -621,7 +643,9 @@ Bart’s most overlooked qualification is his secret career completing every ass
 Bart’s economic instincts are equally presidential, as his management of the playground economy proves that markets respond to imagination rather than lectures. When the canteen raised the price of jelly cups, Bart opened a rival stall behind the bike racks and promised “fair prices, fast service and absolutely no questions about where the jelly came from”. The tricolon builds a slogan of reassuring confidence before collapsing into comic evasion, exposing how much of public policy depends on what voters agree not to ask. Within a week the canteen had lowered its prices. Bart declared victory at a press conference held from the top of the monkey bars. “Competition is just cooperation that refuses to wait its turn,” he explained to an audience of second graders and one confused seagull. The paradox reframes rivalry as a form of service, suggesting that Bart understands markets as systems of mutual pressure rather than personal greed. His accounts were kept in crayon. Every trade was nevertheless recorded, and every debt was eventually repaid in trading cards. Even the school auditor, a retired accountant who volunteers on Thursdays, admitted that the books were “messier than a toddler’s lunch but more honest than most budgets”. The simile turns disorder into a mark of transparency. A nation tired of polished deficits might welcome a treasurer whose mistakes are at least written in bright colours.
 Bart also demonstrates that diplomacy depends less on formality than on understanding what other people secretly want. During a lunchtime dispute over the last chocolate milk, he brokered peace by announcing, “Nobody gets the milk, and everybody gets a turn on the swing.” The balance of shared loss and shared reward reveals a negotiator who knows that fairness is felt before it is understood. He later ended a standoff between the fourth and fifth grades with a treaty written on a paper lunch bag. Its single clause read, “No wedgies before noon.” The brevity of the clause shows that effective law need not be lengthy to be respected. The treaty has not been broken once, a record few international agreements can claim. Such moments suggest that his foreign policy would rest on empathy, humour and a strategic supply of snacks. His opponents call him immature. His supporters call him relatable. History suggests that maturity has produced plenty of wars, while immaturity has mostly produced pranks.
 Bart Simpson presents leadership as a willingness to challenge, to labour unseen, to trade boldly and to make peace on unusual terms. The boy who spent his childhood in detention has used that time to study the institutions he would one day run. He has balanced budgets in crayon, brokered treaties on lunch bags and survived more parent-teacher interviews than any sitting politician. His secret years of homework prove that he can carry a heavy burden without asking for credit. Springfield has already trusted him with its lunch money, its jelly cups and its peace. Voters may hesitate to elect a ten-year-old, but they will struggle to find a candidate with more experience in actually getting things done.`;
+
 const BOOKLET_B64 = "";
+
 /* =====================================================================
 TEXT MODEL (works for any pasted essay)
 ===================================================================== */
@@ -785,6 +809,7 @@ sents.push({p,s,text:t,wc,role:m==='heading'?'heading':m==='lines'?'line':'prose
 return{paras,sents,pstart,total:sents.reduce((a,x)=>a+x.wc,0),kind:kind||'essay'};
 }
 let PARAS=[],SENTS=[],PSTART=[],TOTALW=1;
+
 /* ---------- fuzzy alignment ---------- */
 function lev(a,b){
 const m=a.length,n=b.length;let prev=[],cur=[];
@@ -816,6 +841,7 @@ ops.reverse();
 const ok=ops.filter(o=>o.op==='ok').length;
 return{ops,ok,acc:ok/Math.max(n,m,1)};
 }
+
 /* ---------- storage ---------- */
 const NS='essayRecall2.';
 const ls={get(k){try{return JSON.parse(localStorage.getItem(NS+k))}catch(e){return null}},set(k,v){try{localStorage.setItem(NS+k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(NS+k)}catch(e){}}};
@@ -841,6 +867,7 @@ const st=ls.get('state.'+id),d=DEFSTATE();
 S=st?{...d,...st,stats:{...d.stats,...st.stats}}:d;
 if(S.g>SENTS.length)S.g=0;
 }
+
 /* ---------- task flow ---------- */
 let queue=[],task=null,phase='type',typed='',t0=0,tries=0,lastKey=0,idleT=0,autoT=0;
 let L=null; // live telemetry for the current attempt
@@ -850,6 +877,7 @@ const ta=$('ta'),typebox=$('typebox'),typedEl=$('typed'),mark=$('mark'),caret=$(
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ROLE={ts:'Topic sentence',quote:'Quote',analysis:'Analysis',lead:'Lead-in',context:'Point',heading:'Heading',line:'Line',prose:'Prose'};
 const RCLS={ts:'ts',quote:'quote',analysis:'an',lead:'lead',context:'context',heading:'ts',line:'lead',prose:'context'};
+
 function rangeText(a,b){
 const out=[];let cur=-1;
 for(let g=a;g<=b;g++){const x=SENTS[g];if(x.p!==cur){out.push([]);cur=x.p}out[out.length-1].push(x.text)}
@@ -941,6 +969,7 @@ return `<button class="q ${i<S.ti?'done':''} ${i===S.ti?'cur':''}" data-i="${i}"
 }).join('');
 }
 $('queue').addEventListener('click',e=>{const b=e.target.closest('.q');if(!b)return;S.ti=+b.dataset.i;loadTask()});
+
 ta.addEventListener('input',e=>{
 if(phase!=='type'){ta.value=typed;return}
 const now=performance.now();
@@ -968,6 +997,7 @@ ta.addEventListener('focus',()=>typebox.classList.add('focus','idle'));
 ta.addEventListener('blur',()=>typebox.classList.remove('focus'));
 typebox.addEventListener('mousedown',e=>{e.preventDefault();focusTa()});
 $('card').addEventListener('click',e=>{if(!e.target.closest('button'))focusTa()});
+
 document.addEventListener('keydown',e=>{
 if(SET.view!=='mem'||!$('howto').hidden)return;
 if(e.target.id==='essaySel')return;
@@ -984,6 +1014,7 @@ else if(e.key==='Tab'){e.preventDefault();skip()}
 else if(document.activeElement===ta)e.preventDefault();
 }else if(phase==='ok'&&document.activeElement===ta)e.preventDefault();
 });
+
 /* ---------- live telemetry ---------- */
 function liveCalc(){
 const now=performance.now(),el=t0?(now-t0)/1000:0;
@@ -1043,6 +1074,7 @@ if(SET.view!=='mem'||!L||!task)return;
 if(phase==='type'&&t0){const c=liveCalc();L.samples.push({w:c.wpm,b:c.burst});if(L.samples.length>120)L.samples.shift();L.peak=Math.max(L.peak,c.burst)}
 renderLive();
 },500);
+
 /* ---------- check ---------- */
 function sentenceAtToken(t,idx){
 let acc=0;for(let g=t.a;g<=t.b;g++){acc+=SENTS[g].wc;if(idx<acc)return g}return t.b;
@@ -1137,6 +1169,7 @@ $('bEnd').onclick=fn;renderSide();save();
 }
 const showDone=()=>endScreen('Essay complete 🎉','You worked through every sentence. Pick a starting point to go again.','Choose a start',openModal);
 const showEmpty=()=>endScreen('No essay yet','Paste an essay to get started.','Paste essay',openEssay);
+
 /* ---------- side panels ---------- */
 function fmtTime(s){s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}h ${m}m`:`${m}m ${s%60}s`}
 const topOf=o=>Object.entries(o).sort((a,b)=>b[1]-a[1]);
@@ -1193,6 +1226,7 @@ $('map').innerHTML=PARAS.map((ss,p)=>`<div class="maprow"><span class="pl">¶${p
 return `<button class="dot ${S.learned[g]?'l':''} ${x.role==='ts'?'ts':''} ${x.unitEnd?'ue':''} ${g===S.g&&phase!=='done'?'cur':''}" data-g="${g}" title="${ROLE[x.role]}: ${esc(t.slice(0,90))}…"></button>`}).join('')}</div></div>`).join('');
 }
 $('map').addEventListener('click',e=>{const d=e.target.closest('.dot');if(d)setStart(+d.dataset.g)});
+
 /* ---------- panels / focus ---------- */
 const PANELS=[...document.querySelectorAll('.panel[data-panel]')];
 function applyPanels(){
@@ -1224,6 +1258,7 @@ applyPanels();
 document.addEventListener('click',()=>{$('panelMenu').hidden=true});
 $('btnFocus').onclick=()=>{SET.focus=!SET.focus;applyPanels();focusTa()};
 $('petX').onclick=()=>{SET.hidden.push('pet');applyPanels()};
+
 /* ---------- start modal ---------- */
 function setStart(g){S.startG=g;S.g=g;S.ti=0;S.started=true;closeModal();loadTask()}
 function openModal(){
@@ -1237,6 +1272,7 @@ function closeModal(){$('modal').hidden=true;focusTa()}
 $('sentList').addEventListener('click',e=>{const b=e.target.closest('.sopt');if(b)setStart(+b.dataset.g)});
 $('modal').addEventListener('click',e=>{if(e.target.id==='modal'&&S.started)closeModal()});
 $('btnStart').onclick=openModal;
+
 /* ---------- essay editor + library ---------- */
 let anaT=0;
 function renderAnalysis(){
@@ -1353,7 +1389,7 @@ $('bExport').onclick=()=>{
 save();
 const states={};allEssays().forEach(e=>{const st=ls.get('state.'+e.id);if(st)states[e.id]=st});
 const blob=new Blob([JSON.stringify({app:'essay-recall',v:2,lib:LIB,states,settings:SET},null,1)],{type:'application/json'});
-const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`essay-recall-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`recallhsc-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 };
 $('bImport').onchange=async e=>{
 const f=e.target.files[0];if(!f)return;e.target.value='';
@@ -1362,12 +1398,13 @@ const d=JSON.parse(await f.text());if(d.app!=='essay-recall')throw 0;
 (d.lib||[]).forEach(x=>{const i=LIB.findIndex(y=>y.id===x.id);if(i<0)LIB.push(x);else LIB[i]=x});
 Object.entries(d.states||{}).forEach(([k,v])=>ls.set('state.'+k,v));
 ls.set('lib',LIB);renderSwitcher();loadEssay(ACTIVE);loadTask();openEssay(ACTIVE);toast(`Restored ${(d.lib||[]).length} essays`);
-}catch(err){alert('That file is not an Essay Recall backup.')}
+}catch(err){alert('That file is not a RecallHSC backup.')}
 };
 $('bCloseEssay').onclick=closeEssay;
 $('essayModal').addEventListener('click',e=>{if(e.target.id==='essayModal')closeEssay()});
 $('btnEssay').onclick=()=>openEssay();
 $('btnUpload').onclick=()=>openEssay(null);
+
 /* ---------- settings ---------- */
 function bindSettings(){
 const fill=el=>el.style.setProperty('--p',((el.value-el.min)/(el.max-el.min)*100)+'%');
@@ -1381,6 +1418,7 @@ const seg=()=>$('sScope').querySelectorAll('button').forEach(b=>b.classList.togg
 $('sScope').onclick=e=>{const b=e.target.closest('button');if(!b||b.dataset.v===SET.scope)return;SET.scope=b.dataset.v;seg();S.ti=0;save();if(phase!=='done')loadTask()};
 $('btnReset').onclick=()=>{if(confirm('Reset progress and stats for this essay?')){S=DEFSTATE();save();loadTask();openModal()}};
 }
+
 /* ---------- background: drifting aurora + particles + keystroke ripples ---------- */
 (function(){
 const c=$('bg'),x=c.getContext('2d');let W,H;const dpr=Math.min(1.5,devicePixelRatio||1);
@@ -1425,6 +1463,7 @@ x.beginPath();x.arc(p.x,p.y,2.2*al+.4,0,7);x.fillStyle=`rgba(16,185,129,${al*.8}
 }
 requestAnimationFrame(frame);
 })();
+
 /* =====================================================================
 RUBRIC GUIDE
 ===================================================================== */
@@ -1470,6 +1509,19 @@ blurb:'A comparative study of two prescribed texts: where they echo each other (
 links:[['Trial stats source ↗','https://artofsmart.com.au/hsc-english/advanced/textual-conversations/']],
 verbs:['explore','reveal','identify','interpret','analyse','evaluate','compare','understand'],
 rubric:`Students explore the ways in which the comparative study of texts can reveal resonances and dissonances within and between texts. Students identify, interpret, analyse and evaluate the textual features, conventions, contexts, values and purposes of TWO prescribed texts. By comparing TWO texts, students understand how authors are influenced by other texts, contexts and values, and how these shape meaning. Through their comparative study, they explore common or disparate issues, values, assumptions or perspectives, and the ways these are depicted. By responding imaginatively, interpretively and critically to the comparative study, students explore and evaluate individual and common textual features, concepts, ideas and values.`,
+outcomes:[['Understanding',[
+['The ','relationship between reader, author, text and context',''],
+['Text structures, including ','mode, medium, form, language features and stylistic elements',', and the ways they ','shape meaning',''],
+['The ','influence of context and values',' on the perspectives and ideas in texts'],
+['','Theme, genre and aesthetic elements',', and the ways they are used to represent ','personal and public worlds',' and influence responses'],
+['The ','influence of historical and cultural context',' across a pair of texts'],
+['The ways a comparative study creates a ','new understanding and appreciation',' of each text']]],
+['Responding',[
+['Compose texts that explore text structures, language features and stylistic elements from different contexts to ','deepen understanding of how meaning is made',''],
+['','Compare and evaluate',' textual form and language features in a pair of texts'],
+['Compose ','sustained critical texts that affirm and challenge ideas, values and perspectives',' in a pair of texts'],
+['Use the ','language of critical and creative expression',' to ','refine arguments',' and craft sustained writing'],
+['Apply appropriate language and terminology used for ','making connections, interpreting texts and shaping meaning','']]]],
 chips:['resonances and dissonances within and between texts','identify, interpret, analyse and evaluate','textual features, conventions, contexts, values and purposes','how authors are influenced by other texts, contexts and values','how these shape meaning','common or disparate issues, values, assumptions or perspectives','the ways these are depicted','imaginatively, interpretively and critically','individual and common textual features, concepts, ideas and values'],
 newTitle:'New weight in the 2027 rubric',newLead:'Module A has no brand-new ideas, but these two get much more emphasis, and NESA’s 2027 sample paper leans on them.',
 samples:[['Analyse how each text’s context shapes your understanding of the conversation between them.','NESA 2027 sample · Example A, any pair · 20 marks (paraphrased)'],['How has comparing the pair deepened your understanding of shared or differing perspectives on identity?','NESA 2027 sample · Example B, pair-specific · 20 marks (paraphrased)']],
@@ -1488,6 +1540,19 @@ blurb:'A close study of one substantial text as a whole: its construction, conte
 links:[['Trial stats source ↗','https://artofsmart.com.au/hsc-english/advanced/critical-study-of-literature/']],
 verbs:['develop','understand','appreciate','analyse','evaluate','investigate','explore','strengthen'],
 rubric:`Students develop detailed analytical and critical knowledge of a substantial literary text. Through increasingly informed personal responses to the text in its entirety, students understand and appreciate the text’s distinctive qualities, notions of meaning, and significance. Students study ONE prescribed text, focusing on an analysis of the text’s construction, content and language. This enables students to develop informed personal perspectives of the text as well as an understanding of its cultural contribution, basing their judgements on evidence drawn from their critical reading. They evaluate the context of the text’s composition and reception, investigate and evaluate the perspectives of others, and explore the ideas in the text, further strengthening their personal perspectives.`,
+outcomes:[['Understanding',[
+['The ','relationship between reader, author, text and context',''],
+['The ways a text can be ','valued for its aesthetic qualities',', text structures, language features and stylistic elements'],
+['The ','language of critical expression',' in refining arguments and interpreting texts'],
+['The ways ','mode, medium and form',' shape and inform responses to texts'],
+['The ways language forms, features and structures are used to ','represent a range of perspectives',''],
+['The ways texts can ','reflect, confirm and challenge expectations',' associated with particular ','genres and styles',''],
+['The ways ','context can shape social, moral and ethical perspectives',' in texts'],
+['The effect of ','theme and genre',', and how these can ','influence a texts value','']]],
+['Responding',[
+['Compose critical texts that ','affirm or challenge the ideas, values and perspectives',' represented in a complex text'],
+['Compose ','informed personal responses',' shaped by critical interpretations of texts and textual analysis'],
+['Support critical interpretations of texts through ','sustained argument and relevant textual analysis','']]]],
 chips:['detailed analytical and critical knowledge','increasingly informed personal responses to the text in its entirety','distinctive qualities, notions of meaning, and significance','construction, content and language','informed personal perspectives','cultural contribution','evidence drawn from their critical reading','the context of the text’s composition and reception','the perspectives of others','explore the ideas in the text'],
 newTitle:'New in the 2027 rubric: barely tested so far',newLead:'Two ideas are completely new, and one has been renamed. Expect trial writers to target them.',
 samples:[['To what extent does your text use distinctive features to shape meaning?','NESA 2027 sample · Example A, any text · 20 marks (paraphrased)'],['A two-idea statement (“a representation of X and Y”): how far does it match your understanding of the text?','NESA 2027 sample · Examples B and C, text-specific · 20 marks (paraphrased)']],
@@ -1507,7 +1572,20 @@ blurb:'Your own sustained, cohesive writing for different purposes and audiences
 fmt:[['Section III · 20 marks','One task, often a piece plus a reflection on it.'],['≈ 12 + 8 marks','Average trial split between piece and reflection when both are set.'],['No set texts','From 2027. Paper 2 is 2 hours plus 5 minutes reading.']],
 links:[['Trial stats source ↗','https://artofsmart.com.au/hsc-english/advanced/the-craft-of-writing/']],
 verbs:['strengthen','extend','reflect','apply','evaluate','generate','explore','experiment','consider','refine'],
-rubric:`Students strengthen and extend their knowledge and skills as accomplished writers. They write for a range of purposes and audiences, using language to convey ideas with power and precision. Through the study of quality texts of the past as well as recognised contemporary works, students reflect on the process of writing and apply their knowledge of structure, language and form to create their own sustained and cohesive compositions. These provide models and stimulus for the development of their own complex ideas and written expression. They evaluate how writers use language critically, creatively and imaginatively for a range of purposes, including to express insights, evoke emotion, shape perspective or share aesthetic vision. Students generate and explore various concepts through discussion and speculation. Through drafting and revising, they experiment with figurative, rhetorical and linguistic devices, including allusion, imagery, narrative voice, characterisation and tone. Students consider context, purpose and audience to deliberately shape meaning in their own compositions. They apply the conventions of spelling, punctuation and grammar appropriately in critical, creative and imaginative writing. Students also reflect on the processes of writing to develop their knowledge of textual forms and features in their own sustained and cohesive compositions. Students refine and strengthen their own skills in composing highly crafted, imaginative, discursive, persuasive and reflective texts.`,
+rubric:`Students strengthen and extend their knowledge and skills as accomplished writers. They write for a range of purposes and audiences, using language to convey ideas with power and precision. Through the study of quality texts of the past as well as recognised contemporary works, students reflect on the process of writing and apply their knowledge of structure, language and form to create their own sustained and cohesive compositions. These provide models and stimulus for the development of their own complex ideas and written expression. They evaluate how writers use language critically, creatively and imaginatively for a range of purposes, including to express insights, evoke emotion, shape perspective or share aesthetic vision.
+
+Students generate and explore various concepts through discussion and speculation. Through drafting and revising, they experiment with figurative, rhetorical and linguistic devices, including allusion, imagery, narrative voice, characterisation and tone. Students consider context, purpose and audience to deliberately shape meaning in their own compositions. They apply the conventions of spelling, punctuation and grammar appropriately in critical, creative and imaginative writing. Students also reflect on the processes of writing to develop their knowledge of textual forms and features in their own sustained and cohesive compositions.
+
+Students refine and strengthen their own skills in composing highly crafted, imaginative, discursive, persuasive and reflective texts.`,
+outcomes:[['Understanding',[
+['The ','aesthetic qualities of texts',' and the ','power of language',' to express ideas, perspectives and experiences'],
+['The ','forms, language features and stylistic choices',' that shape imaginative, discursive, persuasive and reflective texts']]],
+['Responding',[
+['Compose personal, critical and creative texts that ','experiment with emerging forms',', language features and literary devices including ','imagery, motif and allusion',''],
+['Compose texts that use the ','language of critical and creative expression',''],
+['Compose imaginative, discursive, persuasive and reflective texts that ','affirm or challenge ideas, values and perspectives',' represented in texts'],
+['Use ','metalanguage',' to ','assess and reflect on their own process of writing',' and the writing of others'],
+['','Draft, reflect, edit, refine, revise and present',' texts for a range of audiences and purposes']]]],
 chips:['accomplished writers','a range of purposes and audiences','power and precision','quality texts of the past as well as recognised contemporary works','reflect on the process of writing','structure, language and form','sustained and cohesive compositions','complex ideas and written expression','critically, creatively and imaginatively','express insights, evoke emotion, shape perspective or share aesthetic vision','discussion and speculation','drafting and revising','figurative, rhetorical and linguistic devices','allusion, imagery, narrative voice, characterisation and tone','context, purpose and audience','deliberately shape meaning','conventions of spelling, punctuation and grammar','textual forms and features','highly crafted, imaginative, discursive, persuasive and reflective texts'],
 newTitle:'New in the 2027 rubric: barely tested so far',newLead:'One new form, and a change to what the reflection is about.',
 samples:[['(a) Continue a literary extract as imaginative, discursive or persuasive writing that evokes a particular emotion.','NESA 2027 sample · Part (a) · 10 marks (paraphrased)'],['(b) Evaluate how your language in (a) evokes that emotional response.','NESA 2027 sample · Part (b) · 10 marks (paraphrased)']],
@@ -1520,6 +1598,7 @@ setup:[['Respond to a stimulus idea',55,'35/64'],['Given opening',20,'13/64'],['
 refl:[['Explain composition choices',57,'16/28'],['Analyse own language use',21,'6/28'],['Evaluate effectiveness',18,'5/28'],['Analyse a mentor text or stimulus',4,'1/28']],
 src:'Counts cover 92 craft of writing tasks (64 creative pieces) from 67 English Advanced trial papers, plus every HSC paper 2019–2025, as coded by Art of Smart Insights. 28 of the 92 tasks include a reflection.'}
 };
+
 const yearsHtml=y=>`<div class="years">${y.length?y.map(v=>`<span>HSC ${v}</span>`).join(''):'<span class="none">not yet set in an HSC paper</span>'}</div>`;
 const bar=(label,v,n,scale,alt)=>`<div class="bar"><span class="bl">${label}</span><div class="bt"><div class="bf ${alt?'alt':''}" data-w="${Math.min(100,v/scale*100)}"></div></div><span class="bv">${v}% <small>${n}</small></span></div>`;
 function ideaHtml(it,i,cls,scale=50){
@@ -1540,7 +1619,7 @@ let rub=esc(m.rubric);
 [...m.chips].sort((a,b)=>b.length-a.length).forEach(c=>{rub=rub.split(esc(c)).join(`<mark class="rk">${esc(c)}</mark>`)});
 const seg=parts=>parts.map((p,i)=>i%2?`<mark class="rk">${esc(p)}</mark>`:esc(p)).join('');
 h+=`<section class="gsec"><h2>The NESA rubric <span class="tag hot">exact wording</span></h2>
-<div class="rubric"><p>${rub}</p></div>
+<div class="rubric">${rub.split(/\n\s*\n/).map(p=>`<p>${p}</p>`).join('')}</div>
 ${m.outcomes?m.outcomes.map(([t,list])=>`<div class="rlab">${t}</div><ul class="outc">${list.map(l=>`<li>${seg(l)}</li>`).join('')}</ul>`).join(''):''}
 ${m.note?`<div class="rnote">${esc(m.note)}</div>`:''}
 <div class="rlab">Key terms to use in your responses</div><div class="chips">${m.chips.map(c=>`<span>${esc(c)}</span>`).join('')}</div></section>`;
@@ -1561,6 +1640,7 @@ h+=`<p class="src">${m.src} Figures and idea summaries adapted from Art of Smart
 return h;
 }
 const TIPS=``; /* NSBHS toolkit: removed from history (now encrypted in js/toolkit.vault.json) */
+
 function bookletHtml(){
 return `<section class="gsec ghero"><div class="kick">Practice paper</div><h1>Writing booklet</h1><p>A lined English Advanced writing booklet (9 pages) for timed practice. It’s embedded in this page, so the download works offline and nothing is fetched from anywhere.</p></section>
 <section class="gsec"><div class="booklet"><div class="page"><b>English Advanced</b><i>Writing Booklet · NESA number ______</i></div>
@@ -1601,6 +1681,7 @@ $('bOpen').onclick=()=>window.open(URL.createObjectURL(bookletBlob()),'_blank');
 }
 }
 $('gnav').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;SET.gsec=b.dataset.g;save();renderGuide();window.scrollTo({top:0,behavior:'smooth'})});
+
 /* =====================================================================
 PET FALCON: pixel sprite, eats cookies, studies maths, reacts to you
 ===================================================================== */
@@ -1733,6 +1814,7 @@ if(e==='checkpoint'){mood='pass';moodT=24;flap=18;for(let i=0;i<4;i++)hearts.pus
 if(e==='fast'){flap=6;say(pick(LINES.fast))}
 }};
 })();
+
 /* =====================================================================
 GAMIFY: retro platformer skin over the same typing engine.
 Every passed task = jump up one floating platform. Fail = stay put (rain cloud).
@@ -1899,6 +1981,7 @@ fail(){rain=70;shake=18;prog=0},
 reset(){S.game={level:0,coins:0};camY=standPos(0,0).y-H*.62}
 };
 })();
+
 /* ---------- views ---------- */
 function setView(v){
 SET.view=v;save();
@@ -1907,12 +1990,14 @@ document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.v
 if(v==='guide')renderGuide();else{requestAnimationFrame(()=>{placeCaret();drawSpark()});focusTa()}
 }
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>setView(t.dataset.view));
+
 if(document.fonts)document.fonts.ready.then(()=>placeCaret());
 window.addEventListener('resize',()=>placeCaret());
 function showHowto(){$('howto').hidden=false;setTimeout(()=>$('bHowto').focus(),50)}
 $('bHowto').onclick=()=>{$('howto').hidden=true;ls.set('seen',1);if(!S.started&&SET.view==='mem')openModal();else focusTa()};
 $('btnHelp').onclick=showHowto;
 $('howto').addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Enter'){e.preventDefault();$('bHowto').click()}});
+
 bindSettings();
 loadEssay(ACTIVE);
 renderSwitcher();
