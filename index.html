@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src blob:; worker-src 'none'; manifest-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#0ea5e9">
+<meta property="og:title" content="RecallHSC">
+<meta property="og:description" content="Memorise HSC English essays by typing them, chunk by chunk. NESA rubrics, trial-question stats and exam tips included.">
+<meta property="og:type" content="website">
 <title>RecallHSC</title>
 <meta name="description" content="RecallHSC: memorise HSC English essays by typing them, chunk by chunk, with NESA rubrics, trial-question stats and exam tips.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230ea5e9'/%3E%3Crect x='10' y='8' width='3' height='16' rx='1.5' fill='white'/%3E%3C/svg%3E">
@@ -600,6 +606,14 @@ body.gamify .dot{background:#1a222c}body.gamify .dot.l{background:var(--sky)}
 body.gamify .page{background:#e5e7eb!important}
 body.gamify .q.cur{background:var(--sky);color:#0b1324}
 body.gamify .card{box-shadow:0 0 0 4px #a3e635,0 0 0 8px #0b1324,0 0 60px rgba(163,230,53,.25)}
+/* ---------- footer + focus ---------- */
+.sitefoot{text-align:center;padding:10px 20px 34px;margin-top:-80px}
+.fmark{font-size:15px;font-weight:700;letter-spacing:-.02em;color:var(--faint)}
+.fmark b{color:var(--sky);font-weight:800}
+body.guide .sitefoot{margin-top:-50px}
+body.gamify .fmark{font-family:'Press Start 2P',monospace;font-size:11px;letter-spacing:0}
+:focus-visible{outline:2px solid var(--sky2);outline-offset:2px}
+button:focus:not(:focus-visible){outline:none}
 /* ---------- pet falcon ---------- */
 .pet{position:fixed;left:14px;bottom:12px;z-index:40;display:flex;align-items:flex-end;gap:4px;pointer-events:none;animation:petIn .7s cubic-bezier(.2,1.4,.4,1) both;animation-delay:.6s}
 @keyframes petIn{from{transform:translateY(110px);opacity:0}}
@@ -765,6 +779,8 @@ body.gamify .card{box-shadow:0 0 0 4px #a3e635,0 0 0 8px #0b1324,0 0 60px rgba(1
 </div>
 </div>
 
+<footer class="sitefoot layer"><span class="fmark">Recall<b>HSC</b>.</span></footer>
+<noscript><div style="position:fixed;inset:0;display:grid;place-items:center;background:#f4f9ff;font:16px system-ui;z-index:99">RecallHSC needs JavaScript turned on.</div></noscript>
 <script type="application/json" id="docs">{"ex":[]}</script>
 <div class="pet" id="pet"><button class="px" id="petX" title="Hide Don (bring back from Panels)">✕</button><canvas id="petCv" width="32" height="24" title="Don the falcon · click for a cookie"></canvas><div class="bub" id="petBub"></div></div>
 
@@ -983,9 +999,33 @@ const DEFSET={delay:2,strict:88,phrase:4,essay:true,hide:true,scope:'start',moti
 const DEFSTATS=()=>({att:0,pass:0,words:0,chars:0,time:0,accSum:0,keys:0,bs:0,wpmSum:0,wpmN:0,bestWpm:0,bestBurst:0,flawless:0,rhythmSum:0,rhythmN:0,hes:0,longestPause:0,
 missed:{},typos:{},fails:{},slipSum:0,slipN:0,recAtt:0,recPass:0,bldAtt:0,bldPass:0,hours:{},cps:0,hist:[],retries:0,tasks:0,firstLetter:0,firstLetterN:0,taskMs:{build:[0,0],para:[0,0],essay:[0,0]}});
 const DEFSTATE=()=>({startG:0,g:0,ti:0,learned:[],started:false,stats:DEFSTATS()});
+/* ---- validation: storage and imported backups are untrusted input ---- */
+const okId=v=>typeof v==='string'&&/^[A-Za-z0-9_-]{1,40}$/.test(v);
+const num=v=>{v=Number(v);return Number.isFinite(v)?v:0};
+function cleanLib(list){
+return (Array.isArray(list)?list:[]).filter(e=>e&&okId(e.id)&&e.id!=='sample'&&typeof e.text==='string').slice(0,200).map(e=>({
+id:e.id,title:String(e.title||'Essay').slice(0,60),text:e.text.slice(0,200000),kind:e.kind==='creative'?'creative':'essay',
+src:typeof e.src==='string'?e.src.slice(0,80):undefined,updated:num(e.updated)}));
+}
+function cleanState(st){
+if(!st||typeof st!=='object')return null;
+const d=DEFSTATE(),s=st.stats&&typeof st.stats==='object'?st.stats:{},o={...d.stats};
+for(const k of Object.keys(d.stats)){if(typeof d.stats[k]==='number')o[k]=num(s[k])}
+const map=(m,max)=>{const r={};if(m&&typeof m==='object')for(const[k,v]of Object.entries(m).slice(0,max))r[String(k).slice(0,80)]=num(v);return r};
+o.missed=map(s.missed,2000);o.typos=map(s.typos,2000);o.fails=map(s.fails,2000);
+o.hours={};if(s.hours&&typeof s.hours==='object')for(const[k,v]of Object.entries(s.hours))if(/^\d{1,2}$/.test(k)&&Array.isArray(v))o.hours[k]=[num(v[0]),num(v[1])];
+o.hist=(Array.isArray(s.hist)?s.hist:[]).slice(-60).map(h=>[Math.max(0,Math.min(100,num(h&&h[0]))),h&&h[1]?1:0]);
+o.taskMs={};for(const t of['build','para','essay']){const v=s.taskMs&&s.taskMs[t];o.taskMs[t]=[num(v&&v[0]),num(v&&v[1])]}
+const g=st.game&&typeof st.game==='object'?{level:Math.max(0,num(st.game.level)|0),coins:Math.max(0,num(st.game.coins)|0),marks:{}}:undefined;
+if(g&&st.game.marks&&typeof st.game.marks==='object')for(const[k,v]of Object.entries(st.game.marks))if(/^\d+$/.test(k)&&['step','flag','castle'].includes(v))g.marks[k]=v;
+return{startG:Math.max(0,num(st.startG)|0),g:Math.max(0,num(st.g)|0),ti:Math.max(0,num(st.ti)|0),learned:(Array.isArray(st.learned)?st.learned:[]).map(Boolean),
+started:!!st.started,nS:num(st.nS),stats:o,game:g};
+}
 let SET={...DEFSET,...(ls.get('settings')||{})};
-let LIB=ls.get('lib')||[];
-let ACTIVE=ls.get('active')||'sample';
+SET.hidden=(Array.isArray(SET.hidden)?SET.hidden:[]).filter(x=>typeof x==='string');
+['delay','strict','phrase'].forEach(k=>{SET[k]=num(SET[k])||DEFSET[k]});
+let LIB=cleanLib(ls.get('lib'));
+let ACTIVE=okId(ls.get('active'))?ls.get('active'):'sample';
 let S=null;
 const essayText=id=>id==='sample'?RAW:(LIB.find(e=>e.id===id)||{}).text;
 const essayKind=id=>id==='sample'?'essay':(LIB.find(e=>e.id===id)||{}).kind||'essay';
@@ -995,8 +1035,7 @@ let text=essayText(id);if(!text){id='sample';text=RAW}
 ACTIVE=id;
 ({paras:PARAS,sents:SENTS,pstart:PSTART,total:TOTALW}=parseEssay(text,essayKind(id)));
 TOTALW=TOTALW||1;
-const st=ls.get('state.'+id),d=DEFSTATE();
-S=st?{...d,...st,stats:{...d.stats,...st.stats}}:d;
+S=cleanState(ls.get('state.'+id))||DEFSTATE();
 if(S.g>SENTS.length)S.g=0;
 }
 
@@ -1535,10 +1574,12 @@ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=
 $('bImport').onchange=async e=>{
 const f=e.target.files[0];if(!f)return;e.target.value='';
 try{
-const d=JSON.parse(await f.text());if(d.app!=='essay-recall')throw 0;
-(d.lib||[]).forEach(x=>{const i=LIB.findIndex(y=>y.id===x.id);if(i<0)LIB.push(x);else LIB[i]=x});
-Object.entries(d.states||{}).forEach(([k,v])=>ls.set('state.'+k,v));
-ls.set('lib',LIB);renderSwitcher();loadEssay(ACTIVE);loadTask();openEssay(ACTIVE);toast(`Restored ${(d.lib||[]).length} essays`);
+if(f.size>20e6)throw 0;
+const d=JSON.parse(await f.text());if(!d||d.app!=='essay-recall')throw 0;
+const inc=cleanLib(d.lib);
+inc.forEach(x=>{const i=LIB.findIndex(y=>y.id===x.id);if(i<0)LIB.push(x);else LIB[i]=x});
+if(d.states&&typeof d.states==='object')Object.entries(d.states).forEach(([k,v])=>{const c=cleanState(v);if(c&&(k==='sample'||okId(k)))ls.set('state.'+k,c)});
+ls.set('lib',LIB);renderSwitcher();loadEssay(ACTIVE);loadTask();openEssay(ACTIVE);toast(`Restored ${inc.length} essays`);
 }catch(err){alert('That file is not a RecallHSC backup.')}
 };
 $('bCloseEssay').onclick=closeEssay;
