@@ -144,6 +144,11 @@ body.focus .col{display:none}
 .diff .del{background:var(--badsoft);color:#b91c1c;box-shadow:inset 0 -2px 0 var(--bad)}
 .diff .ins{color:var(--faint);text-decoration:line-through;font-size:.85em}
 .diff .br{display:block;height:.7em}
+.diff .ahead{color:var(--faint);font-style:italic;opacity:.75}
+.lg-ahead{background:transparent!important;border:1px dashed var(--faint)}
+.prompt .nextc{color:var(--faint);opacity:.55;transition:opacity .2s}
+.prompt .nextc:hover{opacity:.85}
+body.gamify .prompt .nextc{color:#94a3b8;opacity:.8}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:12px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 
@@ -1155,7 +1160,10 @@ ops.push({op:'ins',u:j-1});j--;
 }
 ops.reverse();
 const ok=ops.filter(o=>o.op==='ok').length;
-return{ops,ok,acc:ok/Math.max(n,m,1)};
+// Words typed past the end of the target (typing ahead) don't count against you; stray extras in the middle count half.
+let trail=0;for(let k=ops.length-1;k>=0&&ops[k].op==='ins';k--)trail++;
+const interior=ops.filter(o=>o.op==='ins').length-trail;
+return{ops,ok,trail,acc:n?Math.min(1,ok/(n+.5*interior)):0};
 }
 
 /* ---------- storage ---------- */
@@ -1224,7 +1232,7 @@ return out.map(a=>a.join(' ')).join('\n\n');
 }
 function buildQueue(g){
 const x=SENTS[g],ph=chunkSentence(x.text,SET.phrase),q=[];
-ph.forEach((_,k)=>q.push({type:'build',k:k+1,n:ph.length,shown:ph.slice(0,k+1),text:ph.slice(0,k+1).join(' '),a:g,b:g}));
+ph.forEach((_,k)=>q.push({type:'build',k:k+1,n:ph.length,shown:ph.slice(0,k+1),next:ph[k+1]||'',text:ph.slice(0,k+1).join(' '),a:g,b:g}));
 const floor=SET.scope==='start'?Math.min(S.startG,g):0;
 const pa=Math.max(PSTART[x.p],floor),last=x.s===PARAS[x.p].length-1,pt=rangeText(pa,g),solo=PARAS[x.p].length===1;
 if(!solo){
@@ -1272,6 +1280,7 @@ prompt.classList.remove('veil');
 prompt.classList.remove('enter');void prompt.offsetWidth;prompt.classList.add('enter');
 if(task.type==='build'){
 prompt.innerHTML=task.shown.map((p,i)=>i===task.shown.length-1?`<mark>${esc(p)}</mark>`:`<span class="old">${esc(p)}</span>`).join(' ')+
+(task.next?` <span class="nextc" title="Coming next: no need to memorise yet">${esc(task.next)}${task.k+1<task.n?' …':''}</span>`:'')+
 `<div class="phint">${task.k===1?'Read it, then type it. ':''}${SET.hide?'The prompt hides once you start typing.':''}</div>`;
 }else{
 const first=items(task.text).filter(i=>i.norm).slice(0,2).map(i=>i.orig).join(' ');
@@ -1333,6 +1342,8 @@ clearTimeout(autoT);
 const U=tokens(typed),T=task.T;
 Game.progress(U.length/T.length);
 if(U.length>=T.length&&U[U.length-1]===T[T.length-1])autoT=setTimeout(()=>{if(phase==='type')check()},180);
+// typing ahead: once the target's last word is in, check after a short pause
+else if(U.length>T.length&&U.slice(T.length-2).includes(T[T.length-1]))autoT=setTimeout(()=>{if(phase==='type')check()},650);
 });
 ta.addEventListener('focus',()=>typebox.classList.add('focus','idle'));
 ta.addEventListener('blur',()=>typebox.classList.remove('focus'));
@@ -1475,7 +1486,7 @@ let html='',ptr=0;
 const plain=it=>it.br?'<span class="br"></span>':`<span class="w">${esc(it.orig)}</span> `;
 const flush=k=>{while(ptr<k){html+=plain(its[ptr]);ptr++}};
 for(const o of r.ops){
-if(o.op==='ins'){html+=`<span class="w ins">${esc(U[o.u])}</span> `;continue}
+if(o.op==='ins'){const ahead=r.ops.indexOf(o)>=r.ops.length-r.trail;html+=`<span class="w ${ahead?'ahead':'ins'}"${ahead?' title="Typed ahead: not counted"':''}>${esc(U[o.u])}</span> `;continue}
 const ii=cmp[o.t];flush(ii);
 const it=its[ii];
 if(o.op==='ok')html+=`<span class="w">${esc(it.orig)}</span> `;
@@ -1485,7 +1496,7 @@ ptr=ii+1;
 }
 flush(its.length);
 prompt.classList.remove('veil');
-prompt.innerHTML=`<div class="diff">${html}</div><div class="legend"><span><i style="background:#fde68a"></i>wrong word (yours struck)</span><span><i style="background:#fecaca"></i>missed</span><span><i style="background:#e2e8f0"></i>extra</span><span>Read for as long as you like.</span></div>`;
+prompt.innerHTML=`<div class="diff">${html}</div><div class="legend"><span><i style="background:#fde68a"></i>wrong word (yours struck)</span><span><i style="background:#fecaca"></i>missed</span><span><i style="background:#e2e8f0"></i>extra</span>${r.trail?'<span><i class="lg-ahead"></i>typed ahead (not counted)</span>':''}<span>Read for as long as you like.</span></div>`;
 }
 function retry(){phase='type';typed='';ta.value='';t0=0;L=newLive();typebox.classList.remove('bad','ok');$('card').classList.remove('flash-bad');renderPrompt();renderFoot();focusTa()}
 function skip(){next()}
