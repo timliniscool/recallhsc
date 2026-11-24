@@ -235,3 +235,23 @@ test('confirmations use the in-app window (works where browser pop-ups are block
   await page.locator('#btnReset').click();await page.locator('#cfYes').click();
   await expect.poll(()=>page.evaluate(()=>[S.g,S.epoch])).toEqual([0,1]);
 });
+
+test('a long two-half sentence counts as learned once both halves are built, even if the whole-sentence recall is skipped',async({page})=>{
+  await openApp(page,{seed:{'state.sample':{startG:0,g:1,ti:0,learned:[true],started:true}}});
+  expect(await page.evaluate(()=>!!splitSentence(SENTS[1].text))).toBe(true); // sample sentence 2 is split into halves
+  for(let i=0;i<30&&await page.evaluate(()=>task.type==='build');i++){
+    expect(await answer(page)).toBe('ok');
+    await page.evaluate(()=>advance());
+  }
+  expect(await page.evaluate(()=>task.type)).toBe('sent');
+  expect(await page.evaluate(()=>S.learned[1])).toBe(true);
+  await page.locator('#btnSkip').click(); // skip the whole-sentence recall
+  await page.reload();await page.waitForFunction(()=>typeof task!=='undefined'&&task);
+  expect(await page.evaluate(()=>[S.g,S.learned[1]])).toEqual([2,true]);
+});
+
+test('progress saved before the fix: long sentences already moved past are counted on load',async({page})=>{
+  await openApp(page,{seed:{'state.sample':{startG:0,g:2,ti:0,learned:[true],started:true}}});
+  expect(await page.evaluate(()=>S.learned[1])).toBe(true);
+  expect(await page.evaluate(()=>pctOf(ACTIVE))).toBeGreaterThan(0);
+});

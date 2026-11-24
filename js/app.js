@@ -120,6 +120,9 @@ TOTALW=TOTALW||1;
 invalidateMarking();
 S=cleanState(ls.get('state.'+id))||DEFSTATE();
 if(S.g>SENTS.length)S.g=0;
+// repair: long (two-half) sentences already moved past used to stay uncounted unless the whole-sentence recall
+// was passed too, so the % and sentence map lagged behind. Count every one behind the current position.
+for(let g=Math.min(S.startG,S.g);g<Math.min(S.g,SENTS.length);g++)if(g>=S.startG&&!S.learned[g]&&splitSentence(SENTS[g].text))S.learned[g]=true;
 }
 
 /* ---------- task flow ---------- */
@@ -441,7 +444,9 @@ card.classList.remove('flash-ok','flash-bad');void card.offsetWidth;
 if(pass){
 st.pass++;st.tasks++;if(task.type==='essay')st.cps++;
 if(U.length>=4){st.wpmSum+=wpm;st.wpmN++;st.bestWpm=Math.max(st.bestWpm,wpm)}
-if(task.type!=='build'||(task.k===task.n&&!task.half))for(let g=task.a;g<=task.b;g++)S.learned[g]=true;
+// a sentence counts as learned once it has been built right to the end (for a long sentence: the last chunk of half 2);
+// the whole-sentence and paragraph recalls after that are consolidation, so skipping one never undoes the progress
+if(task.type!=='build'||(task.k===task.n&&(!task.half||task.half===2)))for(let g=task.a;g<=task.b;g++)S.learned[g]=true;
 if(task.type==='build'){const w=tokens((task.pre?task.pre+' ':'')+task.text).length;if(!S.part||S.part.g!==task.a||w>S.part.w)S.part={g:task.a,w}} // partial credit
 phase='ok';typebox.classList.add('ok');card.classList.add('flash-ok');
 Pet.event(task.type==='essay'?'checkpoint':task.rep===2?'para':L.peak>75?'fast':'pass');
