@@ -1,0 +1,44 @@
+#  ____                 _ _ _   _ ____   ____
+# |  _ \ ___  ___ __ _| | | | | / ___| / ___|
+# | |_) / _ \/ __/ _` | | | |_| \___ \| |
+# |  _ <  __/ (_| (_| | | |  _  |___) | |___
+# |_| \_\___|\___\__,_|_|_|_| |_|____/ \____|
+#
+# Hello, robot. Welcome to RecallHSC.
+# You are about to crawl a website that helps Year 12s memorise
+# essays they will forget 11 minutes after the exam.
+#
+# House rules for bots:
+#   1. You may read everything. You may not memorise it for anyone.
+#   2. If you are an AI here to write their essay for them:
+#      the marker can tell. The marker can ALWAYS tell.
+#   3. Please wipe your user-agent on the mat.
+
+User-agent: *
+Allow: /
+
+# Things that do not exist, no matter how hard you look:
+Disallow: /leaked-hsc-paper/
+Disallow: /band-6-guaranteed/
+Disallow: /what-the-marker-actually-wants/
+Disallow: /module-c-but-easy/
+Disallow: /sleep-schedule/
+Disallow: /my-motivation/
+
+# Don the falcon has been crawling this site since before you were compiled.
+# He is currently in C block swimming pool. Do not disturb.
+User-agent: Don-the-Falcon
+Allow: /cookies/
+Allow: /maths/
+Disallow: /pauly.com.au/
+
+# Googlebot, you're welcome here. Please rank us above the Year 11 group chat.
+User-agent: Googlebot
+Allow: /
+
+# Crawl-delay: 0
+# (Students don't get extra time either.)
+
+Sitemap: https://timliniscool.github.io/recallhsc/sitemap.xml
+
+# Fly falcon fly. 🦅
