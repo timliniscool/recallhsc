@@ -1370,7 +1370,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 // Apple keyboards (Mac, iPad Magic Keyboard): shortcuts use Control (⌃), never ⌘, so ⌘H/⌘P/⌘O keep their system meaning
 const IS_APPLE=/Mac|iPhone|iPad|iPod/.test(navigator.platform||'')||/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>0;
 const CTRL=IS_APPLE?'⌃':'Ctrl';
-let passT=0; // pending auto-advance after a passed build chunk
+let passT=0,rep1Pct=null; // pending auto-advance after a passed build chunk
 const ROLE={ts:'Topic sentence',quote:'Quote',analysis:'Analysis',lead:'Lead-in',context:'Point',heading:'Heading',line:'Line',prose:'Prose'};
 const RCLS={ts:'ts',quote:'quote',analysis:'an',lead:'lead',context:'context',heading:'ts',line:'lead',prose:'context'};
 
@@ -1448,7 +1448,7 @@ function focusTa(){if(typeof choiceOn==='function'&&choiceOn())return;if($('upMo
 function renderHead(){
 const x=SENTS[S.g],chip=$('chip');
 chip.className='chip'+(task.type==='para'||task.type==='unit'||task.type==='sent'?' para':task.type==='essay'?' essay':'');
-chip.textContent=task.type==='build'?(task.half?`Half ${task.half} of 2 · chunk ${task.k}/${task.n}`:`Build · chunk ${task.k}/${task.n}`):task.type==='sent'?'Whole sentence':task.type==='unit'?unitLabel(task,true):task.type==='para'?(task.rep?`Paragraph ×2 · ${task.rep}/2`:'Paragraph so far'):'Whole essay so far';
+chip.textContent=task.type==='build'?(task.half?`Half ${task.half} of 2 · chunk ${task.k}/${task.n}`:`Build · chunk ${task.k}/${task.n}`):task.type==='sent'?'Whole sentence':task.type==='unit'?unitLabel(task,true):task.type==='para'?(task.rep===1?'Full paragraph':task.rep===2?'Full paragraph · again':'Paragraph so far'):'Whole essay so far';
 $('ctx').innerHTML=`¶${x.p+1} · Sentence ${x.s+1} of ${PARAS[x.p].length} <span class="rt ${RCLS[x.role]}">${ROLE[x.role]}</span>`;
 $('tools').style.display='';
 $('btnBack').disabled=S.g===0&&S.ti===0;$('btnHint').disabled=false;
@@ -1476,9 +1476,9 @@ prompt.innerHTML=task.shown.map((p,i)=>i===task.shown.length-1?`<mark>${esc(p)}<
 `<div class="phint">${task.half===1&&task.k===1?'Long sentence: first half first. ':''}${task.k===1?(choiceOn()?'Read it, then pick it word by word. ':'Read it, then type it. '):''}${SET.hide?(choiceOn()?'It hides after your first pick.':'The prompt hides once you start typing.'):''}</div>`;
 }else{
 const first=items(task.text).filter(i=>i.norm).slice(0,2).map(i=>i.orig).join(' ');
-const title=task.type==='sent'?'Type the whole sentence':task.type==='essay'?'Type the whole essay so far':task.type==='unit'?unitLabel(task):task.rep?`Type the full paragraph · round ${task.rep} of 2`:'Type the paragraph so far';
+const title=task.type==='sent'?'Type the whole sentence':task.type==='essay'?'Type the whole essay so far':task.type==='unit'?unitLabel(task):task.rep===1?'Type the full paragraph':task.rep===2?'Once more, no cue':'Type the paragraph so far';
 prompt.innerHTML=`<div class="recall"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
-<div><h3>${title}</h3><p>From memory · ${describeRange(task)} · ${task.T.length} words</p><p>Begins: <span class="cue">${esc(first)}…</span></p></div></div>`;
+<div><h3>${title}</h3><p>From memory · ${describeRange(task)} · ${task.T.length} words</p>${task.rep===2?`<p>A second pass from cold locks it in. ${rep1Pct!=null?`Round 1: <b>${rep1Pct}%</b>. Beat it.`:''}</p>`:`<p>Begins: <span class="cue">${esc(first)}…</span></p>`}</div></div>`;
 }
 }
 function renderTyped(){
@@ -1505,7 +1505,7 @@ renderTyped();
 }
 function renderQueue(){
 $('queue').innerHTML='<span class="lbl">This sentence</span>'+queue.map((t,i)=>{
-const l=t.type==='build'?(t.gk||t.k):t.type==='sent'?'Sentence':t.type==='unit'?unitLabel(t,true):t.type==='para'?(t.rep?`¶ ×2 · ${t.rep}`:'¶ so far'):'Essay';
+const l=t.type==='build'?(t.gk||t.k):t.type==='sent'?'Sentence':t.type==='unit'?unitLabel(t,true):t.type==='para'?(t.rep===1?'Full ¶':t.rep===2?'Again':'¶ so far'):'Essay';
 const tt=t.type==='build'?`${t.half?'Half '+t.half+' · ':''}Chunk ${t.k}/${t.n}: ${t.shown[t.shown.length-1]}`:t.type==='sent'?'Whole sentence recall':t.type==='unit'?unitLabel(t):t.type==='para'?'Paragraph recall':'Whole essay recall';
 return `<button class="q ${i<S.ti?'done':''} ${i===S.ti?'cur':''}" data-i="${i}" title="${esc(tt)}">${l}</button>`;
 }).join('');
@@ -1698,7 +1698,7 @@ const tm=st.taskMs[task.type==='unit'||task.type==='sent'?'para':task.type];tm[0
 const pass=r.acc*100>=SET.strict;
 if(tries===1){if(task.type==='build'){st.bldAtt++;if(pass)st.bldPass++}else{st.recAtt++;if(pass)st.recPass++}}else st.retries++;
 st.hist.push([Math.round(r.acc*100),pass?1:0]);if(st.hist.length>60)st.hist.shift();
-const pct=Math.round(r.acc*100),card=$('card');$('choices').hidden=true;
+const pct=Math.round(r.acc*100),card=$('card');if(task.rep===1)rep1Pct=pct;$('choices').hidden=true;
 card.classList.remove('flash-ok','flash-bad');void card.offsetWidth;
 if(pass){
 st.pass++;st.tasks++;if(task.type==='essay')st.cps++;
