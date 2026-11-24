@@ -206,7 +206,30 @@ body.gamify .ch .n{font-family:var(--px);font-size:7px}
 .pv-b mark{background:linear-gradient(transparent 12%,var(--tint) 12%,var(--tint) 92%,transparent 92%);color:var(--skyink);padding:0 2px;border-radius:3px}
 .pv-f{padding:8px 20px 12px;font-size:12px;color:var(--muted)}
 .peekb{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-#btnBack:disabled{opacity:.45;cursor:default}
+/* task toolbar: one quiet pill of icon buttons */
+.tools{position:relative;display:inline-flex;align-items:center;gap:2px;padding:3px;border:1px solid var(--line2);border-radius:12px;background:var(--surface)}
+.tb{position:relative;display:grid;place-items:center;width:32px;height:30px;border:0;border-radius:9px;background:none;color:var(--muted);cursor:pointer;transition:background .12s,color .12s;-webkit-tap-highlight-color:transparent}
+.tb:hover,.tb:focus-visible{background:var(--hover);color:var(--skyink)}
+.tb:active,.tb.held{background:var(--tint);color:var(--skyink)}
+.tb:disabled{opacity:.35;cursor:default;background:none;color:var(--muted)}
+.tsep{width:1px;height:18px;background:var(--line2);margin:0 3px}
+.tb[data-tip]::after{content:attr(data-tip) attr(data-kl);position:absolute;top:calc(100% + 8px);left:50%;transform:translate(-50%,-3px);white-space:pre;background:var(--ink);color:#fff;font:500 11.5px/1.3 var(--sans);padding:5px 8px;border-radius:7px;opacity:0;pointer-events:none;transition:opacity .12s,transform .12s;z-index:40}
+.tb:hover::after,.tb:focus-visible::after{opacity:1;transform:translate(-50%,0);transition-delay:.25s}
+.tb:last-of-type::after{left:auto;right:0;transform:translateY(-3px)}
+.tb:last-of-type:hover::after{transform:none}
+.kpop .pet{opacity:0;transition:opacity .15s}
+.keys{right:0;min-width:270px;padding:10px 12px;z-index:90}
+.keys .krow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:5px 2px;font-size:13px;color:var(--ink2)}
+.keys .krow span:last-child{display:flex;gap:3px;flex:none}
+.keys .kh{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600;margin:4px 2px 2px}
+.btn kbd{background:none;border:0;padding:0 0 0 4px;color:inherit;opacity:.7;font-size:11px}
+@media(pointer:coarse){.kbonly,.btn kbd{display:none}.tb{width:38px;height:36px}.tb[data-tip]::after{display:none}}
+body.gamify .tools{border-radius:0;border:2px solid #0b1324;background:#fff;box-shadow:2px 2px 0 #0b1324;padding:2px}
+body.gamify .tb{border-radius:0;color:#0b1324}
+body.gamify .tb:hover,body.gamify .tb:focus-visible,body.gamify .tb.held{background:#ecfccb;color:#0b1324}
+body.gamify .tsep{background:#0b1324;opacity:.3}
+body.gamify .tb[data-tip]::after{font-family:var(--px);font-size:7px;border-radius:0;background:#0b1324;color:#ecfccb}
+body.gamify .keys .krow{font-family:var(--px);font-size:8px;line-height:1.6}
 body.gamify .pv-in{border-radius:0;border:2px solid var(--line2);box-shadow:6px 6px 0 rgba(0,0,0,.5)}
 body.gamify .pv-h,body.gamify .pv-f{font-family:var(--px);font-size:9px;letter-spacing:0}
 body.gamify .pv-b mark{background:#fef08a;color:#0b1324;border-radius:0}
@@ -390,8 +413,7 @@ body.guide .mem-item{display:none}
 /* card header: label + HUD on one line, the action buttons on their own line */
 .card-head,body.gamify .card-head{flex-wrap:wrap;row-gap:8px}
 .card-head .spacer{flex:1 0 100%;height:0;order:5}
-.card-head .btn{order:6}
-#btnBack{margin-right:auto}
+.card-head .tools{order:6;margin-left:auto}
 body.gamify .ghud{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .pv-b{font-size:16px}
 body.guide #essMenu,body.guide #btnUpload{display:none}
@@ -815,7 +837,7 @@ button:focus:not(:focus-visible){outline:none}
 @media(max-width:640px){
 body.gamify .top{padding:8px 10px;row-gap:6px}
 body.gamify .tab{padding:7px 9px}
-body.gamify .card-head{margin:10px 10px 8px}
+body.gamify .card-head{margin:10px 10px 8px;flex-wrap:wrap;row-gap:8px}
 body.gamify .card-head .btn{padding:6px 7px}
 }
 </style>
@@ -901,11 +923,17 @@ body.gamify .card-head .btn{padding:6px 7px}
 <span class="ctx" id="ctx"></span>
 <span class="spacer"></span>
 <span class="ghud" id="ghud"></span>
-<button class="btn small" id="btnBack" title="Back to the previous step (Ctrl+Z when the box is empty)" aria-label="Back to the previous step">←</button>
-<button class="btn small peekb" id="btnPeekP" title="Hold to see the paragraph so far (hold Ctrl+P)">¶</button>
-<button class="btn small peekb" id="btnPeekE" title="Hold to see the whole essay so far (hold Ctrl+O)">Essay</button>
-<button class="btn small" id="btnHint" title="Reveal next word (Ctrl+H)">Peek word</button>
-<button class="btn small" id="btnSkip" title="Skip this task">Skip</button>
+<div class="tools menu" id="tools" role="toolbar" aria-label="Task tools">
+<button class="tb" id="btnBack" aria-label="Back one step" data-tip="Back" data-k="Z"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+<i class="tsep"></i>
+<button class="tb peekb" id="btnPeekP" aria-label="Hold to see the paragraph so far" data-tip="Hold: paragraph" data-k="P"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4v16"/><path d="M17 4v16"/><path d="M19 4H9.5a4.5 4.5 0 0 0 0 9H13"/></svg></button>
+<button class="tb peekb" id="btnPeekE" aria-label="Hold to see the whole essay so far" data-tip="Hold: whole essay" data-k="O"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg></button>
+<button class="tb" id="btnHint" aria-label="Show the next word" data-tip="Next word" data-k="H"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.1 14c.2-1 .7-1.7 1.5-2.5A6 6 0 1 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/></svg></button>
+<i class="tsep"></i>
+<button class="tb" id="btnSkip" aria-label="Skip this step" data-tip="Skip"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 4 10 8-10 8z"/><path d="M19 5v14"/></svg></button>
+<button class="tb kbonly" id="btnKeys" aria-label="Keyboard shortcuts" aria-expanded="false" data-tip="Shortcuts" data-k="/"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg></button>
+<div class="menu-pop keys" id="keysPop" hidden role="dialog" aria-label="Keyboard shortcuts"></div>
+</div>
 </div>
 <div class="prompt" id="prompt"></div>
 <div class="typebox empty" id="typebox"><span class="phd" id="phd">Start typing…</span><span id="typed"></span><span id="mark">&#8203;</span><div id="caret"></div></div>
@@ -1380,8 +1408,8 @@ const x=SENTS[S.g],chip=$('chip');
 chip.className='chip'+(task.type==='para'||task.type==='unit'?' para':task.type==='essay'?' essay':'');
 chip.textContent=task.type==='build'?`Build · chunk ${task.k}/${task.n}`:task.type==='unit'?unitLabel(task,true):task.type==='para'?(task.rep?`Paragraph ×2 · ${task.rep}/2`:'Paragraph so far'):'Whole essay so far';
 $('ctx').innerHTML=`¶${x.p+1} · Sentence ${x.s+1} of ${PARAS[x.p].length} <span class="rt ${RCLS[x.role]}">${ROLE[x.role]}</span>`;
-for(const b of ['btnHint','btnSkip','btnBack','btnPeekP','btnPeekE'])$(b).style.display='';
-$('btnBack').disabled=S.g===0&&S.ti===0;
+$('tools').style.display='';
+$('btnBack').disabled=S.g===0&&S.ti===0;$('btnHint').disabled=false;
 }
 // "IQTVE" for quote + evaluation units in essays; neutral wording for intros, conclusions and creative pieces
 function unitLabel(t,short){
@@ -1428,7 +1456,7 @@ if(over>typebox.scrollTop)typebox.scrollTop=over;
 }
 function renderFoot(extra){
 if(phase==='type'){
-foot.innerHTML=`<span class="wc"></span><span class="spacer"></span><span class="khint"><kbd>Enter</kbd> check · <kbd>${CTRL}</kbd><kbd>H</kbd> word · hold <kbd>${CTRL}</kbd><kbd>P</kbd> ¶ · hold <kbd>${CTRL}</kbd><kbd>O</kbd> essay</span>`;
+foot.innerHTML=`<span class="wc"></span><span class="spacer"></span><span class="khint"><kbd>Enter</kbd> check <span class="dotsep">·</span> <kbd>${CTRL}</kbd><kbd>/</kbd> shortcuts</span>`;
 renderTyped();
 }else foot.innerHTML=extra;
 }
@@ -1480,6 +1508,8 @@ if(!$('modal').hidden){if(e.key==='Escape')$('bCloseStart').click();return}
 if(e.target.closest&&e.target.closest('.panel[data-panel=settings],.menu-pop'))return;
 // shortcuts use e.code so they still work when Option/Alt or a non-US layout changes e.key
 const ctl=e.ctrlKey&&!e.altKey,K=e.code;
+if(ctl&&K==='Slash'){e.preventDefault();toggleKeys();return}
+if(e.key==='Escape'&&!$('keysPop').hidden){e.preventDefault();toggleKeys(false);return}
 if(ctl&&(K==='KeyP'||K==='KeyO')){e.preventDefault();if(!e.repeat)peek(K==='KeyP'?'para':'essay');return}
 if((ctl||e.metaKey&&!e.altKey)&&K==='KeyZ'&&!e.shiftKey){
 // typing still in the box → normal undo; otherwise step back
@@ -1527,10 +1557,10 @@ o.querySelector('.pv-b').innerHTML=html;
 o.hidden=false;peekOn=kind;
 const m=o.querySelector('mark:last-of-type');if(m)m.scrollIntoView({block:'nearest'});
 }
-function unpeek(){peekOn=null;$('peekView').hidden=true;focusTa()}
+function unpeek(){peekOn=null;$('peekView').hidden=true;document.querySelectorAll('.tb.held').forEach(b=>b.classList.remove('held'));focusTa()}
 for(const [id,k] of [['btnPeekP','para'],['btnPeekE','essay']]){
 const b=$(id);
-b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);peek(k)});
+b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);b.classList.add('held');peek(k)});
 for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>{if(peekOn)unpeek()});
 b.addEventListener('contextmenu',e=>e.preventDefault());
 }
@@ -1795,11 +1825,21 @@ $('chUndo').onclick=()=>{if(phase!=='type'||!cIdx)return;cIdx--;L.bs++;const w=t
 $('chKb').onclick=()=>setChoice(false);
 $('btnSkip').onclick=()=>{if(phase!=='done')skip()};
 document.querySelectorAll('.k-ctl').forEach(k=>k.textContent=CTRL);
-$('btnHint').title=`Reveal the next word (${CTRL}H)`;$('btnPeekP').title=`Hold to see the paragraph so far (hold ${CTRL}P)`;$('btnPeekE').title=`Hold to see the whole essay so far (hold ${CTRL}O)`;$('btnBack').title=`Back to the previous step (${CTRL}Z when the box is empty)`;
+// tooltips show the shortcut on keyboard devices
+if(!matchMedia('(pointer:coarse)').matches)document.querySelectorAll('.tb[data-k]').forEach(b=>b.dataset.kl='  '+CTRL+b.dataset.k);
+(()=>{
+const K=(...k)=>k.map(x=>`<kbd>${x}</kbd>`).join('');
+const row=(l,k)=>`<div class="krow"><span>${l}</span><span>${k}</span></div>`;
+$('keysPop').innerHTML='<div class="kh">While typing</div>'+row('Check',K('Enter'))+row('Next word',K(CTRL,'H'))+row('Hold: paragraph so far',K(CTRL,'P'))+row('Hold: whole essay so far',K(CTRL,'O'))+row('Back one step <small>(empty box)</small>',K(CTRL,'Z'))+
+'<div class="kh">After marking</div>'+row('Continue / retry',K('Enter'))+row('Skip',K('Tab'))+
+'<div class="kh">Anywhere</div>'+row('Switch essay',K(IS_APPLE?'⌥':'Alt','1–9'))+row('This list',K(CTRL,'/'));
+})();
+function toggleKeys(force){const p=$('keysPop'),open=force??p.hidden;p.hidden=!open;$('btnKeys').setAttribute('aria-expanded',open);document.body.classList.toggle('kpop',open);if(open)fitPop(p);else focusTa()}
+$('btnKeys').onclick=e=>{e.stopPropagation();toggleKeys()};
 function endScreen(title,msg,btn,fn){
 phase='done';task=null;
 $('chip').className='chip';$('chip').textContent=title;$('ctx').textContent='';
-for(const b of ['btnHint','btnSkip','btnBack','btnPeekP','btnPeekE'])$(b).style.display='none';clearTimeout(passT);
+$('tools').style.display='none';clearTimeout(passT);
 prompt.innerHTML=`<div class="done-wrap"><h2>${title}</h2><p style="font-family:var(--sans);color:var(--muted)">${msg}</p></div>`;
 typedEl.textContent='';$('queue').innerHTML='';$('meterFill').style.width='0';
 foot.innerHTML=`<span class="spacer"></span><button class="btn primary small" id="bEnd">${btn}</button>`;
@@ -1899,7 +1939,7 @@ el.style.right='auto';el.style.left=(left-pr.left)+'px';el.style.transformOrigin
 const room=innerHeight-r.top-m;if(r.height>room){el.style.maxHeight=Math.max(160,room)+'px';el.style.overflowY='auto'}
 }
 addEventListener('resize',()=>['panelMenu','moreMenu','essPop'].forEach(id=>fitPop($(id))));
-document.addEventListener('pointerdown',e=>{if(e.target.closest('.menu'))return;for(const id of ['panelMenu','moreMenu','essPop'])$(id).hidden=true;$('essBtn').classList.remove('open')},true);
+document.addEventListener('pointerdown',e=>{if(e.target.closest('.menu'))return;for(const id of ['panelMenu','moreMenu','essPop','keysPop'])$(id).hidden=true;$('essBtn').classList.remove('open');$('btnKeys').setAttribute('aria-expanded',false);document.body.classList.remove('kpop')},true);
 $('btnPanels').onclick=e=>{e.stopPropagation();const p=$('panelMenu');p.hidden=!p.hidden;$('moreMenu').hidden=true;$('essPop').hidden=true;fitPop(p)};
 $('panelMenu').addEventListener('click',e=>e.stopPropagation());
 $('panelMenu').addEventListener('change',e=>{
