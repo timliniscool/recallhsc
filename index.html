@@ -339,41 +339,33 @@ body.gamify ::-webkit-scrollbar-thumb:hover{background-color:rgba(163,230,53,.6)
 .sopt .n{font-family:var(--sans);font-size:11px;color:var(--faint);margin-right:8px}
 .sopt.l{border-left:3px solid var(--sky2)}
 .sopt.sel{border-color:var(--sky);background:var(--tint);color:var(--ink)}
+/* start menu: matching soft cards; the natural next step gets a light sky tint */
 .startopts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
-.sbig{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:16px 18px;border:1px solid var(--line2);border-radius:16px;background:var(--surface);color:var(--ink);text-align:left;cursor:pointer;transition:border-color .15s,background .15s}
-.sbig b{font-size:15.5px;font-weight:600}
-.sbig span{font-size:12.5px;color:var(--muted)}
+.sbig{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line2);border-radius:16px;background:var(--surface);color:var(--ink);text-align:left;cursor:pointer;transition:border-color .15s,background .15s,transform .1s}
+.sbig.wide{grid-column:1/-1}
+.sbig .si{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--track);color:var(--muted)}
+.sbig .st{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sbig b{font-size:15px;font-weight:600}
+.sbig span.d{font-size:12.5px;color:var(--muted)}
 .sbig:hover{border-color:var(--sky2);background:var(--hover)}
-.sbig.primary{background:#0277b5;border-color:#0277b5;color:#fff}
-.sbig.primary span{color:#e0f2fe}
-.sbig.primary:hover{background:#03669b;border-color:#03669b}
-.sbig.on{border-color:var(--sky);background:var(--tint)}
+.sbig:active{transform:scale(.99)}
+.sbig.rec{border-color:var(--sky2);background:var(--tint)}
+.sbig.rec .si{background:var(--surface);color:var(--skyink)}
+.sbig.rec b{color:var(--skyink)}
+.sbig.on{border-color:var(--sky2);background:var(--tint)}
 #sentWrap{margin-top:14px}
-#resumeBox:not(:empty){margin-bottom:10px}
 @media(max-width:520px){.startopts{grid-template-columns:1fr}}
-body.gamify .sbig{border-radius:0;border:2px solid var(--line2)}
-body.gamify .sbig.primary{background:#a3e635;border-color:#a3e635;color:#0b1324}
-body.gamify .sbig.primary span{color:#1a2e05}
 .startpick{position:sticky;bottom:-26px;margin:12px -26px -26px;padding:14px 26px 18px;background:var(--surface);border-top:1px solid var(--line2);box-shadow:0 -10px 24px rgba(15,23,42,.06)}
 .startpick p{margin:0 0 10px;font-size:14px;color:var(--ink2)}
 .sp-btns{display:flex;gap:8px;flex-wrap:wrap}
 .sp-btns .btn{flex:1 1 200px;justify-content:center;padding:10px 12px}
-body.gamify .startopts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
-.sbig{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:16px 18px;border:1px solid var(--line2);border-radius:16px;background:var(--surface);color:var(--ink);text-align:left;cursor:pointer;transition:border-color .15s,background .15s}
-.sbig b{font-size:15.5px;font-weight:600}
-.sbig span{font-size:12.5px;color:var(--muted)}
-.sbig:hover{border-color:var(--sky2);background:var(--hover)}
-.sbig.primary{background:#0277b5;border-color:#0277b5;color:#fff}
-.sbig.primary span{color:#e0f2fe}
-.sbig.primary:hover{background:#03669b;border-color:#03669b}
-.sbig.on{border-color:var(--sky);background:var(--tint)}
-#sentWrap{margin-top:14px}
-#resumeBox:not(:empty){margin-bottom:10px}
-@media(max-width:520px){.startopts{grid-template-columns:1fr}}
-body.gamify .sbig{border-radius:0;border:2px solid var(--line2)}
-body.gamify .sbig.primary{background:#a3e635;border-color:#a3e635;color:#0b1324}
-body.gamify .sbig.primary span{color:#1a2e05}
-.startpick{background:#0e1319;border-color:#1e2833}
+body.gamify .sbig{border-radius:0;border:2px solid var(--line2);background:#0e1319}
+body.gamify .sbig .si{border-radius:0;background:#151c25;color:var(--ink2)}
+body.gamify .sbig:hover,body.gamify .sbig.on{border-color:#a3e635;background:#151c25}
+body.gamify .sbig.rec{border-color:#a3e635;background:rgba(163,230,53,.1)}
+body.gamify .sbig.rec .si{background:#a3e635;color:#0b1324}
+body.gamify .sbig.rec b{color:#d9f99d}
+body.gamify .startpick{background:#0e1319;border-color:#1e2833;box-shadow:none}
 .essay-in{width:100%;min-height:150px;border:1.5px solid var(--line2);border-radius:14px;padding:14px;font-family:var(--serif);font-size:15.5px;line-height:1.55;resize:vertical;outline:none;background:var(--surface2)}
 .essay-in:focus{border-color:var(--sky2);background:var(--surface);box-shadow:0 0 0 4px rgba(56,189,248,.14)}
 .ana-head{display:flex;align-items:center;gap:10px;margin:14px 0 8px;flex-wrap:wrap}
@@ -1030,8 +1022,8 @@ body.gamify .ch{font-size:11px}
 <div class="sheet-head"><h2>Where do you want to start?</h2><span class="spacer"></span><button class="xbtn" id="bCloseStart" title="Close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
 <div id="resumeBox"></div>
 <div class="startopts" id="startOpts">
-<button class="sbig primary" id="bFromTop"><b>Start from the beginning</b><span>First sentence, first paragraph</span></button>
-<button class="sbig" id="bPickSent"><b>Choose a sentence</b><span>Jump in anywhere</span></button>
+<button class="sbig" id="bFromTop"><span class="si"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4v16"/><path d="m19 12-10 0"/><path d="m13 6 6 6-6 6"/></svg></span><span class="st"><b>Start from the beginning</b><span class="d">First sentence, first paragraph</span></span></button>
+<button class="sbig" id="bPickSent"><span class="si"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/></svg></span><span class="st"><b>Choose a sentence</b><span class="d">Jump in anywhere</span></span></button>
 </div>
 <div id="sentWrap" hidden><p class="sub">Tap a sentence to start there.</p><div id="sentList"></div></div>
 <div class="startpick" id="startPick" hidden>
@@ -2055,12 +2047,16 @@ S.g=g;S.ti=0;S.started=true;closeModal();loadTask();
 }
 let pickG=0;
 function openModal(){
-$('resumeBox').innerHTML=S.started&&S.g<SENTS.length?`<button class="btn primary" id="bResume">Continue at ¶${SENTS[S.g].p+1}, sentence ${SENTS[S.g].s+1}</button>`:'';
+const canResume=S.started&&S.g<SENTS.length&&(S.g>0||S.ti>0);
+$('resumeBox').innerHTML='';
+$('startOpts').querySelector('#bResume')?.remove();
+if(canResume)$('startOpts').insertAdjacentHTML('afterbegin',`<button class="sbig wide rec" id="bResume"><span class=\"si\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8 5v14l11-7z\"/></svg></span><span class="st"><b>Pick up where you left off</b><span class="d">¶${SENTS[S.g].p+1}, sentence ${SENTS[S.g].s+1}</span></span></button>`);
+$('bFromTop').classList.toggle('rec',!canResume);
 if($('bResume'))$('bResume').onclick=closeModal;
 $('sentList').innerHTML=PARAS.map((ss,p)=>`<div class="pgroup"><h5>Paragraph ${p+1}</h5>${ss.map((t,s)=>{const g=PSTART[p]+s,w=t.split(/\s+/),x=SENTS[g];
 return `<button class="sopt ${S.learned[g]?'l':''}" data-g="${g}"><span class="n">${s+1}</span><span class="rt ${RCLS[x.role]}" style="margin-right:8px">${ROLE[x.role]}</span>${esc(w.slice(0,12).join(' '))}${w.length>12?'…':''}</button>`}).join('')}</div>`).join('');
 $('sentWrap').hidden=true;$('startPick').hidden=true;$('bPickSent').classList.remove('on');
-$('modal').hidden=false;setTimeout(()=>$('bFromTop').focus({preventScroll:true}),50);
+$('modal').hidden=false;setTimeout(()=>($('bResume')||$('bFromTop')).focus({preventScroll:true}),50);
 }
 function closeModal(){$('modal').hidden=true;$('startPick').hidden=true;focusTa()}
 $('sentList').addEventListener('click',e=>{
