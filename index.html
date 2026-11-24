@@ -1389,7 +1389,7 @@ for(let i=0;i<n-1;i++){
 const t=w[i];
 const opens=(t.match(/[“]/g)||[]).length+(/^[(]?"/.test(t)?1:0),closes=(t.match(/[”]/g)||[]).length+(/"[,.;:!?)]*$/.test(t)&&!/^[(]?"[^"]*$/.test(t)?1:0);
 if(opens>closes)inQ=true;else if(closes>opens)inQ=false;
-const brk=/[,;:]["”’)]?$/.test(t)||/^[—–]$/.test(w[i+1])||/[—–]$/.test(t);
+const brk=/[,;:]["”’)]?$/.test(t)||/^[—–]$/.test(w[i+1])||/[—–]$/.test(t)||(!inQ&&/^[(]?[“"]/.test(w[i+1])); // clause break, or just before a quotation opens
 if(!brk||inQ||i+1<4||n-(i+1)<6)continue;
 const d=Math.abs((i+1)-n/2);if(d<bestD){bestD=d;best=i+1}
 }
@@ -1415,7 +1415,7 @@ let us=g;while(us>pa&&!SENTS[us-1].unitEnd)us--;
 const unitHasQuote=()=>{for(let k=us;k<=g;k++)if(SENTS[k].role==='quote')return true;let e=g;while(e<SENTS.length-1&&!SENTS[e].unitEnd&&SENTS[e+1].p===x.p)e++;for(let k=g+1;k<=e;k++)if(SENTS[k].role==='quote')return true;return false};
 if(!solo){
 if(us<g)q.push({type:'unit',text:rangeText(us,g),a:us,b:g,iq:unitHasQuote()&&x.role!=='ts',done:x.unitEnd});
-if(last){q.push({type:'para',rep:1,text:pt,a:pa,b:g});q.push({type:'para',rep:2,text:pt,a:pa,b:g})}
+if(last){const fa=PSTART[x.p],ft=rangeText(fa,g);q.push({type:'para',rep:1,text:ft,a:fa,b:g});q.push({type:'para',rep:2,text:ft,a:fa,b:g})} // "full paragraph" is always the whole paragraph, whatever the start point
 else if(x.unitEnd||x.role==='ts')q.push({type:'para',text:pt,a:pa,b:g}); // link the finished IQTVE into the paragraph
 }
 if(SET.essay&&x.cp)q.push({type:'essay',text:rangeText(floor,g),a:floor,b:g});
