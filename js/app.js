@@ -442,7 +442,7 @@ st.hist.push(mode==='standard'?[Math.round(r.acc*100),pass?1:0]:[Math.round(r.ac
 const pct=Math.round(r.acc*100),card=$('card');if(task.rep===1)rep1Pct=pct;$('choices').hidden=true;
 card.classList.remove('flash-ok','flash-bad');void card.offsetWidth;
 if(pass){
-st.pass++;st.tasks++;if(task.type==='essay')st.cps++;
+st.pass++;st.tasks++;if(task.type==='essay')st.cps++;if(self.track){track('study');if(task.type==='para')track('paragraph-recall');if(task.type==='essay')track('essay-recall')}
 if(U.length>=4){st.wpmSum+=wpm;st.wpmN++;st.bestWpm=Math.max(st.bestWpm,wpm)}
 // a sentence counts as learned once it has been built right to the end (for a long sentence: the last chunk of half 2);
 // the whole-sentence and paragraph recalls after that are consolidation, so skipping one never undoes the progress
@@ -778,7 +778,7 @@ addEventListener('resize',()=>['panelMenu','moreMenu','essPop'].forEach(id=>fitP
 document.addEventListener('pointerdown',e=>{if(e.target.closest('.menu'))return;for(const id of ['panelMenu','moreMenu','essPop','keysPop'])$(id).hidden=true;$('essBtn').classList.remove('open');$('btnKeys').setAttribute('aria-expanded',false);document.body.classList.remove('kpop')},true);
 $('btnPanels').onclick=e=>{e.stopPropagation();const p=$('panelMenu');p.hidden=!p.hidden;$('moreMenu').hidden=true;$('essPop').hidden=true;fitPop(p)};
 $('panelMenu').addEventListener('pointermove',e=>{const t=e.target.closest('.focustile');if(!t)return;const r=t.getBoundingClientRect();t.style.setProperty('--mx',(e.clientX-r.left)+'px');t.style.setProperty('--my',(e.clientY-r.top)+'px')});
-$('panelMenu').addEventListener('click',e=>{e.stopPropagation();if(e.target.closest('#mFocusBtn')){const tile=e.target.closest('#mFocusBtn').getBoundingClientRect();SET.focus=!SET.focus;applyPanels();$('mFocusBtn').focus();if(SET.focus)lockInRipple(tile.left+28,tile.top+tile.height/2);announce(SET.focus?'Focus on. Locked in.':'Focus off.')}});
+$('panelMenu').addEventListener('click',e=>{e.stopPropagation();if(e.target.closest('#mFocusBtn')){const tile=e.target.closest('#mFocusBtn').getBoundingClientRect();SET.focus=!SET.focus;applyPanels();$('mFocusBtn').focus();if(SET.focus){lockInRipple(tile.left+28,tile.top+tile.height/2);self.track&&track('focus')}announce(SET.focus?'Focus on. Locked in.':'Focus off.')}});
 /* Focus on: pearlescent ripple out of the tile, plus a brief "Locked in" tag. Skipped with reduced motion. */
 function lockInRipple(x,y){
 if(document.body.classList.contains('reduce')||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
@@ -792,7 +792,7 @@ document.body.appendChild(o);setTimeout(()=>o.remove(),2100);
 $('panelMenu').addEventListener('change',e=>{
 const t=e.target;
 if(t.id==='mGame'){
-SET.gamify=t.checked;
+SET.gamify=t.checked;if(t.checked&&self.track)track('game-mode');
 if(SET.gamify){SET.preGame=[...SET.hidden];SET.hidden=[...PANELS.map(p=>p.dataset.panel),'pet']}
 else if(SET.preGame){SET.hidden=SET.preGame;delete SET.preGame}
 requestAnimationFrame(()=>{placeCaret();focusTa()});
@@ -1117,6 +1117,7 @@ const id='e'+Date.now().toString(36);
 LIB.unshift({id,title:($('upTitle').value.trim()||titleOf(mdClean(txt))).slice(0,60),text:txt,kind:UP.kind,updated:Date.now()});
 const onb=ONBOARD;ONBOARD=false;$('upCancel').textContent=$('upCancel').dataset.label||$('upCancel').textContent;
 ls.set('lib',LIB);$('upModal').hidden=true;renderSwitcher();
+self.track&&track('upload');
 if(onb){save();loadEssay(id);renderSwitcher();setStart(0);toast('Saved. Off you go')}else switchEssay(id);
 };
 

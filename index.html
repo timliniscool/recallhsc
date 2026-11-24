@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://fcnqhlcumstgoyfovuzt.supabase.co wss://fcnqhlcumstgoyfovuzt.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src blob:; worker-src 'self'; manifest-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://fcnqhlcumstgoyfovuzt.supabase.co wss://fcnqhlcumstgoyfovuzt.supabase.co https://timliniscool.goatcounter.com; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src blob:; worker-src 'self'; manifest-src 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#0ea5e9">
 <meta property="og:title" content="RecallHSC">
@@ -1306,6 +1306,7 @@ body.gamify .iconbtn:hover{background:#151c25;color:#d9f99d}
 </section>
 <section class="sgroup" aria-labelledby="sgApp" id="appGroup"><h3 id="sgApp">App</h3>
 <div class="set"><span id="installTxt">Install RecallHSC to open it like an app, even offline.</span><button class="btn small" id="btnInstall">Install</button></div>
+<label class="set" id="statsRow"><span>Anonymous usage stats <small>(page visits and features used; no cookies, never your essays)</small></span><input type="checkbox" class="sw" id="sStats"></label>
 <p class="snote" id="installHelp" hidden></p>
 <p class="snote" id="offlineNote"></p>
 </section>
@@ -1411,5 +1412,6 @@ body.gamify .iconbtn:hover{background:#151c25;color:#d9f99d}
 <script src="js/sync/conflict.js"></script>
 <script src="js/sync/sync.js"></script>
 <script src="js/pwa/pwa.js"></script>
+<script src="js/analytics.js"></script>
 </body>
 </html>

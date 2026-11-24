@@ -29,7 +29,7 @@ function refreshUI(){
   const mi=$('mInstall');if(mi)mi.hidden=standalone()||(!deferred&&!isIOS);
 }
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;refreshUI()});
-addEventListener('appinstalled',()=>{deferred=null;refreshUI();if(self.toast)toast('RecallHSC installed')});
+addEventListener('appinstalled',()=>{deferred=null;if(self.track)track('install');refreshUI();if(self.toast)toast('RecallHSC installed')});
 addEventListener('online',refreshUI);addEventListener('offline',refreshUI);
 async function install(){
   if(!deferred){refreshUI();const h=$('installHelp');if(h){h.hidden=false;h.focus&&h.focus()}return}

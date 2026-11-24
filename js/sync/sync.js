@@ -277,7 +277,7 @@ function render(){
 ${other?`<p class="snote warn">This device last synced with a <b>different account</b>. Its essays won’t be uploaded to ${email} unless you choose to.</p>`:''}
 <p class="snote">Turning on sync <b>combines</b> this device’s ${n} essay${n===1?'':'s'} with any already in your account. Nothing is deleted: identical essays are matched, and if the same essay was edited differently on two devices you’ll keep both versions. The built-in sample essay isn’t synced.</p>
 <div class="syrow"><button class="btn small primary" id="syOn">${other?'Upload this device’s essays to this account':'Turn on sync'}</button><button class="btn small" id="syOut">Sign out</button></div>${PRIVACY}`;
-    $('syOn').onclick=async()=>{const e=ensureEngine();const mm=e.meta();if(mm.userId&&mm.userId!==user.id){mm.base={};mm.tombs={};lsTry('cloud',mm)}await e.enable(user.id);announce('Cloud sync turned on.');render()};
+    $('syOn').onclick=async()=>{const e=ensureEngine();const mm=e.meta();if(mm.userId&&mm.userId!==user.id){mm.base={};mm.tombs={};lsTry('cloud',mm)}await e.enable(user.id);announce('Cloud sync turned on.');if(self.track)track('sync');render()};
     $('syOut').onclick=signOut;
     return;
   }
