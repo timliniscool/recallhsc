@@ -12,7 +12,9 @@ const h=crypto.createHash('sha256');const missing=[];
 for(const u of list){
   const f=path.join(root,u==='./'?'index.html':u);
   if(!fs.existsSync(f)){missing.push(u);continue}
-  h.update(u+'\0');h.update(fs.readFileSync(f));
+  // text files hashed with LF line endings, so a Windows checkout (autocrlf) and CI agree
+  const b=fs.readFileSync(f);
+  h.update(u+'\0');h.update(/\.(png|ico|jpe?g|webp|gif|woff2?)$/i.test(f)?b:Buffer.from(b.toString('utf8').replace(/\r\n/g,'\n')));
 }
 if(missing.length){console.error('sw.js precaches missing files:',missing.join(', '));process.exit(1)}
 const hash=h.digest('hex').slice(0,12);
