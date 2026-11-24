@@ -791,20 +791,25 @@ document.body.appendChild(o);setTimeout(()=>o.remove(),2100);
 }
 $('panelMenu').addEventListener('change',e=>{
 const t=e.target;
-if(t.id==='mGame'){
-SET.gamify=t.checked;if(t.checked&&self.track)track('game-mode');
-if(SET.gamify){SET.preGame=[...SET.hidden];SET.hidden=[...PANELS.map(p=>p.dataset.panel),'pet']}
-else if(SET.preGame){SET.hidden=SET.preGame;delete SET.preGame}
-requestAnimationFrame(()=>{placeCaret();focusTa()});
-}
+if(t.id==='mGame'){setGame(t.checked);return}
 else{const id=t.dataset.p;SET.hidden=SET.hidden.filter(x=>x!==id);if(!t.checked)SET.hidden.push(id);if(t.checked)SET.focus=false}
 applyPanels();
 });
+/* game mode on/off: from the Panels menu (desktop) or the ⋯ menu (phones) */
+function setGame(on){
+on=!!on;if(on===!!SET.gamify)return;
+SET.gamify=on;if(on&&self.track)track('game-mode');
+if(on){SET.preGame=[...SET.hidden];SET.hidden=[...PANELS.map(p=>p.dataset.panel),'pet']}
+else if(SET.preGame){SET.hidden=SET.preGame;delete SET.preGame}
+applyPanels();save();
+requestAnimationFrame(()=>{placeCaret();focusTa()});
+announce(on?'Game mode on.':'Game mode off.');
+}
 document.addEventListener('click',()=>{$('panelMenu').hidden=true});
 $('btnSettings').onclick=()=>openSettings();
-$('btnMore').onclick=e=>{e.stopPropagation();const m=$('moreMenu');m.hidden=!m.hidden;$('panelMenu').hidden=true;$('essPop').hidden=true;fitPop(m)};
+$('btnMore').onclick=e=>{e.stopPropagation();const m=$('moreMenu');$('mGameItem').textContent=SET.gamify?'Leave game mode':'Game mode (retro platformer)';m.hidden=!m.hidden;$('panelMenu').hidden=true;$('essPop').hidden=true;fitPop(m)};
 $('moreMenu').addEventListener('click',e=>{const b=e.target.closest('[data-more]');if(!b)return;$('moreMenu').hidden=true;
-({manage:()=>openEssay(),start:openModal,upload:openUpload,help:showHowto,settings:()=>openSettings(),install:()=>self.RecallPWA&&RecallPWA.install(),choice:()=>setChoice(!choiceOn())})[b.dataset.more]()});
+({manage:()=>openEssay(),start:openModal,upload:openUpload,help:showHowto,settings:()=>openSettings(),install:()=>self.RecallPWA&&RecallPWA.install(),choice:()=>setChoice(!choiceOn()),game:()=>setGame(!SET.gamify)})[b.dataset.more]()});
 document.addEventListener('click',()=>{$('moreMenu').hidden=true});
 $('petX').onclick=()=>{SET.hidden.push('pet');applyPanels()};
 

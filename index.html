@@ -951,7 +951,7 @@ body.gamify .top .ibtn svg{display:block;shape-rendering:crispEdges}
 body.gamify .essgroup .esel{height:36px;padding-top:0;padding-bottom:0}
 
 @media(max-width:640px){
-  #btnHelp{order:3;width:32px;height:32px;margin-left:0}
+  #btnHelp{order:3;width:38px;height:38px;min-height:38px;min-width:38px;margin-left:0;border-radius:50%;padding:0;flex:none}
   #btnSettings{display:none}
   .essgroup{order:10;flex:1 1 100%;min-width:0}
   .essgroup #essMenu{flex:1;min-width:0}
@@ -1168,6 +1168,7 @@ body.gamify .iconbtn:hover{background:#151c25;color:#d9f99d}
 <button class="mitem mem-item" data-more="start">Choose start</button>
 <button class="mitem mem-item" data-more="upload">Upload essay</button>
 <button class="mitem mem-item" data-more="choice" id="mChoice">Tap-to-pick words</button>
+<button class="mitem mem-item" data-more="game" id="mGameItem">Game mode</button>
 <hr class="mem-item">
 <button class="mitem" data-more="settings">Settings</button>
 <button class="mitem" data-more="install" id="mInstall" hidden>Install app</button>
