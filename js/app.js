@@ -754,19 +754,36 @@ save();
 PANELS.forEach(p=>{const x=p.querySelector('.x');x.setAttribute('aria-label','Hide '+p.dataset.name);x.onclick=()=>{SET.hidden.push(p.dataset.panel);applyPanels()}});
 function fitPop(el){
 if(!el||el.hidden)return;
-el.style.left=el.style.right=el.style.maxHeight='';el.style.transformOrigin='';
-const pr=el.offsetParent?el.offsetParent.getBoundingClientRect():{left:0,right:innerWidth},m=10;let r=el.getBoundingClientRect();
-if(r.left<m||r.right>innerWidth-m){
-const w=Math.min(r.width,innerWidth-2*m),left=Math.max(m,Math.min(r.left,innerWidth-m-w));
+el.style.left=el.style.right=el.style.maxHeight=el.style.maxWidth='';el.style.transformOrigin='';
+// measure the menu at its real size: the opening animation scales it, which made the old check miss overflow
+const anim=el.style.animation;el.style.animation='none';
+const vw=document.documentElement.clientWidth,m=10;
+el.style.maxWidth=(vw-2*m)+'px';
+const pr=el.offsetParent?el.offsetParent.getBoundingClientRect():{left:0,right:vw};let r=el.getBoundingClientRect();
+if(r.left<m||r.right>vw-m){
+const w=Math.min(r.width,vw-2*m),left=Math.max(m,Math.min(r.left,vw-m-w));
 el.style.right='auto';el.style.left=(left-pr.left)+'px';el.style.transformOrigin='top left';r=el.getBoundingClientRect();
 }
-const room=innerHeight-r.top-m;if(r.height>room){el.style.maxHeight=Math.max(160,room)+'px';el.style.overflowY='auto'}
+const room=innerHeight-Math.max(0,r.top)-m;if(r.height>room){el.style.maxHeight=Math.max(160,room)+'px';el.style.overflowY='auto'}
+el.style.animation=anim;
 }
+// refit whenever a menu's contents change size (long essay titles, the list re-rendering while open)
+if(window.ResizeObserver){const ro=new ResizeObserver(es=>es.forEach(e=>{if(!e.target.hidden)fitPop(e.target)}));['panelMenu','moreMenu','essPop','keysPop'].forEach(id=>$(id)&&ro.observe($(id)))}
 addEventListener('resize',()=>['panelMenu','moreMenu','essPop'].forEach(id=>fitPop($(id))));
 document.addEventListener('pointerdown',e=>{if(e.target.closest('.menu'))return;for(const id of ['panelMenu','moreMenu','essPop','keysPop'])$(id).hidden=true;$('essBtn').classList.remove('open');$('btnKeys').setAttribute('aria-expanded',false);document.body.classList.remove('kpop')},true);
 $('btnPanels').onclick=e=>{e.stopPropagation();const p=$('panelMenu');p.hidden=!p.hidden;$('moreMenu').hidden=true;$('essPop').hidden=true;fitPop(p)};
 $('panelMenu').addEventListener('pointermove',e=>{const t=e.target.closest('.focustile');if(!t)return;const r=t.getBoundingClientRect();t.style.setProperty('--mx',(e.clientX-r.left)+'px');t.style.setProperty('--my',(e.clientY-r.top)+'px')});
-$('panelMenu').addEventListener('click',e=>{e.stopPropagation();if(e.target.closest('#mFocusBtn')){SET.focus=!SET.focus;applyPanels();$('mFocusBtn').focus()}});
+$('panelMenu').addEventListener('click',e=>{e.stopPropagation();if(e.target.closest('#mFocusBtn')){const tile=e.target.closest('#mFocusBtn').getBoundingClientRect();SET.focus=!SET.focus;applyPanels();$('mFocusBtn').focus();if(SET.focus)lockInRipple(tile.left+28,tile.top+tile.height/2);announce(SET.focus?'Focus on. Locked in.':'Focus off.')}});
+/* Focus on: pearlescent ripple out of the tile, plus a brief "Locked in" tag. Skipped with reduced motion. */
+function lockInRipple(x,y){
+if(document.body.classList.contains('reduce')||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+document.querySelectorAll('.lockin').forEach(n=>n.remove());
+const far=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
+const o=document.createElement('div');o.className='lockin';o.setAttribute('aria-hidden','true');
+o.style.cssText=`--x:${x}px;--y:${y}px;--s:${(far*2/100*1.08).toFixed(2)}`;
+o.innerHTML='<i></i><i></i><i></i><b>Locked in</b>';
+document.body.appendChild(o);setTimeout(()=>o.remove(),2100);
+}
 $('panelMenu').addEventListener('change',e=>{
 const t=e.target;
 if(t.id==='mGame'){
