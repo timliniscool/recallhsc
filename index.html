@@ -1437,7 +1437,7 @@ o.taskMs={};for(const t of['build','para','essay']){const v=s.taskMs&&s.taskMs[t
 const g=st.game&&typeof st.game==='object'?{level:Math.max(0,num(st.game.level)|0),coins:Math.max(0,num(st.game.coins)|0),marks:{}}:undefined;
 if(g&&st.game.marks&&typeof st.game.marks==='object')for(const[k,v]of Object.entries(st.game.marks))if(/^\d+$/.test(k)&&['step','flag','castle'].includes(v))g.marks[k]=v;
 return{startG:Math.max(0,num(st.startG)|0),g:Math.max(0,num(st.g)|0),ti:Math.max(0,num(st.ti)|0),learned:(Array.isArray(st.learned)?st.learned:[]).map(Boolean),
-started:!!st.started,nS:num(st.nS),stats:o,game:g};
+started:!!st.started,nS:num(st.nS),stats:o,game:g,resetAt:num(st.resetAt),part:st.part&&typeof st.part==='object'?{g:Math.max(0,num(st.part.g)|0),w:Math.max(0,num(st.part.w)|0)}:null};
 }
 let SET={...DEFSET,...(ls.get('settings')||{})};
 if(typeof SET.choice!=='boolean')SET.choice=null;
@@ -1448,7 +1448,28 @@ let ACTIVE=okId(ls.get('active'))?ls.get('active'):'sample';
 let S=null;
 const essayText=id=>id==='sample'?RAW:(LIB.find(e=>e.id===id)||{}).text;
 const essayKind=id=>id==='sample'?'essay':(LIB.find(e=>e.id===id)||{}).kind||'essay';
-const save=()=>{if(S)S.nS=SENTS.length;ls.set('state.'+ACTIVE,S);ls.set('settings',SET);ls.set('active',ACTIVE)};
+/* words memorised: whole learnt sentences, plus the chunks already passed in the sentence being built */
+function learnedWords(){
+let w=SENTS.reduce((a,x,g)=>a+(S.learned[g]?x.wc:0),0);
+if(S.part&&SENTS[S.part.g]&&!S.learned[S.part.g])w+=Math.min(S.part.w,SENTS[S.part.g].wc);
+return w;
+}
+// another tab saved this essay: keep both tabs' progress instead of the older tab overwriting it
+addEventListener('storage',e=>{
+if(!S||e.key!==NS+'state.'+ACTIVE||!e.newValue)return;
+let inc;try{inc=cleanState(JSON.parse(e.newValue))}catch(_){return}if(!inc)return;
+if((inc.resetAt||0)>(S.resetAt||0)){S=inc;loadTask();return}   // a reset in the other tab wins
+inc.learned.forEach((v,g)=>{if(v)S.learned[g]=true});
+if(inc.g>S.g||(inc.g===S.g&&inc.ti>S.ti)){S.g=inc.g;S.ti=inc.ti;S.started=true;if(phase==='type'&&!typed)loadTask()}
+if(inc.part&&(!S.part||inc.part.g>S.part.g||(inc.part.g===S.part.g&&inc.part.w>S.part.w)))S.part=inc.part;
+renderSide();
+});
+let saveWarned=false;
+function lsTry(k,v){try{localStorage.setItem(NS+k,JSON.stringify(v));return true}catch(e){
+if(!saveWarned){saveWarned=true;setTimeout(()=>toast('Couldn’t save progress: browser storage is full or blocked'),0)}return false}}
+const save=()=>{if(S){S.nS=SENTS.length;lsTry('state.'+ACTIVE,S)}lsTry('settings',SET);lsTry('active',ACTIVE)};
+const saveSettings=()=>{lsTry('settings',SET);lsTry('active',ACTIVE)};
+addEventListener('pagehide',()=>save());
 function loadEssay(id){
 if(!allEssays().some(e=>e.id===id))id=allEssays()[0].id;let text=essayText(id);
 ACTIVE=id;
@@ -1774,7 +1795,7 @@ function check(){
 clearTimeout(autoT);
 const st=S.stats,U=tokens(typed),r=align(task.T,U);
 const secs=Math.max(1,(performance.now()-(t0||performance.now()))/1000),wpm=Math.round(typed.length/5/(secs/60));
-st.att++;tries++;st.words+=U.length;st.chars+=typed.length;st.accSum+=r.acc;st.keys+=L.keys;st.bs+=L.bs;st.hes+=L.hes;
+st.att++;tries++;S.started=true;st.words+=U.length;st.chars+=typed.length;st.accSum+=r.acc;st.keys+=L.keys;st.bs+=L.bs;st.hes+=L.hes;
 st.longestPause=Math.max(st.longestPause,L.longest);st.bestBurst=Math.max(st.bestBurst,Math.round(L.peak));
 const lc=liveCalc();if(lc.rhythm!=null){st.rhythmSum+=lc.rhythm;st.rhythmN++}
 // word-level forensics
@@ -1801,6 +1822,7 @@ if(pass){
 st.pass++;st.tasks++;if(task.type==='essay')st.cps++;
 if(U.length>=4){st.wpmSum+=wpm;st.wpmN++;st.bestWpm=Math.max(st.bestWpm,wpm)}
 if(task.type!=='build'||(task.k===task.n&&!task.half))for(let g=task.a;g<=task.b;g++)S.learned[g]=true;
+if(task.type==='build'){const w=tokens((task.pre?task.pre+' ':'')+task.text).length;if(!S.part||S.part.g!==task.a||w>S.part.w)S.part={g:task.a,w}} // partial credit
 phase='ok';typebox.classList.add('ok');card.classList.add('flash-ok');
 Pet.event(task.type==='essay'?'checkpoint':task.rep===2?'para':L.peak>75?'fast':'pass');
 Game.pass(task,r.ok);
@@ -1893,7 +1915,7 @@ $('btnHint').onclick=hint;
 const IS_PHONE=matchMedia('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<600;
 const choiceOn=()=>SET.choice==null?IS_PHONE:!!SET.choice;
 let cIdx=0,cWords=[],VOCAB=null,VOCAB_FOR=null;
-function setChoice(on){SET.choice=on;save();$('sChoice').checked=on;applyChoice();if(phase==='type'){cIdx=0;typed='';ta.value='';renderTyped();renderPrompt();renderFoot()}renderChoices();if(!on)focusTa()}
+function setChoice(on){SET.choice=on;saveSettings();$('sChoice').checked=on;applyChoice();if(phase==='type'){cIdx=0;typed='';ta.value='';renderTyped();renderPrompt();renderFoot()}renderChoices();if(!on)focusTa()}
 function applyChoice(){
 const on=choiceOn();document.body.classList.toggle('choice',on);
 ta.readOnly=on;ta.inputMode=on?'none':'text';if(on)ta.blur();
@@ -2016,7 +2038,7 @@ const showEmpty=()=>endScreen('No essay yet','Paste one in and you’re away.','
 function fmtTime(s){s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}h ${m}m`:`${m}m ${s%60}s`}
 const topOf=o=>Object.entries(o).sort((a,b)=>b[1]-a[1]);
 function renderSide(){
-const lw=SENTS.reduce((a,x,g)=>a+(S.learned[g]?x.wc:0),0),pct=lw/TOTALW,P=Math.round(pct*100);
+const lw=learnedWords(),pct=Math.min(1,lw/TOTALW),P=Math.round(pct*100);
 $('ringPct').textContent=P+'%';$('leftPct').textContent=(100-P)+'% left';
 $('wordsLeft').textContent=(TOTALW-lw).toLocaleString();
 $('sentDone').textContent=`${SENTS.filter((_,g)=>S.learned[g]).length}/${SENTS.length}`;
@@ -2136,7 +2158,7 @@ S.g=g;S.ti=0;S.started=true;closeModal();loadTask();
 }
 let pickG=0;
 function openModal(){
-const canResume=S.started&&S.g<SENTS.length&&(S.g>0||S.ti>0);
+const canResume=S.g<SENTS.length&&(S.g>0||S.ti>0);
 $('resumeBox').innerHTML='';
 $('startOpts').querySelector('#bResume')?.remove();
 if(canResume)$('startOpts').insertAdjacentHTML('afterbegin',`<button class="sbig wide rec" id="bResume"><span class=\"si\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8 5v14l11-7z\"/></svg></span><span class="st"><b>Pick up where you left off</b><span class="d">¶${SENTS[S.g].p+1}, sentence ${SENTS[S.g].s+1}</span></span></button>`);
@@ -2163,7 +2185,8 @@ $('bKnown').onclick=()=>setStart(pickG,true);
 $('modal').addEventListener('click',e=>{if(e.target.id==='modal'&&S.started)closeModal()});
 $('btnStart').onclick=openModal;
 // × always works: if nothing has been picked yet, start from the top rather than leaving the user stuck
-$('bCloseStart').onclick=()=>{if(S.started)closeModal();else setStart(0)};
+const hasProgress=()=>S.g>0||S.ti>0||S.learned.some(Boolean)||!!S.part;
+$('bCloseStart').onclick=()=>{if(S.started||hasProgress()){S.started=true;save();closeModal()}else setStart(0)};
 
 /* ---------- essay library: list + edit view ---------- */
 /* Essays live in localStorage (cookies cap out at ~4 KB, far too small for essays). It is per browser/device,
@@ -2175,7 +2198,7 @@ const essayTitle=id=>(allEssays().find(e=>e.id===id)||{}).title||'Essay';
 state; others are worked out from their saved state (parsed once per text and cached). */
 const PCT_CACHE=new Map();
 function pctOf(id){
-if(id===ACTIVE)return Math.round(SENTS.reduce((a,x,g)=>a+(S.learned[g]?x.wc:0),0)/Math.max(1,TOTALW)*100);
+if(id===ACTIVE)return Math.round(Math.min(1,learnedWords()/Math.max(1,TOTALW))*100);
 const st=ls.get('state.'+id);if(!st||!Array.isArray(st.learned)||!st.learned.some(Boolean))return 0;
 const txt=essayText(id)||'',key=id+':'+txt.length;
 let wc=PCT_CACHE.get(key);if(!wc){wc=parseEssay(txt,essayKind(id)).sents.map(x=>x.wc);PCT_CACHE.set(key,wc)}
@@ -2396,13 +2419,13 @@ if(onb){save();loadEssay(id);renderSwitcher();setStart(0);toast('Saved. Off you 
 function bindSettings(){
 const fill=el=>el.style.setProperty('--p',((el.value-el.min)/(el.max-el.min)*100)+'%');
 const R=(id,key,fmt,rebuild)=>{const el=$(id),o=$('o'+id.slice(1));el.value=SET[key];o.textContent=fmt(SET[key]);fill(el);
-el.oninput=()=>{SET[key]=+el.value;o.textContent=fmt(SET[key]);fill(el);save()};
+el.oninput=()=>{SET[key]=+el.value;o.textContent=fmt(SET[key]);fill(el);saveSettings()};
 if(rebuild)el.onchange=()=>{S.ti=0;if(phase!=='done')loadTask()}};
 R('sDelay','delay',v=>v+'s');R('sStrict','strict',v=>v+'%');R('sPhrase','phrase',v=>v+'w',true);
 const C=(id,key)=>{const el=$(id);el.checked=SET[key];el.onchange=()=>{SET[key]=el.checked;save();if(key==='essay'){S.ti=0;if(phase!=='done')loadTask()}else if(key==='hide'&&phase==='type')renderPrompt()}};
 C('sEssay','essay');C('sHide','hide');C('sMotion','motion');
 $('sChoice').checked=choiceOn();$('sChoice').onchange=e=>setChoice(e.target.checked);
-$('btnReset').onclick=()=>{if(confirm('Reset progress and stats for this essay?')){S=DEFSTATE();save();loadTask();openModal()}};
+$('btnReset').onclick=()=>{if(confirm('Reset progress and stats for this essay?')){S=DEFSTATE();S.resetAt=Date.now();save();loadTask();openModal()}};
 }
 
 /* ---------- background: drifting aurora + particles + keystroke ripples ---------- */
@@ -2687,7 +2710,7 @@ $('bDl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjec
 $('bOpen').onclick=()=>window.open(URL.createObjectURL(bookletBlob()),'_blank');
 }
 }
-$('gnav').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;SET.gsec=b.dataset.g;save();renderGuide();window.scrollTo({top:0,behavior:'smooth'})});
+$('gnav').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;SET.gsec=b.dataset.g;saveSettings();renderGuide();window.scrollTo({top:0,behavior:'smooth'})});
 
 /* =====================================================================
 PET FALCON: pixel sprite, eats cookies, studies maths, reacts to you
@@ -2766,7 +2789,13 @@ hello:['locked in? let’s go','we lock in today','quiet on the creek. study tim
 for(const k in NOW)LINES[k]=(LINES[k]||[]).concat(NOW[k]);
 let sessionStart=performance.now(),longSaid=0;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
-function say(t,force){const now=performance.now();if(!force&&now-lastSay<4500)return;lastSay=now;bub.textContent=t;bub.classList.add('show');clearTimeout(bubT);bubT=setTimeout(()=>bub.classList.remove('show'),3400)}
+/* Pacing: one line every 20–30s at most. Lines are weighted towards pauses: mid-typing (a key in the last
+2s) only ~1 in 4 chances get through; after a submission or during a hesitation they almost always do.
+Clicking Don, and his hello, always get an answer. */
+let lastType=0,nextOk=0;
+function say(t,force){const now=performance.now();
+if(force!=="always"){if(now<nextOk)return;if(now-lastType<2000&&Math.random()>.25)return}
+nextOk=now+20000+Math.random()*10000;lastSay=now;bub.textContent=t;bub.classList.add('show');clearTimeout(bubT);bubT=setTimeout(()=>bub.classList.remove('show'),3400)}
 function setState(s){state=s;stT=0;bites=0;if(s==='study')syms=[]}
 function px(X,Y,c){x.fillStyle=PAL[c]||c;x.fillRect(X,Y,1,1)}
 function sprite(rows,ox,oy){rows.forEach((r,j)=>{for(let i=0;i<r.length;i++)if(r[i]!=='.')px(ox+i,oy+j,r[i])})}
@@ -2825,8 +2854,10 @@ if(state==='study'&&stT%7===0)syms.push({t:pick(['π','∑','x²','√','∞','+
 if(state==='study'&&stT>90&&idle>4000)setState('idle');
 if(idle<8000&&performance.now()-sessionStart>1800000*(longSaid+1)){longSaid++;say(pick(LINES.long),true)}
 if(state==='idle'&&(stT===30||stT===100)&&Math.random()<.85)say(pick(LINES.idle));
-// keeps chatting while you study (roughly every 10–15s), mixing study lines with general banter
-if(state==='study'&&stT>0&&stT%100===0&&Math.random()<.75)say(pick(Math.random()<.5?LINES.study:LINES.idle));
+// while studying: a chance to chat every ~7s; pauses of 2s+ (hesitations) get extra chances
+if(state==='study'){const p=performance.now()-lastType;
+if(stT%60===0&&Math.random()<.6)say(pick(Math.random()<.5?LINES.study:LINES.idle));
+else if(p>2000&&p<15000&&Math.random()<.06)say(pick(Math.random()<.5?LINES.study:LINES.idle))}
 if((state==='scroll'||state==='swim'||state==='eat')&&stT===70&&Math.random()<.6)say(pick(LINES[state]));
 if(state==='scroll'&&stT>110)setState('idle');
 if(state==='swim'&&stT>120)setState('idle');
@@ -2843,12 +2874,13 @@ hearts.forEach(h=>{h.y-=.3;h.a-=.03});hearts=hearts.filter(h=>h.a>0);
 draw();
 }
 setInterval(()=>{if(!document.hidden&&!root.classList.contains('hidden'))tick()},110);
-cv.addEventListener('click',()=>{lastAct=performance.now();flap=8;for(let i=0;i<3;i++)hearts.push({x:6+Math.random()*10,y:6,a:1});setState('eat');say(pick(LINES.pet),true)});
-setTimeout(()=>say(pick(LINES.hello),true),1800);
+cv.addEventListener('click',()=>{lastAct=performance.now();flap=8;for(let i=0;i<3;i++)hearts.push({x:6+Math.random()*10,y:6,a:1});setState('eat');say(pick(LINES.pet),"always")});
+setTimeout(()=>say(pick(LINES.hello),"always"),1800);
 return{
 event(e){
 lastAct=performance.now();
-if(e==='type'){if(state==='sleep'||state==='idle')setState('study');return}
+if(e==='type'){lastType=performance.now();if(state==='sleep'||state==='idle')setState('study');return}
+lastType=0; // a result means they have finished typing
 if(e==='pass'){mood='pass';moodT=14;flap=10;if(Math.random()<.85)say(pick(LINES.pass))}
 if(e==='fail'){mood='fail';moodT=30;if(Math.random()<.6)say(pick(LINES.fail),true)}
 if(e==='para'){mood='pass';moodT=20;flap=14;say(pick(LINES.para),true)}
@@ -3082,7 +3114,7 @@ reset(){S.game={level:0,coins:0};camY=standPos(0,0).y-H*.62}
 
 /* ---------- views ---------- */
 function setView(v){
-SET.view=v;save();
+SET.view=v;saveSettings();
 document.body.classList.toggle('guide',v==='guide');
 document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
 if(v==='guide')renderGuide();else{requestAnimationFrame(()=>{placeCaret();drawSpark()});focusTa()}
@@ -3104,7 +3136,8 @@ applyChoice();
 loadTask();
 setView(SET.view);
 if(!ls.get('seen'))showHowto();
-else if(!S.started&&SET.view==='mem')openModal();
+else if(!S.started&&!hasProgress()&&SET.view==='mem')openModal();
+else if(!S.started&&hasProgress()){S.started=true;save()}
 </script>
 </body>
 </html>
