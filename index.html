@@ -214,23 +214,28 @@ body.gamify .ch .n{font-family:var(--px);font-size:7px}
 .tb:active,.tb.held{background:var(--tint);color:var(--skyink)}
 .tb:disabled{opacity:.35;cursor:default;background:none;color:var(--muted)}
 .tsep{width:1px;height:18px;background:var(--line2);margin:0 3px}
-.tb[data-tip]::after{content:attr(data-tip) attr(data-kl);position:absolute;top:calc(100% + 8px);left:50%;transform:translate(-50%,-3px);white-space:pre;background:var(--ink);color:#fff;font:500 11.5px/1.3 var(--sans);padding:5px 8px;border-radius:7px;opacity:0;pointer-events:none;transition:opacity .12s,transform .12s;z-index:40}
-.tb:hover::after,.tb:focus-visible::after{opacity:1;transform:translate(-50%,0);transition-delay:.25s}
-.tb:last-of-type::after{left:auto;right:0;transform:translateY(-3px)}
-.tb:last-of-type:hover::after{transform:none}
+.tip{position:fixed;left:0;top:0;z-index:120;pointer-events:none;white-space:nowrap;background:var(--ink);color:#fff;font:500 11.5px/1.3 var(--sans);padding:5px 8px;border-radius:7px;opacity:0;transform:translateY(3px);transition:opacity .12s,transform .12s}
+.tip.show{opacity:1;transform:none}
+.tip kbd{background:rgba(255,255,255,.14);border:0;color:#fff;margin-left:6px;padding:0 5px}
+.tip::after{content:'';position:absolute;left:var(--ax,50%);bottom:-4px;width:8px;height:8px;background:inherit;transform:translateX(-50%) rotate(45deg)}
 .kpop .pet{opacity:0;transition:opacity .15s}
-.keys{right:0;min-width:270px;padding:10px 12px;z-index:90}
+.keys{position:fixed;right:auto;top:auto;min-width:280px;max-width:calc(100vw - 20px);padding:12px 14px;z-index:110}
 .keys .krow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:5px 2px;font-size:13px;color:var(--ink2)}
 .keys .krow span:last-child{display:flex;gap:3px;flex:none}
 .keys .kh{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600;margin:4px 2px 2px}
 .btn kbd{background:none;border:0;padding:0 0 0 4px;color:inherit;opacity:.7;font-size:11px}
-@media(pointer:coarse){.kbonly,.btn kbd{display:none}.tb{width:38px;height:36px}.tb[data-tip]::after{display:none}}
+@media(pointer:coarse){.kbonly,.btn kbd{display:none}.tb{width:38px;height:36px}.tip{display:none}}
 body.gamify .tools{border-radius:0;border:2px solid #0b1324;background:#fff;box-shadow:2px 2px 0 #0b1324;padding:2px}
 body.gamify .tb{border-radius:0;color:#0b1324}
 body.gamify .tb:hover,body.gamify .tb:focus-visible,body.gamify .tb.held{background:#ecfccb;color:#0b1324}
 body.gamify .tsep{background:#0b1324;opacity:.3}
-body.gamify .tb[data-tip]::after{font-family:var(--px);font-size:7px;border-radius:0;background:#0b1324;color:#ecfccb}
-body.gamify .keys .krow{font-family:var(--px);font-size:8px;line-height:1.6}
+body.gamify .tip{font-family:'Press Start 2P',monospace;font-size:8px;line-height:1.5;border-radius:0;background:#0b0f14;color:#ecfccb;border:2px solid #a3e635;box-shadow:3px 3px 0 #000;padding:6px 8px}
+body.gamify .tip kbd{font-family:'Press Start 2P',monospace;font-size:7px;background:#a3e635;color:#0b1324;border-radius:0}
+body.gamify .tip::after{display:none}
+body.gamify .keys.menu-pop{background:#0b0f14;border:2px solid #a3e635;box-shadow:6px 6px 0 rgba(0,0,0,.7)}
+body.gamify .keys .kh{font-family:'Press Start 2P',monospace;font-size:7px;letter-spacing:0;color:#a3e635}
+body.gamify .keys .krow{font-family:'Press Start 2P',monospace;font-size:8px;line-height:1.6;color:#e2e8f0}
+body.gamify .keys kbd{font-family:'Press Start 2P',monospace;font-size:7px;border-radius:0;background:#121820;border:2px solid #5b6b80;color:#d9f99d;padding:2px 5px}
 body.gamify .pv-in{border-radius:0;border:2px solid var(--line2);box-shadow:6px 6px 0 rgba(0,0,0,.5)}
 body.gamify .pv-h,body.gamify .pv-f{font-family:var(--px);font-size:9px;letter-spacing:0}
 body.gamify .pv-b mark{background:#fef08a;color:#0b1324;border-radius:0}
@@ -807,12 +812,31 @@ body.gamify .brand{font-family:'Press Start 2P',monospace;font-size:12px;letter-
 body.gamify .brand .hsc{margin-left:-6px}
 body.gamify .logo{background:linear-gradient(135deg,#bef264,#65a30d);box-shadow:0 0 14px rgba(163,230,53,.45);border-radius:3px}
 body.gamify .tabs{background:#10151c}
-body.gamify .tab.on{background:#1a222c;color:var(--sky2);box-shadow:inset 0 0 0 1px rgba(163,230,53,.35)}
-body.gamify .btn{background:#161e28;border-color:#64758b;color:var(--ink2)}
-body.gamify .btn:hover{background:#151c25;border-color:var(--sky);color:var(--sky2)}
-body.gamify .btn.primary{background:var(--sky);border-color:var(--sky);color:#0b1324;box-shadow:0 0 18px rgba(163,230,53,.35)}
-body.gamify .btn.primary:hover{background:#bef264;color:#0b1324}
-body.gamify .btn.on{background:rgba(163,230,53,.14);border-color:var(--sky);color:var(--sky2)}
+body.gamify .tab.on{background:#a3e635;color:#0b1324;box-shadow:none}
+/* retro buttons: pixel type, square corners, chunky border, hard drop shadow that presses in */
+body.gamify .btn{font-family:'Press Start 2P',monospace;font-size:9px;font-weight:400;letter-spacing:0;line-height:1.4;border-radius:0;border:2px solid #5b6b80;background:#121820;color:#e2e8f0;box-shadow:3px 3px 0 #000;padding:8px 11px;transition:transform .06s,box-shadow .06s,background .1s,border-color .1s,color .1s}
+body.gamify .btn.small{font-size:8px;padding:6px 9px}
+body.gamify .btn:hover{background:#18212c;border-color:#a3e635;color:#d9f99d}
+body.gamify .btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #000}
+body.gamify .btn:focus-visible{outline:2px dashed #a3e635;outline-offset:3px}
+body.gamify .btn.primary{background:#a3e635;border-color:#d9f99d;color:#0b1324;box-shadow:3px 3px 0 #3f6212}
+body.gamify .btn.primary:hover{background:#bef264;border-color:#ecfccb;color:#0b1324}
+body.gamify .btn.primary:active{box-shadow:0 0 0 #3f6212}
+body.gamify .btn.on{background:#1f2a12;border-color:#a3e635;color:#d9f99d}
+body.gamify .btn:disabled{opacity:.4;transform:none;box-shadow:3px 3px 0 #000}
+body.gamify .btn kbd{font-family:'Press Start 2P',monospace;font-size:7px}
+body.gamify .esel svg{color:#a3e635}
+body.gamify #btnUpload{font-size:9px}
+body.gamify .tabs{border-radius:0;border:2px solid #2a3442;padding:2px;background:#0b0f14}
+body.gamify .tab{font-family:'Press Start 2P',monospace;font-size:8px;border-radius:0;padding:8px 10px;color:#94a3b8}
+body.gamify .tab:hover{color:#d9f99d}
+body.gamify .xbtn{border-radius:0;border:2px solid #5b6b80;background:#121820;color:#e2e8f0;box-shadow:2px 2px 0 #000}
+body.gamify .xbtn:hover{border-color:#a3e635;color:#d9f99d}
+body.gamify .menu-pop{border-radius:0;border:2px solid #2f3b4a;box-shadow:5px 5px 0 rgba(0,0,0,.65)}
+body.gamify .mitem{border-radius:0}
+body.gamify .seg{border-radius:0;border:2px solid #2a3442;background:#0b0f14}
+body.gamify .seg button{border-radius:0;font-family:'Press Start 2P',monospace;font-size:7px}
+body.gamify .seg button.on{background:#a3e635;color:#0b1324;box-shadow:none}
 body.gamify :is(.menu-pop,.sheet,.sheet-foot){background:#0e1319;border-color:#1e2833;color:var(--ink2)}
 body.gamify .eitem:hover,body.gamify .eitem:focus-visible,body.gamify .menu-pop label:hover{background:#151c25}
 body.gamify .modal{background:rgba(0,0,0,.6)}
@@ -974,7 +998,6 @@ body.gamify .ch{font-size:11px}
 <i class="tsep"></i>
 <button class="tb" id="btnSkip" aria-label="Skip this step" data-tip="Skip"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 4 10 8-10 8z"/><path d="M19 5v14"/></svg></button>
 <button class="tb kbonly" id="btnKeys" aria-label="Keyboard shortcuts" aria-expanded="false" data-tip="Shortcuts" data-k="/"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg></button>
-<div class="menu-pop keys" id="keysPop" hidden role="dialog" aria-label="Keyboard shortcuts"></div>
 </div>
 </div>
 <div class="prompt" id="prompt"></div>
@@ -1016,6 +1039,8 @@ body.gamify .ch{font-size:11px}
 </div>
 </main>
 
+<div class="menu-pop keys menu" id="keysPop" hidden role="dialog" aria-label="Keyboard shortcuts"></div>
+<div class="tip" id="tip" role="tooltip"></div>
 <div class="peekview" id="peekView" hidden role="dialog" aria-live="polite"><div class="pv-in"><div class="pv-h"></div><div class="pv-b"></div><div class="pv-f">Let go to hide</div></div></div>
 <div class="modal" id="modal" hidden>
 <div class="sheet">
@@ -1910,7 +1935,31 @@ $('keysPop').innerHTML='<div class="kh">While typing</div>'+row('Check',K('Enter
 '<div class="kh">After marking</div>'+row('Continue / retry',K('Enter'))+row('Skip',K('Tab'))+
 '<div class="kh">Anywhere</div>'+row('Switch essay',K(IS_APPLE?'⌥':'Alt','1–9'))+row('This list',K(CTRL,'/'));
 })();
-function toggleKeys(force){const p=$('keysPop'),open=force??p.hidden;p.hidden=!open;$('btnKeys').setAttribute('aria-expanded',open);document.body.classList.toggle('kpop',open);if(open)fitPop(p);else focusTa()}
+function placeKeys(){
+const p=$('keysPop');if(p.hidden)return;
+const b=$('btnKeys').getBoundingClientRect(),w=p.offsetWidth,h=p.offsetHeight,m=10;
+const left=Math.max(m,Math.min(b.right-w,innerWidth-w-m));
+const below=b.bottom+8,top=below+h<=innerHeight-m?below:Math.max(m,b.top-8-h); // below the button, or above if no room
+p.style.left=left+'px';p.style.top=top+'px';
+}
+function toggleKeys(force){const p=$('keysPop'),open=force??p.hidden;p.hidden=!open;$('btnKeys').setAttribute('aria-expanded',open);document.body.classList.toggle('kpop',open);if(open)placeKeys();else focusTa()}
+addEventListener('resize',placeKeys);addEventListener('scroll',placeKeys,{passive:true});
+/* one tooltip for the toolbar, placed above the icon (below only if there's no room) */
+(()=>{
+const tip=$('tip');let cur=null,tmr=0;
+const show=b=>{cur=b;tip.innerHTML=esc(b.dataset.tip)+(b.dataset.kl?`<kbd>${esc(b.dataset.kl.trim())}</kbd>`:'');
+tip.classList.remove('show');const r=b.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight,m=8;
+const x=Math.max(m,Math.min(r.left+r.width/2-w/2,innerWidth-w-m));let y=r.top-h-9;if(y<m)y=r.bottom+9;
+tip.style.left=x+'px';tip.style.top=y+'px';tip.style.setProperty('--ax',(r.left+r.width/2-x)+'px');
+requestAnimationFrame(()=>tip.classList.add('show'))};
+const hide=()=>{clearTimeout(tmr);cur=null;tip.classList.remove('show')};
+$('tools').addEventListener('pointerover',e=>{const b=e.target.closest('.tb[data-tip]');if(!b||b===cur||e.pointerType==='touch')return;clearTimeout(tmr);tmr=setTimeout(()=>show(b),cur?0:250)});
+$('tools').addEventListener('pointerleave',hide);
+$('tools').addEventListener('focusin',e=>{const b=e.target.closest('.tb[data-tip]');if(b&&b.matches(':focus-visible'))show(b)});
+$('tools').addEventListener('focusout',hide);
+$('tools').addEventListener('pointerdown',hide);
+addEventListener('scroll',hide,{passive:true});
+})();
 $('btnKeys').onclick=e=>{e.stopPropagation();toggleKeys()};
 function endScreen(title,msg,btn,fn){
 phase='done';task=null;
