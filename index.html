@@ -1379,9 +1379,35 @@ const out=[];let cur=-1;
 for(let g=a;g<=b;g++){const x=SENTS[g];if(x.p!==cur){out.push([]);cur=x.p}out[out.length-1].push(x.text)}
 return out.map(a=>a.join(' ')).join('\n\n');
 }
+/* Long sentences (20+ words) are learnt in two halves, split at the clause break (, ; : —) nearest the
+middle, never inside a quotation and never leaving the first half under 4 words or the second under 6. */
+function splitSentence(text){
+const w=text.split(/\s+/).filter(Boolean),n=w.length;
+if(n<20)return null;
+let inQ=false,best=-1,bestD=1e9;
+for(let i=0;i<n-1;i++){
+const t=w[i];
+const opens=(t.match(/[“]/g)||[]).length+(/^[(]?"/.test(t)?1:0),closes=(t.match(/[”]/g)||[]).length+(/"[,.;:!?)]*$/.test(t)&&!/^[(]?"[^"]*$/.test(t)?1:0);
+if(opens>closes)inQ=true;else if(closes>opens)inQ=false;
+const brk=/[,;:]["”’)]?$/.test(t)||/^[—–]$/.test(w[i+1])||/[—–]$/.test(t);
+if(!brk||inQ||i+1<4||n-(i+1)<6)continue;
+const d=Math.abs((i+1)-n/2);if(d<bestD){bestD=d;best=i+1}
+}
+return best<0?null:[w.slice(0,best).join(' '),w.slice(best).join(' ')];
+}
 function buildQueue(g){
-const x=SENTS[g],ph=chunkSentence(x.text,SET.phrase),q=[];
+const x=SENTS[g],q=[],halves=splitSentence(x.text);
+if(halves){
+// half 1 chunk by chunk, half 2 chunk by chunk, then the whole sentence from memory
+let off=0;
+halves.forEach((h,hi)=>{const ph=chunkSentence(h,SET.phrase);
+ph.forEach((_,k)=>q.push({type:'build',k:k+1,n:ph.length,gk:off+k+1,half:hi+1,pre:hi?halves[0]:'',shown:ph.slice(0,k+1),next:ph[k+1]||'',text:ph.slice(0,k+1).join(' '),a:g,b:g}));
+off+=ph.length});
+q.push({type:'sent',text:x.text,a:g,b:g});
+}else{
+const ph=chunkSentence(x.text,SET.phrase);
 ph.forEach((_,k)=>q.push({type:'build',k:k+1,n:ph.length,shown:ph.slice(0,k+1),next:ph[k+1]||'',text:ph.slice(0,k+1).join(' '),a:g,b:g}));
+}
 const floor=SET.scope==='start'?Math.min(S.startG,g):0;
 const pa=Math.max(PSTART[x.p],floor),last=x.s===PARAS[x.p].length-1,pt=rangeText(pa,g),solo=PARAS[x.p].length===1;
 // the IQTVE (unit) this sentence belongs to: from the sentence after the previous unit end, up to here
@@ -1397,7 +1423,8 @@ const out=[];
 for(const t of q){
 const prev=out[out.length-1];
 if(prev&&!t.rep&&prev.text===t.text)continue;
-if(t.type==='essay'&&out.some(o=>(o.type==='para'||o.type==='unit')&&o.text===t.text))continue;
+if(t.type==='essay'&&out.some(o=>(o.type==='para'||o.type==='unit'||o.type==='sent')&&o.text===t.text))continue;
+if((t.type==='unit'||(t.type==='para'&&!t.rep))&&out.some(o=>o.type==='sent'&&o.text===t.text))continue;
 if(t.type==='para'&&!t.rep&&out.some(o=>o.type==='unit'&&o.text===t.text))continue;
 out.push(t);
 }
@@ -1420,8 +1447,8 @@ focusTa();save();
 function focusTa(){if(typeof choiceOn==='function'&&choiceOn())return;if($('upModal').hidden&&$('modal').hidden&&$('essayModal').hidden&&$('howto').hidden&&SET.view==='mem')ta.focus({preventScroll:true})}
 function renderHead(){
 const x=SENTS[S.g],chip=$('chip');
-chip.className='chip'+(task.type==='para'||task.type==='unit'?' para':task.type==='essay'?' essay':'');
-chip.textContent=task.type==='build'?`Build · chunk ${task.k}/${task.n}`:task.type==='unit'?unitLabel(task,true):task.type==='para'?(task.rep?`Paragraph ×2 · ${task.rep}/2`:'Paragraph so far'):'Whole essay so far';
+chip.className='chip'+(task.type==='para'||task.type==='unit'||task.type==='sent'?' para':task.type==='essay'?' essay':'');
+chip.textContent=task.type==='build'?(task.half?`Half ${task.half} of 2 · chunk ${task.k}/${task.n}`:`Build · chunk ${task.k}/${task.n}`):task.type==='sent'?'Whole sentence':task.type==='unit'?unitLabel(task,true):task.type==='para'?(task.rep?`Paragraph ×2 · ${task.rep}/2`:'Paragraph so far'):'Whole essay so far';
 $('ctx').innerHTML=`¶${x.p+1} · Sentence ${x.s+1} of ${PARAS[x.p].length} <span class="rt ${RCLS[x.role]}">${ROLE[x.role]}</span>`;
 $('tools').style.display='';
 $('btnBack').disabled=S.g===0&&S.ti===0;$('btnHint').disabled=false;
@@ -1445,10 +1472,11 @@ prompt.classList.remove('enter');void prompt.offsetWidth;prompt.classList.add('e
 if(task.type==='build'){
 prompt.innerHTML=task.shown.map((p,i)=>i===task.shown.length-1?`<mark>${esc(p)}</mark>`:`<span class="old">${esc(p)}</span>`).join(' ')+
 (task.next?` <span class="nextc" title="Coming next: no need to memorise yet">${esc(task.next)}${task.k+1<task.n?' …':''}</span>`:'')+
-`<div class="phint">${task.k===1?(choiceOn()?'Read it, then pick it word by word. ':'Read it, then type it. '):''}${SET.hide?(choiceOn()?'It hides after your first pick.':'The prompt hides once you start typing.'):''}</div>`;
+(task.half===2&&task.k===1?`<div class="phint">Second half: carry on from “${esc(task.pre.split(/\s+/).slice(-3).join(' '))}”</div>`:'')+
+`<div class="phint">${task.half===1&&task.k===1?'Long sentence: first half first. ':''}${task.k===1?(choiceOn()?'Read it, then pick it word by word. ':'Read it, then type it. '):''}${SET.hide?(choiceOn()?'It hides after your first pick.':'The prompt hides once you start typing.'):''}</div>`;
 }else{
 const first=items(task.text).filter(i=>i.norm).slice(0,2).map(i=>i.orig).join(' ');
-const title=task.type==='essay'?'Type the whole essay so far':task.type==='unit'?unitLabel(task):task.rep?`Type the full paragraph · round ${task.rep} of 2`:'Type the paragraph so far';
+const title=task.type==='sent'?'Type the whole sentence':task.type==='essay'?'Type the whole essay so far':task.type==='unit'?unitLabel(task):task.rep?`Type the full paragraph · round ${task.rep} of 2`:'Type the paragraph so far';
 prompt.innerHTML=`<div class="recall"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
 <div><h3>${title}</h3><p>From memory · ${describeRange(task)} · ${task.T.length} words</p><p>Begins: <span class="cue">${esc(first)}…</span></p></div></div>`;
 }
@@ -1477,8 +1505,8 @@ renderTyped();
 }
 function renderQueue(){
 $('queue').innerHTML='<span class="lbl">This sentence</span>'+queue.map((t,i)=>{
-const l=t.type==='build'?t.k:t.type==='unit'?unitLabel(t,true):t.type==='para'?(t.rep?`¶ ×2 · ${t.rep}`:'¶ so far'):'Essay';
-const tt=t.type==='build'?`Chunk ${t.k}/${t.n}: ${t.shown[t.shown.length-1]}`:t.type==='unit'?unitLabel(t):t.type==='para'?'Paragraph recall':'Whole essay recall';
+const l=t.type==='build'?(t.gk||t.k):t.type==='sent'?'Sentence':t.type==='unit'?unitLabel(t,true):t.type==='para'?(t.rep?`¶ ×2 · ${t.rep}`:'¶ so far'):'Essay';
+const tt=t.type==='build'?`${t.half?'Half '+t.half+' · ':''}Chunk ${t.k}/${t.n}: ${t.shown[t.shown.length-1]}`:t.type==='sent'?'Whole sentence recall':t.type==='unit'?unitLabel(t):t.type==='para'?'Paragraph recall':'Whole essay recall';
 return `<button class="q ${i<S.ti?'done':''} ${i===S.ti?'cur':''}" data-i="${i}" title="${esc(tt)}">${l}</button>`;
 }).join('');
 }
@@ -1561,7 +1589,7 @@ for(let g=a;g<=b;g++){
 const s=SENTS[g];
 if(s.p!==cur){if(cur>=0)html+='</p>';html+='<p>';cur=s.p}
 // the current sentence is only revealed up to what the student has been shown so far
-let t=s.text;if(g===S.g&&task.type==='build')t=task.text;
+let t=s.text;if(g===S.g&&task.type==='build')t=(task.pre?task.pre+' ':'')+task.text;
 const hl=g>=task.a&&g<=task.b;
 html+=(hl?`<mark>${esc(t)}</mark>`:esc(t))+' ';
 }
@@ -1666,7 +1694,7 @@ if(o.op==='sub'){const k=U[o.u]+'→'+w;st.typos[k]=(st.typos[k]||0)+1}
 if(task.type!=='build'){st.slipSum+=firstErr<0?1:firstErr/task.T.length;st.slipN++}
 if(U.length&&task.T.length){st.firstLetterN++;if(U[0][0]===task.T[0][0])st.firstLetter++}
 const h=new Date().getHours();st.hours[h]=st.hours[h]||[0,0];st.hours[h][0]+=r.acc;st.hours[h][1]++;
-const tm=st.taskMs[task.type==='unit'?'para':task.type];tm[0]+=secs/Math.max(1,task.T.length);tm[1]++;
+const tm=st.taskMs[task.type==='unit'||task.type==='sent'?'para':task.type];tm[0]+=secs/Math.max(1,task.T.length);tm[1]++;
 const pass=r.acc*100>=SET.strict;
 if(tries===1){if(task.type==='build'){st.bldAtt++;if(pass)st.bldPass++}else{st.recAtt++;if(pass)st.recPass++}}else st.retries++;
 st.hist.push([Math.round(r.acc*100),pass?1:0]);if(st.hist.length>60)st.hist.shift();
@@ -1675,7 +1703,7 @@ card.classList.remove('flash-ok','flash-bad');void card.offsetWidth;
 if(pass){
 st.pass++;st.tasks++;if(task.type==='essay')st.cps++;
 if(U.length>=4){st.wpmSum+=wpm;st.wpmN++;st.bestWpm=Math.max(st.bestWpm,wpm)}
-if(task.type!=='build'||task.k===task.n)for(let g=task.a;g<=task.b;g++)S.learned[g]=true;
+if(task.type!=='build'||(task.k===task.n&&!task.half))for(let g=task.a;g<=task.b;g++)S.learned[g]=true;
 phase='ok';typebox.classList.add('ok');card.classList.add('flash-ok');
 Pet.event(task.type==='essay'?'checkpoint':task.rep===2?'para':L.peak>75?'fast':'pass');
 Game.pass(task,r.ok);
@@ -1735,7 +1763,7 @@ if(S.ti>0)S.ti--;
 else if(S.g>0){S.g--;S.ti=buildQueue(S.g).length-1}
 else return;
 loadTask();
-const t=$('toast');t.textContent='Back to: '+(task.type==='build'?`chunk ${task.k}/${task.n}`:$('chip').textContent);t.classList.add('show');
+const t=$('toast');t.textContent='Back to: '+$('chip').textContent;t.classList.add('show');
 clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1400);
 }
 function retry(){clearTimeout(passT);passT=0;phase='type';typed='';ta.value='';t0=0;L=newLive();cIdx=0;typebox.classList.remove('bad','ok');$('card').classList.remove('flash-bad');renderPrompt();renderFoot();renderChoices();focusTa()}
