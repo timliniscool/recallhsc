@@ -2024,6 +2024,7 @@ const paraDone=PARAS.filter((ss,p)=>ss.every((_,s)=>S.learned[PSTART[p]+s])).len
 $('paraDone').textContent=`${paraDone}/${PARAS.length}`;
 $('ringArc').style.strokeDashoffset=314.16*(1-pct);
 $('tbFill').style.width=pct*100+'%';$('topPct').textContent=P+'% memorised';
+if(!$('essPop').hidden)renderSwitcher();if(!$('essayModal').hidden&&!$('mgListView')?.hidden)mgList();
 const st=S.stats;
 const nem=topOf(st.missed)[0],typo=topOf(st.typos)[0],hard=topOf(st.fails)[0];
 const hrs=st.time/3600,rate=hrs>0.01?lw/hrs:0,eta=rate?(TOTALW-lw)/rate*3600:null;
@@ -2170,9 +2171,15 @@ so Back up / Restore moves everything between devices as one JSON file. */
 const SAMPLE_TITLE='Sample · Bart for President';
 const allEssays=()=>[...(ls.get('sampleGone')?[]:[{id:'sample',title:SAMPLE_TITLE,kind:'essay'}]),...LIB];
 const essayTitle=id=>(allEssays().find(e=>e.id===id)||{}).title||'Essay';
+/* % memorised by words, the same measure as the progress ring and top bar. The active essay uses live
+state; others are worked out from their saved state (parsed once per text and cached). */
+const PCT_CACHE=new Map();
 function pctOf(id){
-const st=id===ACTIVE?S:ls.get('state.'+id);if(!st||!st.learned)return 0;
-const n=st.learned.filter(Boolean).length,m=id===ACTIVE?SENTS.length:Math.max(n,(st.nS||1));return Math.round(n/Math.max(1,m)*100);
+if(id===ACTIVE)return Math.round(SENTS.reduce((a,x,g)=>a+(S.learned[g]?x.wc:0),0)/Math.max(1,TOTALW)*100);
+const st=ls.get('state.'+id);if(!st||!Array.isArray(st.learned)||!st.learned.some(Boolean))return 0;
+const txt=essayText(id)||'',key=id+':'+txt.length;
+let wc=PCT_CACHE.get(key);if(!wc){wc=parseEssay(txt,essayKind(id)).sents.map(x=>x.wc);PCT_CACHE.set(key,wc)}
+const tot=wc.reduce((a,b)=>a+b,0);return Math.round(wc.reduce((a,w,g)=>a+(st.learned[g]?w:0),0)/Math.max(1,tot)*100);
 }
 function renderSwitcher(){
 $('essName').textContent=essayTitle(ACTIVE);
@@ -2759,7 +2766,7 @@ hello:['locked in? let’s go','we lock in today','quiet on the creek. study tim
 for(const k in NOW)LINES[k]=(LINES[k]||[]).concat(NOW[k]);
 let sessionStart=performance.now(),longSaid=0;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
-function say(t,force){const now=performance.now();if(!force&&now-lastSay<6500)return;lastSay=now;bub.textContent=t;bub.classList.add('show');clearTimeout(bubT);bubT=setTimeout(()=>bub.classList.remove('show'),3400)}
+function say(t,force){const now=performance.now();if(!force&&now-lastSay<4500)return;lastSay=now;bub.textContent=t;bub.classList.add('show');clearTimeout(bubT);bubT=setTimeout(()=>bub.classList.remove('show'),3400)}
 function setState(s){state=s;stT=0;bites=0;if(s==='study')syms=[]}
 function px(X,Y,c){x.fillStyle=PAL[c]||c;x.fillRect(X,Y,1,1)}
 function sprite(rows,ox,oy){rows.forEach((r,j)=>{for(let i=0;i<r.length;i++)if(r[i]!=='.')px(ox+i,oy+j,r[i])})}
@@ -2817,7 +2824,10 @@ if(state==='eat'&&stT%9===0){bites++;for(let i=0;i<3;i++)crumbs.push({x:17+Math.
 if(state==='study'&&stT%7===0)syms.push({t:pick(['π','∑','x²','√','∞','+','=','∫','dx','3']),x:6+Math.random()*16,y:9,a:1});
 if(state==='study'&&stT>90&&idle>4000)setState('idle');
 if(idle<8000&&performance.now()-sessionStart>1800000*(longSaid+1)){longSaid++;say(pick(LINES.long),true)}
-if(state==='idle'&&(stT===50||stT%240===0)&&Math.random()<.7)say(pick(LINES.idle));
+if(state==='idle'&&(stT===30||stT===100)&&Math.random()<.85)say(pick(LINES.idle));
+// keeps chatting while you study (roughly every 10–15s), mixing study lines with general banter
+if(state==='study'&&stT>0&&stT%100===0&&Math.random()<.75)say(pick(Math.random()<.5?LINES.study:LINES.idle));
+if((state==='scroll'||state==='swim'||state==='eat')&&stT===70&&Math.random()<.6)say(pick(LINES[state]));
 if(state==='scroll'&&stT>110)setState('idle');
 if(state==='swim'&&stT>120)setState('idle');
 if(state==='fly'&&stT===120)say(pick(LINES.back),true);
@@ -2839,7 +2849,7 @@ return{
 event(e){
 lastAct=performance.now();
 if(e==='type'){if(state==='sleep'||state==='idle')setState('study');return}
-if(e==='pass'){mood='pass';moodT=14;flap=10;if(Math.random()<.65)say(pick(LINES.pass))}
+if(e==='pass'){mood='pass';moodT=14;flap=10;if(Math.random()<.85)say(pick(LINES.pass))}
 if(e==='fail'){mood='fail';moodT=30;if(Math.random()<.6)say(pick(LINES.fail),true)}
 if(e==='para'){mood='pass';moodT=20;flap=14;say(pick(LINES.para),true)}
 if(e==='checkpoint'){mood='pass';moodT=24;flap=18;for(let i=0;i<4;i++)hearts.push({x:4+Math.random()*14,y:6,a:1});say(pick(LINES.checkpoint),true)}
