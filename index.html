@@ -338,6 +338,12 @@ body.gamify ::-webkit-scrollbar-thumb:hover{background-color:rgba(163,230,53,.6)
 .sopt:hover{border-color:var(--sky2);background:var(--hover);color:var(--ink)}
 .sopt .n{font-family:var(--sans);font-size:11px;color:var(--faint);margin-right:8px}
 .sopt.l{border-left:3px solid var(--sky2)}
+.sopt.sel{border-color:var(--sky);background:var(--tint);color:var(--ink)}
+.startpick{position:sticky;bottom:-26px;margin:12px -26px -26px;padding:14px 26px 18px;background:var(--surface);border-top:1px solid var(--line2);box-shadow:0 -10px 24px rgba(15,23,42,.06)}
+.startpick p{margin:0 0 10px;font-size:14px;color:var(--ink2)}
+.sp-btns{display:flex;gap:8px;flex-wrap:wrap}
+.sp-btns .btn{flex:1 1 200px;justify-content:center;padding:10px 12px}
+body.gamify .startpick{background:#0e1319;border-color:#1e2833}
 .essay-in{width:100%;min-height:150px;border:1.5px solid var(--line2);border-radius:14px;padding:14px;font-family:var(--serif);font-size:15.5px;line-height:1.55;resize:vertical;outline:none;background:var(--surface2)}
 .essay-in:focus{border-color:var(--sky2);background:var(--surface);box-shadow:0 0 0 4px rgba(56,189,248,.14)}
 .ana-head{display:flex;align-items:center;gap:10px;margin:14px 0 8px;flex-wrap:wrap}
@@ -922,10 +928,9 @@ body.gamify .ch{font-size:11px}
 <div class="set"><span>Pass mark</span><span class="rng"><input type="range" id="sStrict" min="60" max="100" step="1"><output id="oStrict"></output></span></div>
 <div class="set"><span>Max chunk</span><span class="rng"><input type="range" id="sPhrase" min="2" max="7" step="1"><output id="oPhrase"></output></span></div>
 <label class="set"><span>Essay checkpoints</span><input type="checkbox" class="sw" id="sEssay"></label>
-<label class="set"><span>Hide prompt on type</span><input type="checkbox" class="sw" id="sHide"></label>
+<label class="set"><span>Hide the prompt as I type</span><input type="checkbox" class="sw" id="sHide"></label>
 <label class="set"><span>Background motion</span><input type="checkbox" class="sw" id="sMotion"></label>
-<label class="set" title="Pick each next word from three choices instead of typing. On by default on phones."><span>Tap-to-pick words</span><input type="checkbox" class="sw" id="sChoice"></label>
-<div class="set stack"><span>Recall from</span><div class="seg" id="sScope"><button data-v="start">My start point</button><button data-v="begin">Essay beginning</button></div></div>
+<label class="set" title="Tap words instead of typing. On by default on phones."><span>Tap-to-pick words</span><input type="checkbox" class="sw" id="sChoice"></label>
 <div class="set"><span></span><button class="btn small" id="btnReset">Reset progress</button></div>
 </section>
 </div>
@@ -993,9 +998,13 @@ body.gamify .ch{font-size:11px}
 <div class="modal" id="modal" hidden>
 <div class="sheet">
 <div class="sheet-head"><h2>Where do you want to start?</h2><span class="spacer"></span><button class="xbtn" id="bCloseStart" title="Close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
-<p class="sub">Pick any sentence. Paragraph and essay recalls count from here (change this in Settings).</p>
+<p class="sub">Tap a sentence to start there.</p>
 <div id="resumeBox"></div>
 <div id="sentList"></div>
+<div class="startpick" id="startPick" hidden>
+<p id="startPickQ"></p>
+<div class="sp-btns"><button class="btn" id="bLater">I’ll come back to it later</button><button class="btn primary" id="bKnown">I already know it</button></div>
+</div>
 </div>
 </div>
 
@@ -1004,13 +1013,13 @@ body.gamify .ch{font-size:11px}
 <div class="hico"><span class="logo"></span></div>
 <h2>How RecallHSC works</h2>
 <ol class="steps">
-<li><b>Pick an essay</b> from the top bar, or <b>+ Upload</b> your own. Paragraphs, topic sentences and quotes are found automatically.</li>
-<li><b>Type each chunk</b> you see. It hides as you type, then grows a chunk at a time until the sentence is done.</li>
-<li>You’ll then recall the <b>paragraph so far</b>, and the <b>whole essay</b> at each topic sentence and quote + analysis.</li>
-<li>Spelling and punctuation don’t matter. You always see the marking: <kbd>Enter</kbd> continues, or on a miss retries (<kbd>Tab</kbd> skips).</li>
+<li><b>Pick an essay</b> up top, or <b>+ Upload</b> your own.</li>
+<li><b>Type the highlighted bit.</b> Each sentence builds up a few words at a time.</li>
+<li>Every so often you’ll type the <b>paragraph</b> or the <b>whole essay so far</b> from memory.</li>
+<li>Spelling and punctuation don’t count. Check the marking, then <kbd>Enter</kbd> to keep going.</li>
 <li>Hold <kbd class="k-ctl">Ctrl</kbd><kbd>P</kbd> to glance at the paragraph, <kbd class="k-ctl">Ctrl</kbd><kbd>O</kbd> for the whole essay. <kbd class="k-ctl">Ctrl</kbd><kbd>Z</kbd> on an empty box steps back.</li>
 </ol>
-<p class="sub" style="margin:10px 0 16px">Everything saves in this browser. The <b>Rubric guide</b> tab has module stats and exam tips.</p>
+<p class="sub" style="margin:10px 0 16px">It all saves in this browser. Rubrics and exam tips are in the <b>Rubric guide</b> tab.</p>
 <button class="btn primary" id="bHowto" style="width:100%;justify-content:center;padding:10px">Got it, let’s go</button>
 </div>
 </div>
@@ -1027,9 +1036,9 @@ body.gamify .ch{font-size:11px}
 </div>
 <div class="uplab">Type</div>
 <div class="seg up-seg" id="upKind"><button data-v="essay" class="on">Essay</button><button data-v="creative">Creative piece</button></div>
-<p class="uphelp" id="upHelp">Split into topic sentences and quote + analysis units.</p>
+<p class="uphelp" id="upHelp">We’ll find the topic sentences and quotes.</p>
 <div class="upsum" id="upSum"></div>
-<details class="upprev" id="upPrevWrap"><summary>Preview how it will be split</summary><div class="ana" id="upPrev"></div></details>
+<details class="upprev" id="upPrevWrap"><summary>See how it’ll be split</summary><div class="ana" id="upPrev"></div></details>
 <div class="sheet-foot"><button class="btn" id="upCancel">Cancel</button><span class="spacer"></span><button class="btn primary" id="upAdd" disabled>Add essay</button></div>
 </div>
 </div>
@@ -1039,7 +1048,7 @@ body.gamify .ch{font-size:11px}
 <div class="sheet-head"><button class="xbtn mgback" id="mgBack" title="All essays" aria-label="Back to all essays" hidden><svg width="12" height="12" viewBox="0 0 12 12"><path d="M8 1L3 6l5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h2 id="mgH">Your essays</h2><span class="mgcount" id="mgCount"></span><span class="spacer"></span><button class="xbtn" id="bCloseEssay" title="Close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
 <div id="mgListView">
 <div class="mglist" id="mgList"></div>
-<p class="mgnote">Saved in this browser only. Use <b>Back up</b> to keep a copy or move to another device.</p>
+<p class="mgnote">Only saved in this browser. <b>Back up</b> to keep a copy or move it to another device.</p>
 <div class="sheet-foot"><button class="btn small" id="bExport">Back up</button><label class="btn small">Restore<input type="file" id="bImport" accept=".json,application/json" hidden></label><button class="btn small" id="mgSample" hidden>Bring back sample</button><span class="spacer"></span><button class="btn primary" id="bNew">+ Upload essay</button></div>
 </div>
 <div id="mgEditView" hidden>
@@ -1408,7 +1417,7 @@ q.push({type:'sent',text:x.text,a:g,b:g});
 const ph=chunkSentence(x.text,SET.phrase);
 ph.forEach((_,k)=>q.push({type:'build',k:k+1,n:ph.length,shown:ph.slice(0,k+1),next:ph[k+1]||'',text:ph.slice(0,k+1).join(' '),a:g,b:g}));
 }
-const floor=SET.scope==='start'?Math.min(S.startG,g):0;
+const floor=Math.min(S.startG,g);
 const pa=Math.max(PSTART[x.p],floor),last=x.s===PARAS[x.p].length-1,pt=rangeText(pa,g),solo=PARAS[x.p].length===1;
 // the IQTVE (unit) this sentence belongs to: from the sentence after the previous unit end, up to here
 let us=g;while(us>pa&&!SENTS[us-1].unitEnd)us--;
@@ -1472,13 +1481,12 @@ prompt.classList.remove('enter');void prompt.offsetWidth;prompt.classList.add('e
 if(task.type==='build'){
 prompt.innerHTML=task.shown.map((p,i)=>i===task.shown.length-1?`<mark>${esc(p)}</mark>`:`<span class="old">${esc(p)}</span>`).join(' ')+
 (task.next?` <span class="nextc" title="Coming next: no need to memorise yet">${esc(task.next)}${task.k+1<task.n?' …':''}</span>`:'')+
-(task.half===2&&task.k===1?`<div class="phint">Second half: carry on from “${esc(task.pre.split(/\s+/).slice(-3).join(' '))}”</div>`:'')+
-`<div class="phint">${task.half===1&&task.k===1?'Long sentence: first half first. ':''}${task.k===1?(choiceOn()?'Read it, then pick it word by word. ':'Read it, then type it. '):''}${SET.hide?(choiceOn()?'It hides after your first pick.':'The prompt hides once you start typing.'):''}</div>`;
+(task.half===2&&task.k===1?`<div class="phint">…after “${esc(task.pre.split(/\s+/).slice(-3).join(' '))}”</div>`:'');
 }else{
 const first=items(task.text).filter(i=>i.norm).slice(0,2).map(i=>i.orig).join(' ');
 const title=task.type==='sent'?'Type the whole sentence':task.type==='essay'?'Type the whole essay so far':task.type==='unit'?unitLabel(task):task.rep===1?'Type the full paragraph':task.rep===2?'Once more, no cue':'Type the paragraph so far';
 prompt.innerHTML=`<div class="recall"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
-<div><h3>${title}</h3><p>From memory · ${describeRange(task)} · ${task.T.length} words</p>${task.rep===2?`<p>A second pass from cold locks it in. ${rep1Pct!=null?`Round 1: <b>${rep1Pct}%</b>. Beat it.`:''}</p>`:`<p>Begins: <span class="cue">${esc(first)}…</span></p>`}</div></div>`;
+<div><h3>${title}</h3><p>From memory · ${describeRange(task)} · ${task.T.length} words</p>${task.rep===2?`<p>No hints this time.${rep1Pct!=null?` Last go: <b>${rep1Pct}%</b>.`:''}</p>`:`<p>Starts with <span class="cue">${esc(first)}…</span></p>`}</div></div>`;
 }
 }
 function renderTyped(){
@@ -1652,7 +1660,7 @@ if(cv.width!==w*dpr){cv.width=w*dpr;cv.height=h*dpr}
 const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
 const s=L.samples;
 x.strokeStyle='#e3edf8';x.lineWidth=1;x.setLineDash([3,4]);x.beginPath();x.moveTo(0,h-1);x.lineTo(w,h-1);x.stroke();x.setLineDash([]);
-if(s.length<2){x.fillStyle='#94a3b8';x.font='11px Inter';x.fillText('start typing to draw your speed trace',4,h/2+4);return}
+if(s.length<2){x.fillStyle='#94a3b8';x.font='11px Inter';x.fillText('your speed shows up here as you type',4,h/2+4);return}
 const mx=Math.max(40,...s.map(v=>v.b),...s.map(v=>v.w))*1.1,N=Math.max(s.length,30),px=i=>i/(N-1)*w,py=v=>h-3-(v/mx)*(h-8);
 x.beginPath();s.forEach((v,i)=>i?x.lineTo(px(i),py(v.b)):x.moveTo(px(i),py(v.b)));
 x.strokeStyle='rgba(124,58,237,.45)';x.lineWidth=1.2;x.stroke();
@@ -1749,8 +1757,8 @@ ptr=ii+1;
 flush(its.length);
 prompt.classList.remove('veil');
 const has=k=>r.ops.some((o,i)=>o.op===k&&(k!=='ins'||i<r.ops.length-r.trail));
-const keys=[has('sub')&&'<span><i style="background:#fde68a"></i>wrong word (yours struck)</span>',has('del')&&'<span><i style="background:#fecaca"></i>missed</span>',has('ins')&&'<span><i style="background:#e2e8f0"></i>extra</span>',r.trail&&'<span><i class="lg-ahead"></i>typed ahead (not counted)</span>'].filter(Boolean).join('');
-const note=passed?(keys?'Passed: still worth a glance at the slips.':'Word perfect.'):'Read for as long as you like.';
+const keys=[has('sub')&&'<span><i style="background:#fde68a"></i>wrong word (yours crossed out)</span>',has('del')&&'<span><i style="background:#fecaca"></i>missed</span>',has('ins')&&'<span><i style="background:#e2e8f0"></i>extra</span>',r.trail&&'<span><i class="lg-ahead"></i>typed ahead (doesn’t count)</span>'].filter(Boolean).join('');
+const note=passed?(keys?'Passed. Have a quick look at what slipped.':'Nailed it.'):'Have a read, then go again.';
 prompt.innerHTML=`<div class="diff">${html}</div><div class="legend">${keys}<span>${note}</span></div>`;
 }
 function advance(){clearTimeout(passT);passT=0;$('card').classList.remove('flash-ok');if(phase==='ok'||phase==='review')next()}
@@ -1888,8 +1896,8 @@ typedEl.textContent='';$('queue').innerHTML='';$('meterFill').style.width='0';
 foot.innerHTML=`<span class="spacer"></span><button class="btn primary small" id="bEnd">${btn}</button>`;
 $('bEnd').onclick=fn;renderSide();save();
 }
-const showDone=()=>endScreen('Essay complete 🎉','You worked through every sentence. Pick a starting point to go again.','Choose a start',openModal);
-const showEmpty=()=>endScreen('No essay yet','Paste an essay to get started.','Upload essay',openUpload);
+const showDone=()=>endScreen('That’s the whole essay','Want another go? Pick where to start.','Choose a start',openModal);
+const showEmpty=()=>endScreen('No essay yet','Paste one in and you’re away.','Upload essay',openUpload);
 
 /* ---------- side panels ---------- */
 function fmtTime(s){s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}h ${m}m`:`${m}m ${s%60}s`}
@@ -1928,15 +1936,15 @@ $('histN').textContent=st.att?`${st.att} total`:'';
 const tm=t=>{const v=st.taskMs[t];return v[1]?(v[0]/v[1]).toFixed(2)+' <small>s/word</small>':'—'};
 const mem=[
 ['Nemesis word',nem?`“${esc(nem[0])}”`:'—',nem?`missed ${nem[1]}×`:'the word you drop most',1],
-['Signature typo',typo?esc(typo[0]):'—',typo?`${typo[1]}× · what you type → what it is`:'your most repeated slip',1],
-['Hardest sentence',hard&&SENTS[hard[0]]?`¶${SENTS[hard[0]].p+1}.${SENTS[hard[0]].s+1} · ${esc(SENTS[hard[0]].text.split(/\s+/).slice(0,6).join(' '))}…`:'—',hard?`${hard[1]} failed attempts start here`:'where your recalls break most',1],
-['Slip point',st.slipN?Math.round(st.slipSum/st.slipN*100)+'%':'—',`how far into a recall you get before the first error`],
+['Signature typo',typo?esc(typo[0]):'—',typo?`${typo[1]}× · what you type → what it is`:'the typo you keep making',1],
+['Hardest sentence',hard&&SENTS[hard[0]]?`¶${SENTS[hard[0]].p+1}.${SENTS[hard[0]].s+1} · ${esc(SENTS[hard[0]].text.split(/\s+/).slice(0,6).join(' '))}…`:'—',hard?`${hard[1]} failed attempts start here`:'where you usually get stuck',1],
+['Slip point',st.slipN?Math.round(st.slipSum/st.slipN*100)+'%':'—',`how far you usually get before the first mistake`],
 ['Cold recall',st.recAtt?Math.round(st.recPass/st.recAtt*100)+'%':'—','paragraph/essay recalls passed first go'],
 ['Warm recall',st.bldAtt?Math.round(st.bldPass/st.bldAtt*100)+'%':'—','chunk builds passed first go'],
 ['First-word recall',st.firstLetterN?Math.round(st.firstLetter/st.firstLetterN*100)+'%':'—','attempts that start on the right word'],
-['Memorise rate',rate?Math.round(rate)+' <small>words/hr</small>':'—','words locked in per hour studied'],
-['Done by',eta?fmtTime(eta):'—','more study time at this rate'],
-['Sharpest hour',hourBest?hourLbl(hourBest[0]):'—',hourBest?`${Math.round(hourBest[1][0]/hourBest[1][1]*100)}% avg match`:'needs 3+ attempts in an hour'],
+['Memorise rate',rate?Math.round(rate)+' <small>words/hr</small>':'—','words learnt per hour'],
+['Done by',eta?fmtTime(eta):'—','to go, at this pace'],
+['Sharpest hour',hourBest?hourLbl(hourBest[0]):'—',hourBest?`${Math.round(hourBest[1][0]/hourBest[1][1]*100)}% avg match`:'shows after 3+ goes in one hour'],
 ['Build pace',tm('build'),'per word, chunk builds'],
 ['Recall pace',tm('para'),'per word, paragraph recalls'],
 ['Checkpoints',st.cps,'full-essay recalls cleared'],
@@ -1944,7 +1952,7 @@ const mem=[
 ];
 const filled=mem.filter(([,v])=>v!=='—'&&v!==0&&v!=='0');
 $('memKv').innerHTML=filled.length<3
-?`<div class="empty-prof"><b>Your memory profile builds as you practise.</b><span>After a few attempts you’ll see your nemesis word, signature typo, the sentence you trip on most, where recalls break down, and how fast you’re locking words in.</span></div>`
+?`<div class="empty-prof"><b>Nothing here yet.</b><span>Do a few rounds and this fills in: the word you keep dropping, your go-to typo, the sentence that trips you up, and how fast it’s sticking.</span></div>`
 :filled.map(([k,v,s,w])=>`<div class="k ${w?'wide':''}"><div class="l">${k}</div><div class="v">${v}</div><div class="sub">${s}</div></div>`).join('');
 $('map').innerHTML=PARAS.map((ss,p)=>`<div class="maprow"><span class="pl">¶${p+1}</span><div class="dots">${ss.map((t,s)=>{const g=PSTART[p]+s,x=SENTS[g];
 return `<button class="dot ${S.learned[g]?'l':''} ${x.role==='ts'?'ts':''} ${x.unitEnd?'ue':''} ${g===S.g&&phase!=='done'?'cur':''}" data-g="${g}" title="${ROLE[x.role]}: ${esc(t.slice(0,90))}…"></button>`}).join('')}</div></div>`).join('');
@@ -2006,7 +2014,13 @@ document.addEventListener('click',()=>{$('moreMenu').hidden=true});
 $('petX').onclick=()=>{SET.hidden.push('pet');applyPanels()};
 
 /* ---------- start modal ---------- */
-function setStart(g){S.startG=g;S.g=g;S.ti=0;S.started=true;closeModal();loadTask()}
+/* Starting mid-essay: either the earlier part is still to learn (recalls start here and it isn't counted),
+or the student already knows it (we take their word: it counts as learnt and recalls cover the whole essay). */
+function setStart(g,known){
+if(known){for(let k=0;k<g;k++)S.learned[k]=true;S.startG=0}else S.startG=g;
+S.g=g;S.ti=0;S.started=true;closeModal();loadTask();
+}
+let pickG=0;
 function openModal(){
 $('resumeBox').innerHTML=S.started&&S.g<SENTS.length?`<button class="btn primary" id="bResume">Continue at ¶${SENTS[S.g].p+1}, sentence ${SENTS[S.g].s+1}</button>`:'';
 if($('bResume'))$('bResume').onclick=closeModal;
@@ -2014,8 +2028,17 @@ $('sentList').innerHTML=PARAS.map((ss,p)=>`<div class="pgroup"><h5>Paragraph ${p
 return `<button class="sopt ${S.learned[g]?'l':''}" data-g="${g}"><span class="n">${s+1}</span><span class="rt ${RCLS[x.role]}" style="margin-right:8px">${ROLE[x.role]}</span>${esc(w.slice(0,12).join(' '))}${w.length>12?'…':''}</button>`}).join('')}</div>`).join('');
 $('modal').hidden=false;
 }
-function closeModal(){$('modal').hidden=true;focusTa()}
-$('sentList').addEventListener('click',e=>{const b=e.target.closest('.sopt');if(b)setStart(+b.dataset.g)});
+function closeModal(){$('modal').hidden=true;$('startPick').hidden=true;focusTa()}
+$('sentList').addEventListener('click',e=>{
+const b=e.target.closest('.sopt');if(!b)return;const g=+b.dataset.g;
+if(g===0){setStart(0);return}                       // nothing before it to ask about
+pickG=g;document.querySelectorAll('.sopt.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');
+const x=SENTS[g];
+$('startPickQ').innerHTML=`Starting at <b>¶${x.p+1}, sentence ${x.s+1}</b>. What about everything before it?`;
+$('startPick').hidden=false;$('bKnown').focus({preventScroll:true});
+});
+$('bLater').onclick=()=>setStart(pickG,false);
+$('bKnown').onclick=()=>setStart(pickG,true);
 $('modal').addEventListener('click',e=>{if(e.target.id==='modal'&&S.started)closeModal()});
 $('btnStart').onclick=openModal;
 // × always works: if nothing has been picked yet, start from the top rather than leaving the user stuck
@@ -2100,11 +2123,11 @@ $('mgSave').disabled=false;
 const m=parseEssay(txt,editKind),pl=(n,w)=>`<span>${n.toLocaleString()} ${w}${n===1?'':'s'}</span>`;
 $('mgSum').innerHTML=pl(m.paras.length,editKind==='creative'?'block':'paragraph')+pl(m.sents.length,'sentence')+pl(m.total,'word');
 const changed=editId!=='sample'&&(txt.replace(/\s+/g,' ').trim()!==(essayText(editId)||'').replace(/\s+/g,' ').trim()||editKind!==essayKind(editId));
-$('mgWarn').textContent=editId==='sample'?'The sample stays as it is. Saving creates your own editable copy.':changed?'Changing the text or type resets progress for this essay.':'';
+$('mgWarn').textContent=editId==='sample'?'Saving makes your own copy. The sample stays as is.':changed?'Heads up: changing this resets your progress on this essay.':'';
 }
 function mgDelete(id){
 const list=allEssays();if(list.length<=1)return;
-if(!confirm(`Delete “${essayTitle(id)}” and its progress? This can’t be undone (unless you have a backup).`))return;
+if(!confirm(`Delete “${essayTitle(id)}”? Your progress on it goes too (unless you’ve got a backup).`))return;
 if(id==='sample')ls.set('sampleGone',1);else{LIB=LIB.filter(x=>x.id!==id);ls.set('lib',LIB)}
 ls.del('state.'+id);
 if(id===ACTIVE){const next=allEssays()[0];ACTIVE='';loadEssay(next.id);save();loadTask();if(!S.started)$('modal').hidden=true}
@@ -2159,7 +2182,7 @@ const inc=cleanLib(d.lib);
 inc.forEach(x=>{const i=LIB.findIndex(y=>y.id===x.id);if(i<0)LIB.push(x);else LIB[i]=x});
 if(d.states&&typeof d.states==='object')Object.entries(d.states).forEach(([k,v])=>{const c=cleanState(v);if(c&&(k==='sample'||okId(k)))ls.set('state.'+k,c)});
 ls.set('lib',LIB);renderSwitcher();loadEssay(ACTIVE);loadTask();mgList();toast(`Restored ${inc.length} essays`);
-}catch(err){alert('That file is not a RecallHSC backup.')}
+}catch(err){alert('That’s not a RecallHSC backup file.')}
 };
 $('bCloseEssay').onclick=closeEssay;
 $('essayModal').addEventListener('click',e=>{if(e.target.id==='essayModal')closeEssay()});
@@ -2177,7 +2200,7 @@ upSync();$('upModal').hidden=false;setTimeout(()=>$('upTitle').focus(),50);
 function closeUpload(){$('upModal').hidden=true;focusTa()}
 function upSetKind(k,auto){
 UP.kind=k;$('upKind').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===k));
-$('upHelp').innerHTML=(k==='creative'?'Split by headings, paragraphs and lines; a Reflection section is still analysed like an essay.':'Split into topic sentences and quote + analysis units.')+(auto?' <span class="auto">Detected automatically.</span>':'');
+$('upHelp').innerHTML=(k==='creative'?'Split by headings, paragraphs and lines. A reflection gets treated like an essay.':'We’ll find the topic sentences and quotes.')+(auto?' <span class="auto">(worked this out from your text)</span>':'');
 }
 function upSync(){
 const txt=$('upText').value;
@@ -2235,8 +2258,6 @@ R('sDelay','delay',v=>v+'s');R('sStrict','strict',v=>v+'%');R('sPhrase','phrase'
 const C=(id,key)=>{const el=$(id);el.checked=SET[key];el.onchange=()=>{SET[key]=el.checked;save();if(key==='essay'){S.ti=0;if(phase!=='done')loadTask()}else if(key==='hide'&&phase==='type')renderPrompt()}};
 C('sEssay','essay');C('sHide','hide');C('sMotion','motion');
 $('sChoice').checked=choiceOn();$('sChoice').onchange=e=>setChoice(e.target.checked);
-const seg=()=>$('sScope').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===SET.scope));seg();
-$('sScope').onclick=e=>{const b=e.target.closest('button');if(!b||b.dataset.v===SET.scope)return;SET.scope=b.dataset.v;seg();S.ti=0;save();if(phase!=='done')loadTask()};
 $('btnReset').onclick=()=>{if(confirm('Reset progress and stats for this essay?')){S=DEFSTATE();save();loadTask();openModal()}};
 }
 
@@ -2482,11 +2503,11 @@ return h;
 const TIPS=``; /* NSBHS toolkit: removed from history (now encrypted in js/toolkit.vault.json) */
 
 function bookletHtml(){
-return `<section class="gsec ghero"><div class="kick">Practice paper</div><h1>Writing booklet</h1><p>A lined English Advanced writing booklet (9 pages) for timed practice. It’s embedded in this page, so the download works offline and nothing is fetched from anywhere.</p></section>
+return `<section class="gsec ghero"><div class="kick">Practice paper</div><h1>Writing booklet</h1><p>A 9-page lined booklet for timed practice. It’s built into the page, so it works offline.</p></section>
 <section class="gsec"><div class="booklet"><div class="page"><b>English Advanced</b><i>Writing Booklet · NESA number ______</i></div>
 <div><h2>English Advanced writing booklet</h2><p class="lead">PDF · 9 pages · ${Math.round(BOOKLET_B64.length*3/4/1024)} KB · lined answer pages with a NESA number box.</p>
 <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" id="bDl">Download PDF</button><button class="btn" id="bOpen">Open in new tab</button></div>
-<p class="src" style="margin-top:12px">Tip: print a few copies and do full timed responses by hand. Your handwriting speed in the exam is the real limit.</p></div></div></section>`;
+<p class="src" style="margin-top:12px">Print a few and do timed responses by hand. In the exam, how fast you write is the real limit.</p></div></div></section>`;
 }
 function bookletBlob(){const b=atob(BOOKLET_B64),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new Blob([u],{type:'application/pdf'})}
 const GNAV=[['common','Common Module','Texts & Human Experiences'],['modA','Module A','Textual Conversations'],['modB','Module B','Critical Study of Literature'],['modC','Module C','The Craft of Writing'],['tips','Exam tips','PEPSS/PECIL, SAQ, themes, Mod C'],['adapt','Adaptation guide','SAQ, phrases, every module'],['exemplars','Mod C exemplars','Read them, or memorise one'],['booklet','Writing booklet','Download the PDF']];
@@ -2498,7 +2519,7 @@ const ADAPT=``; /* NSBHS toolkit: removed from history (now encrypted in js/tool
 
 function adaptHtml(){return ADAPT}
 function exemplarsHtml(){
-return `<section class="gsec ghero"><div class="kick">Module C</div><h1>Mod C exemplars</h1><p>Imaginative and discursive pieces with their reflections. Open one to read it, or press <b>Memorise</b> to add it to your essays in creative mode: split by headings, paragraphs and lines, with the reflection analysed like an essay.</p></section>
+return `<section class="gsec ghero"><div class="kick">Module C</div><h1>Mod C exemplars</h1><p>Imaginative and discursive pieces, with reflections. Read one, or hit <b>Memorise</b> to add it to your essays.</p></section>
 ${DOCS.ex.map((d,i)=>`<details class="gsec doc ex"><summary><span class="exn">${i+1}</span><span class="ext"><b>${esc(d.title)}</b><small>${esc(d.form)} · ${d.words} words</small></span><button class="btn primary small" data-mem="${i}">Memorise</button></summary>${d.html}</details>`).join('')}`;
 }
 function bindExemplars(){
