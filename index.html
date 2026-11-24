@@ -391,6 +391,16 @@ body.gamify .startpick{background:#0e1319;border-color:#1e2833;box-shadow:none}
 .ck{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--ink2);line-height:1.45;margin:0 0 10px;padding:10px 12px;border:1px solid var(--line2);border-radius:12px;background:var(--surface2);cursor:pointer}
 .ck input{accent-color:var(--sky);width:16px;height:16px;margin-top:1px;flex:none}
 .ck.auto{border-color:var(--sky2);background:var(--skysoft)}
+.ana .s.anecdote{background:var(--vtint);border-radius:4px}
+.ana .s.reflect{background:var(--tint);border-radius:4px}
+.ana .s.question{background:var(--amber);border-radius:4px}
+.ana .s.turn{background:var(--greensoft);border-radius:4px;font-weight:600}
+.pv-b .pm-anecdote{box-shadow:inset 0 -2px 0 #a78bfa}
+.pv-b .pm-reflect{box-shadow:inset 0 -2px 0 #38bdf8}
+.pv-b .pm-question{box-shadow:inset 0 -2px 0 #f59e0b}
+.pv-b .pm-turn{box-shadow:inset 0 -2px 0 #22c55e}
+.pv-key{display:inline-flex;gap:10px;margin-left:10px}
+.pv-key i{display:inline-block;width:10px;height:3px;margin-right:4px;vertical-align:middle}
 .ana .s.heading{font-family:var(--sans);font-weight:700;color:var(--skyink);background:var(--tint);border-radius:4px}
 .ana .s.line{display:inline-block;background:var(--vtint);border-radius:4px;margin:1px 0}
 .etitle{flex:1;min-width:0;border:1.5px solid var(--line2);border-radius:11px;padding:9px 12px;font:inherit;font-size:14px;outline:none;background:var(--surface2)}
@@ -496,7 +506,7 @@ body.gamify .iconbtn.del:hover{color:#fca5a5}
 .drophint .link{pointer-events:auto;color:var(--skyink);text-decoration:underline;cursor:pointer}
 .drop.has .drophint{display:none}
 .drop textarea::placeholder{color:transparent}
-.up-seg{max-width:320px}
+.up-seg{max-width:380px}
 .uphelp{margin:8px 0 0;font-size:12.5px;color:var(--muted)}
 .uphelp .auto{color:var(--skyink);font-weight:600}
 .upsum{margin-top:14px;font-size:13px;color:var(--ink2);min-height:18px;font-variant-numeric:tabular-nums}
@@ -1125,7 +1135,7 @@ body.gamify .iconbtn:hover{background:#151c25;color:#d9f99d}
 <div class="drophint" id="upHint"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg><b>Paste text, or drop a .txt / .md file</b><span>or <label class="link">browse<input type="file" id="upFile" accept=".txt,.md,text/plain" hidden></label></span></div>
 </div>
 <div class="uplab">Type</div>
-<div class="seg up-seg" id="upKind"><button data-v="essay" class="on">Essay</button><button data-v="creative">Creative piece</button></div>
+<div class="seg up-seg" id="upKind"><button data-v="essay" class="on">Essay</button><button data-v="creative">Creative / discursive</button></div>
 <p class="uphelp" id="upHelp">We’ll find the topic sentences and quotes.</p>
 <div class="upsum" id="upSum"></div>
 <details class="upprev" id="upPrevWrap"><summary>See how it’ll be split</summary><div class="ana" id="upPrev"></div></details>
@@ -1147,7 +1157,7 @@ body.gamify .iconbtn:hover{background:#151c25;color:#d9f99d}
 <div class="uplab">Text</div>
 <div class="drop has"><textarea id="mgText"></textarea></div>
 <div class="uplab">Type</div>
-<div class="seg up-seg" id="mgKind"><button data-v="essay">Essay</button><button data-v="creative">Creative piece</button></div>
+<div class="seg up-seg" id="mgKind"><button data-v="essay">Essay</button><button data-v="creative">Creative / discursive</button></div>
 <p class="uphelp" id="mgWarn"></p>
 <div class="upsum" id="mgSum"></div>
 <div class="sheet-foot"><button class="btn danger" id="mgDel">Delete</button><span class="spacer"></span><button class="btn" id="mgCancel">Cancel</button><button class="btn primary" id="mgSave">Save</button></div>
@@ -1316,6 +1326,76 @@ const lines=text.replace(/\r/g,'').split(/\n/).map(l=>l.trim()).filter(Boolean);
 const heads=lines.filter(l=>looksHeading(l,mdClean(l))).length;
 return /^\W*(reflection|rationale)\b/im.test(mdClean(text))||heads>=3||lines.filter(l=>l.split(/\s+/).length<=6).length/lines.length>.35;
 }
+/* Discursive writing: personal, exploratory, lots of "I/we", questions and "perhaps", and little literary analysis. */
+function discScore(text){
+const t=mdClean(text),w=t.split(/\s+/).filter(Boolean).length||1;
+const fp=(t.match(/\b(?:I|I’m|I'm|I’ve|I've|my|me|we|our|us)\b/g)||[]).length/w*100;
+const q=(t.match(/\?/g)||[]).length;
+const refl=(t.match(/\b(?:perhaps|maybe|I (?:think|wonder|suppose|remember|realise|realize)|we (?:tend|often|forget|remember|are)|what if|it seems)\b/gi)||[]).length;
+const ss=splitSentences(t.replace(/\s+/g,' ')),ana=ss.filter(x=>ANALYSIS_RX.test(x)||VERB_RX.test(x)).length/Math.max(1,ss.length);
+return{fp,q,refl,ana};
+}
+function looksDiscursive(text){const d=discScore(text);return d.ana<.3&&((d.fp>=2.5)+(d.q>=2)+(d.refl>=2))>=2}
+function detectKind(text){return looksDiscursive(text)||looksCreative(text)?'creative':'essay'}
+/* Moves in discursive prose: anecdote (something that happened), reflection (thinking about it),
+question, turn (a pivot: "But…", "And yet…") and line (a short closing sentence). */
+const TURN_RX=/^(?:[“"‘(]*)(?:but|and yet|yet|still|however|instead|then again|even so|except|and now|only now)\b/i;
+const ANEC_RX=/\b(?:I remember|I was|we were|when I|when we|years ago|as a child|that (?:day|night|summer|winter|morning|evening|afternoon|year)|once,|last (?:week|year|summer)|my (?:mother|father|grandmother|grandfather|mum|dad|nan|brother|sister))\b/i;
+const REFL_RX=/\b(?:perhaps|maybe|I (?:think|wonder|suppose|realise|realize|believe|know)|we (?:tend|often|forget|remember|are|all|never|always)|it seems|what if|there is something)\b/i;
+const ABSTRACT_RX=/\b(?:must|can only|cannot|can never|is to|why|write|writing|words|stories|art|meaning|world|reality|perception|mind|truth|we|us|our|one’s|people|everyone|nobody|no one|humans?|humanity|life|memory|memories|time|truth|love|grief|identity|belonging|home|history|language|always|never|sometimes|often|perhaps|maybe|somehow)\b/i;
+const PAST_RX=/\b(?:was|were|had|did|went|came|saw|said|told|took|felt|knew|thought|found|left|sat|stood|ran|held|\w{3,}ed)\b/gi;
+const PRES_RX=/\b(?:is|are|am|do|does|has|have|can|will|seem|seems|become|becomes|remain|remains|mean|means)\b/gi;
+function tagMoves(ss){
+let prev='reflect';
+return ss.map((s,i)=>{
+const words=s.split(/\s+/).length,plain=s.replace(/“[^”]*”|"[^"]*"/g,' ');
+let r;
+if(/\?["”’)]*$/.test(s.trim()))r='question';
+else if(TURN_RX.test(s))r='turn';
+else if(ANEC_RX.test(plain))r='anecdote';
+else if(REFL_RX.test(plain))r='reflect';
+else{const pa=(plain.match(PAST_RX)||[]).length,pr=(plain.match(PRES_RX)||[]).length;
+r=pr>=pa&&ABSTRACT_RX.test(plain)?'reflect':pa||pr?'anecdote':prev}
+const speech=/[“"]/.test(s);
+if(r!=='question'&&!speech&&((ss.length>1&&i===ss.length-1&&words<=8)||(ss.length===1&&words<=8)))r='line';
+if(r==='anecdote'||r==='reflect')prev=r;
+return r;
+});
+}
+// recurring phrases across paragraphs: the piece's motifs. Each later echo remembers where it first appeared.
+function origPhrase(text,k){
+const its=items(text).filter(i=>i.norm),g=k.split(' ');
+for(let i=0;i+g.length<=its.length;i++)if(g.every((w,j)=>its[i+j].norm===w))return its.slice(i,i+g.length).map(x=>x.orig).join(' ').replace(/^[“"‘(—–-]+|[”"’),.;:!?—–-]+$/g,'').replace(/(\D)\d+$/,'$1');
+return k;
+}
+function pieceStyle(sents){
+// share of narrative vs reflective words (questions and turns count as reflective; lines and essay-style reflections are ignored)
+let n=0,d=0;sents.forEach(x=>{if(x.role==='anecdote')n+=x.wc;else if(['reflect','question','turn'].includes(x.role))d+=x.wc});
+if(n+d<40)return'';const r=d/(n+d);return r<.22?'narrative':r>.6?'discursive':'hybrid';
+}
+function markMotifs(sents){
+const occ=new Map();
+sents.forEach((x,g)=>{if(x.role==='heading')return;const tk=tokens(x.text),seen=new Set();
+for(let n=1;n<=6;n++)for(let i=0;i+n<=tk.length;i++){const gram=tk.slice(i,i+n);
+if(FN.has(gram[0])||FN.has(gram[n-1])||BREAK.has(gram[0])||BREAK.has(gram[n-1]))continue;
+if(!gram.some(w=>!FN.has(w)&&!BREAK.has(w)&&w.length>=4))continue;
+if(n===1&&gram[0].length<6)continue;
+const k=gram.join(' ');if(seen.has(k))continue;seen.add(k);
+if(!occ.has(k))occ.set(k,[]);occ.get(k).push(g)}});
+const cands=[...occ].filter(([k,gs])=>new Set(gs.map(g=>sents[g].p)).size>=2&&(k.includes(' ')?gs.length>=2:gs.length>=3))
+.sort((a,b)=>b[0].split(' ').length-a[0].split(' ').length||b[1].length-a[1].length);
+// longest phrases first; a shorter phrase that sits inside (or overlaps) one already kept is the same motif
+const words=k=>' '+k+' ',kept=[];
+for(const[k,gs]of cands){
+if(gs.length>Math.max(3,sents.length*.4))continue;
+const sh=gs.filter(g=>kept.some(m=>m.gs.includes(g))).length;
+if(kept.some(m=>words(m.k).includes(words(k))||(m.k.split(' ').some(w=>k.split(' ').includes(w)&&w.length>=4)&&sh>=gs.length*.5)))continue;
+kept.push({k,gs});
+}
+const top=kept.sort((a,b)=>b.gs.length*Math.min(4,b.k.split(' ').length)-a.gs.length*Math.min(4,a.k.split(' ').length)).slice(0,6);
+for(const m of top){const f=m.gs[0],done=new Set([sents[f].p]);for(const g of m.gs.slice(1)){const p=sents[g].p;if(done.has(p))continue;if(!sents[g].echo||m.k.length>sents[g].echo.k.length){sents[g].echo={k:m.k,first:f};done.add(p)}}}
+return top.map(m=>origPhrase(sents[m.gs[0]].text,m.k));
+}
 /* Essays: topic sentence / quote / analysis units (detectStructure).
 Creative pieces: headings and short poetic lines become their own units; full-piece recalls land at the
 end of each section or every ~120 words; any "Reflection" section is analysed like an essay. */
@@ -1335,7 +1415,7 @@ continue;
 if(mode==='essay'){const ss=splitSentences(lines.join(' ').replace(/\s+/g,' '));if(ss.length){paras.push(ss);meta.push('essay')}continue}
 const shortLines=lines.length>1&&lines.every(l=>l.split(/\s+/).length<=16);
 const ss=shortLines?lines.flatMap(l=>splitSentences(l)):splitSentences(lines.join(' ').replace(/\s+/g,' '));
-if(ss.length){paras.push(ss);meta.push(shortLines?'lines':'prose')}
+if(ss.length){paras.push(ss);meta.push('disc')} // short lines stay one per sentence, but still get move tags
 }
 }else{
 const clean=mdClean(text);
@@ -1350,6 +1430,19 @@ const{roles,unitEnd}=detectStructure(ss);
 ss.forEach((t,s)=>sents.push({p,s,text:t,wc:tokens(t).length,role:roles[s],unitEnd:unitEnd[s],cp:roles[s]==='ts'||unitEnd[s]||s===ss.length-1}));
 since=0;return;
 }
+if(m==='disc'){
+// beats: an anecdote and the reflection on it. A beat ends before a turn, before a new anecdote once
+// it has been reflected on, after a closing line, at the paragraph end, or after 5 sentences.
+// Whole-piece recalls land on turns (60+ words in) and at section ends.
+const roles=tagMoves(ss);let bl=0,hadR=false;
+ss.forEach((t,s)=>{
+const wc=tokens(t).length,r=roles[s],nr=roles[s+1],last=s===ss.length-1;since+=wc;bl++;if(r!=='anecdote')hadR=true;
+const ue=last||r==='line'||nr==='turn'||(nr==='anecdote'&&hadR)||bl>=5;if(ue){bl=0;hadR=false}
+const cp=(r==='turn'&&since>=60)||(last&&(since>=150||nextHead));if(cp)since=0;
+sents.push({p,s,text:t,wc,role:r,unitEnd:ue,cp});
+});
+return;
+}
 ss.forEach((t,s)=>{
 const wc=tokens(t).length;since+=wc;
 const last=s===ss.length-1,cp=m!=='heading'&&last&&(since>=120||nextHead);
@@ -1357,7 +1450,7 @@ if(cp)since=0;
 sents.push({p,s,text:t,wc,role:m==='heading'?'heading':m==='lines'?'line':'prose',unitEnd:cp,cp});
 });
 });
-return{paras,sents,pstart,total:sents.reduce((a,x)=>a+x.wc,0),kind:kind||'essay',formulaic:isFormulaic(sents)};
+return{paras,sents,pstart,total:sents.reduce((a,x)=>a+x.wc,0),kind:kind||'essay',formulaic:isFormulaic(sents),motifs:kind==='creative'?markMotifs(sents):[],style:kind==='creative'?pieceStyle(sents):''};
 }
 /* Formulaic IQTVE essays (Idea. Quote. Technique. Evaluation. — or QTVE, IQTVEVE…) set the idea out in its own
 sentence and drop the quote in with a short lead-in. Integrated essays weave quotes into their own claims, so
@@ -1491,8 +1584,8 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const IS_APPLE=/Mac|iPhone|iPad|iPod/.test(navigator.platform||'')||/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>0;
 const CTRL=IS_APPLE?'⌃':'Ctrl';
 let passT=0,rep1Pct=null; // pending auto-advance after a passed build chunk
-const ROLE={ts:'Topic sentence',quote:'Quote',analysis:'Analysis',lead:'Lead-in',context:'Point',heading:'Heading',line:'Line',prose:'Prose'};
-const RCLS={ts:'ts',quote:'quote',analysis:'an',lead:'lead',context:'context',heading:'ts',line:'lead',prose:'context'};
+const ROLE={ts:'Topic sentence',quote:'Quote',analysis:'Analysis',lead:'Lead-in',context:'Point',heading:'Heading',line:'Line',prose:'Prose',anecdote:'Narrative',reflect:'Reflection',question:'Question',turn:'Turn'};
+const RCLS={ts:'ts',quote:'quote',analysis:'an',lead:'lead',context:'context',heading:'ts',line:'lead',prose:'context',anecdote:'lead',reflect:'context',question:'quote',turn:'ts'};
 
 function rangeText(a,b){
 const out=[];let cur=-1;
@@ -1538,6 +1631,8 @@ if(us<g)q.push({type:'unit',text:rangeText(us,g),a:us,b:g,iq:unitHasQuote()&&x.r
 if(last){const fa=PSTART[x.p],ft=rangeText(fa,g);q.push({type:'para',rep:1,text:ft,a:fa,b:g});q.push({type:'para',rep:2,text:ft,a:fa,b:g})} // "full paragraph" is always the whole paragraph, whatever the start point
 else if(x.unitEnd||x.role==='ts')q.push({type:'para',text:pt,a:pa,b:g}); // link the finished IQTVE into the paragraph
 }
+// discursive motif drill: this sentence echoes a phrase from an earlier paragraph; recall where it first came up
+if(x.echo&&SENTS[x.echo.first]&&(S.learned[x.echo.first]||x.echo.first>=floor)){const f=x.echo.first;q.push({type:'motif',text:SENTS[f].text,a:f,b:f,phrase:origPhrase(SENTS[f].text,x.echo.k)})}
 if(SET.essay&&x.cp)q.push({type:'essay',text:rangeText(floor,g),a:floor,b:g});
 const out=[];
 for(const t of q){
@@ -1567,15 +1662,21 @@ focusTa();save();
 function focusTa(){if(typeof choiceOn==='function'&&choiceOn())return;if($('upModal').hidden&&$('modal').hidden&&$('essayModal').hidden&&$('howto').hidden&&SET.view==='mem')ta.focus({preventScroll:true})}
 function renderHead(){
 const x=SENTS[S.g],chip=$('chip');
-chip.className='chip'+(task.type==='para'||task.type==='unit'||task.type==='sent'?' para':task.type==='essay'?' essay':'');
-chip.textContent=task.type==='build'?(task.half?`Half ${task.half} of 2 · chunk ${task.k}/${task.n}`:`Build · chunk ${task.k}/${task.n}`):task.type==='sent'?'Whole sentence':task.type==='unit'?unitLabel(task,true):task.type==='para'?(task.rep===1?'Full paragraph':task.rep===2?'Full paragraph · again':'Paragraph so far'):'Whole essay so far';
+chip.className='chip'+(task.type==='para'||task.type==='unit'||task.type==='sent'||task.type==='motif'?' para':task.type==='essay'?' essay':'');
+chip.textContent=task.type==='build'?(task.half?`Half ${task.half} of 2 · chunk ${task.k}/${task.n}`:`Build · chunk ${task.k}/${task.n}`):task.type==='motif'?'Motif':task.type==='sent'?'Whole sentence':task.type==='unit'?unitLabel(task,true):task.type==='para'?(task.rep===1?'Full paragraph':task.rep===2?'Full paragraph · again':'Paragraph so far'):(essayKind(ACTIVE)==='creative'?'Whole piece so far':'Whole essay so far');
 $('ctx').innerHTML=`¶${x.p+1} · Sentence ${x.s+1} of ${PARAS[x.p].length} <span class="rt ${RCLS[x.role]}">${ROLE[x.role]}</span>`;
 $('tools').style.display='';
 $('btnBack').disabled=S.g===0&&S.ti===0;$('btnHint').disabled=false;
 }
 // "IQTVE" for quote + evaluation units in essays; neutral wording for intros, conclusions and creative pieces
 function unitLabel(t,short){
-const creative=essayKind(ACTIVE)==='creative';
+const kind=essayKind(ACTIVE);
+if(kind==='creative'){
+let a=0,r=0;for(let g=t.a;g<=t.b;g++){const ro=SENTS[g].role;if(ro==='anecdote')a++;else if(['reflect','question','turn','line'].includes(ro))r++}
+const nm=a&&r?'narrative + reflection':a?'narrative':r?'reflection':'passage';
+return short?nm[0].toUpperCase()+nm.slice(1)+(t.done?'':' so far'):`Type the ${nm}${t.done?'':' so far'}`;
+}
+const creative=kind==='creative';
 const iq=t.iq&&!creative&&FORMULAIC,ev=t.iq&&!creative&&!FORMULAIC;
 const name=creative?'passage':iq?'IQTVE':ev?'quote + analysis':'section';
 if(short)return (creative?'Passage':iq?'IQTVE':ev?'Quote + analysis':'Section')+(t.done?'':' so far');
@@ -1595,7 +1696,7 @@ prompt.innerHTML=task.shown.map((p,i)=>i===task.shown.length-1?`<mark>${esc(p)}<
 (task.half===2&&task.k===1?`<div class="phint">…after “${esc(task.pre.split(/\s+/).slice(-3).join(' '))}”</div>`:'');
 }else{
 const first=items(task.text).filter(i=>i.norm).slice(0,2).map(i=>i.orig).join(' ');
-const title=task.type==='sent'?'Type the whole sentence':task.type==='essay'?'Type the whole essay so far':task.type==='unit'?unitLabel(task):task.rep===1?'Type the full paragraph':task.rep===2?'Once more, no cue':'Type the paragraph so far';
+const title=task.type==='motif'?`Where did “${esc(task.phrase)}” first come up?`:task.type==='sent'?'Type the whole sentence':task.type==='essay'?(essayKind(ACTIVE)==='creative'?'Type the whole piece so far':'Type the whole essay so far'):task.type==='unit'?unitLabel(task):task.rep===1?'Type the full paragraph':task.rep===2?'Once more, no cue':'Type the paragraph so far';
 prompt.innerHTML=`<div class="recall"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
 <div><h3>${title}</h3><p>From memory · ${describeRange(task)} · ${task.T.length} words</p>${task.rep===2?`<p>No hints this time.${rep1Pct!=null?` Last go: <b>${rep1Pct}%</b>.`:''}</p>`:`<p>Starts with <span class="cue">${esc(first)}…</span></p>`}</div></div>`;
 }
@@ -1624,8 +1725,8 @@ renderTyped();
 }
 function renderQueue(){
 $('queue').innerHTML='<span class="lbl">This sentence</span>'+queue.map((t,i)=>{
-const l=t.type==='build'?(t.gk||t.k):t.type==='sent'?'Sentence':t.type==='unit'?unitLabel(t,true):t.type==='para'?(t.rep===1?'Full ¶':t.rep===2?'Again':'¶ so far'):'Essay';
-const tt=t.type==='build'?`${t.half?'Half '+t.half+' · ':''}Chunk ${t.k}/${t.n}: ${t.shown[t.shown.length-1]}`:t.type==='sent'?'Whole sentence recall':t.type==='unit'?unitLabel(t):t.type==='para'?'Paragraph recall':'Whole essay recall';
+const l=t.type==='build'?(t.gk||t.k):t.type==='motif'?'Motif':t.type==='sent'?'Sentence':t.type==='unit'?unitLabel(t,true):t.type==='para'?(t.rep===1?'Full ¶':t.rep===2?'Again':'¶ so far'):'Essay';
+const tt=t.type==='build'?`${t.half?'Half '+t.half+' · ':''}Chunk ${t.k}/${t.n}: ${t.shown[t.shown.length-1]}`:t.type==='motif'?`Motif: “${t.phrase}”`:t.type==='sent'?'Whole sentence recall':t.type==='unit'?unitLabel(t):t.type==='para'?'Paragraph recall':'Whole essay recall';
 return `<button class="q ${i<S.ti?'done':''} ${i===S.ti?'cur':''}" data-i="${i}" title="${esc(tt)}">${l}</button>`;
 }).join('');
 }
@@ -1702,7 +1803,7 @@ window.addEventListener('blur',()=>{if(peekOn)unpeek()});
 let peekOn=null;
 function peek(kind){
 if(!task||phase==='done'||!SENTS.length)return;
-const x=SENTS[S.g],whole=kind!=='para',a=whole?0:PSTART[x.p],b=whole?SENTS.length-1:S.g; // the essay peek shows everything
+const disc=essayKind(ACTIVE)==='creative',x=SENTS[S.g],whole=kind!=='para',a=whole?0:PSTART[x.p],b=whole?SENTS.length-1:S.g; // the essay peek shows everything
 let html='',cur=-1;
 for(let g=a;g<=b;g++){
 const s=SENTS[g];
@@ -1710,12 +1811,14 @@ if(s.p!==cur){if(cur>=0)html+='</p>';html+='<p>';cur=s.p}
 // the current sentence is only revealed up to what the student has been shown so far
 let t=s.text;if(!whole&&g===S.g&&task.type==='build')t=(task.pre?task.pre+' ':'')+task.text;
 const hl=g>=task.a&&g<=task.b;
-html+=(hl?`<mark>${esc(t)}</mark>`:g>S.g?`<span class="pv-ahead">${esc(t)}</span>`:esc(t))+' ';
+const inner=hl?`<mark>${esc(t)}</mark>`:g>S.g?`<span class="pv-ahead">${esc(t)}</span>`:esc(t);
+html+=(disc&&ROLE[s.role]?`<span class="pm-${s.role}" title="${ROLE[s.role]}">${inner}</span>`:inner)+' ';
 }
 html+='</p>';
 const o=$('peekView');
-o.querySelector('.pv-h').textContent=kind==='para'?`Paragraph ${x.p+1} so far`:'Whole essay';
+o.querySelector('.pv-h').textContent=kind==='para'?`Paragraph ${x.p+1} so far`:(disc?'Whole piece':'Whole essay');
 o.querySelector('.pv-b').innerHTML=html;
+o.querySelector('.pv-f').innerHTML='Let go to hide'+(disc?'<span class="pv-key"><span><i style="background:#a78bfa"></i>narrative</span><span><i style="background:#38bdf8"></i>reflection</span><span><i style="background:#f59e0b"></i>question</span><span><i style="background:#22c55e"></i>turn</span></span>':'');
 o.hidden=false;peekOn=kind;
 const m=o.querySelector('mark');if(m)m.scrollIntoView({block:whole?'center':'nearest'});
 }
@@ -1813,7 +1916,7 @@ if(o.op==='sub'){const k=U[o.u]+'→'+w;st.typos[k]=(st.typos[k]||0)+1}
 if(task.type!=='build'){st.slipSum+=firstErr<0?1:firstErr/task.T.length;st.slipN++}
 if(U.length&&task.T.length){st.firstLetterN++;if(U[0][0]===task.T[0][0])st.firstLetter++}
 const h=new Date().getHours();st.hours[h]=st.hours[h]||[0,0];st.hours[h][0]+=r.acc;st.hours[h][1]++;
-const tm=st.taskMs[task.type==='unit'||task.type==='sent'?'para':task.type];tm[0]+=secs/Math.max(1,task.T.length);tm[1]++;
+const tm=st.taskMs[task.type==='unit'||task.type==='sent'||task.type==='motif'?'para':task.type];tm[0]+=secs/Math.max(1,task.T.length);tm[1]++;
 const pass=r.acc*100>=SET.strict;
 if(tries===1){if(task.type==='build'){st.bldAtt++;if(pass)st.bldPass++}else{st.recAtt++;if(pass)st.recPass++}}else st.retries++;
 st.hist.push([Math.round(r.acc*100),pass?1:0]);if(st.hist.length>60)st.hist.shift();
@@ -2366,16 +2469,16 @@ $('upModal').querySelector('.sheet-head h2').textContent='Add your essay';
 }
 function upSetKind(k,auto){
 UP.kind=k;$('upKind').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===k));
-$('upHelp').innerHTML=(k==='creative'?'Split by headings, paragraphs and lines. A reflection gets treated like an essay.':'We’ll find the topic sentences and quotes.')+(auto?' <span class="auto">(worked this out from your text)</span>':'');
+$('upHelp').innerHTML=(k==='creative'?'Stories, discursive or a mix: we’ll spot the narrative and reflective parts and your motifs. A reflection gets treated like an essay.':'We’ll find the topic sentences and quotes.')+(auto?' <span class="auto">(worked this out from your text)</span>':'');
 }
 function upSync(){
 const txt=$('upText').value;
 $('upDrop').classList.toggle('has',!!txt);
-if(!UP.touched)upSetKind(txt.trim()&&looksCreative(txt)?'creative':'essay',!!txt.trim()&&looksCreative(txt));
+if(!UP.touched){const k=txt.trim()?detectKind(txt):'essay';upSetKind(k,!!txt.trim()&&k!=='essay')}
 $('upAdd').disabled=!txt.trim();
 if(!txt.trim()){$('upSum').innerHTML='';$('upPrev').innerHTML='';$('upPrevWrap').hidden=true;return}
 const m=parseEssay(txt,UP.kind),pl=(n,w)=>`<span>${n.toLocaleString()} ${w}${n===1?'':'s'}</span>`;
-$('upSum').innerHTML=pl(m.paras.length,UP.kind==='creative'?'block':'paragraph')+pl(m.sents.length,'sentence')+pl(m.total,'word')+(UP.kind==='essay'?pl(m.sents.filter(x=>x.role==='quote').length,'quote'):'');
+$('upSum').innerHTML=(UP.kind==='creative'&&m.style?`<span class="auto">reads as ${m.style}</span> · `:'')+pl(m.paras.length,UP.kind==='creative'?'block':'paragraph')+pl(m.sents.length,'sentence')+pl(m.total,'word')+(UP.kind==='essay'?pl(m.sents.filter(x=>x.role==='quote').length,'quote'):'');
 $('upPrevWrap').hidden=false;
 if($('upPrevWrap').open)upPreview(m);
 }
