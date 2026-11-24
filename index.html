@@ -433,7 +433,8 @@ label.btn{cursor:pointer;display:inline-flex;align-items:center}
 .eitem .bar i{display:block;height:100%;background:var(--sky2)}
 .eitem .p{font-size:11px;color:var(--faint);width:30px;text-align:right;font-variant-numeric:tabular-nums}
 .epop .act{display:flex;gap:6px;padding:6px 4px 2px}
-.epop .act .btn{flex:1;justify-content:center;display:inline-flex}
+.epop .act .btn{flex:1 1 0;min-width:0;justify-content:center;display:inline-flex;padding-left:8px;padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.epop{box-sizing:border-box}
 .ehead{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600;padding:6px 10px 4px}
 @media(max-width:1100px){#btnEssay{display:none}.esel{max-width:160px}}
 .libitem .pct{font-size:11px;color:var(--faint);padding-right:8px}
@@ -942,6 +943,7 @@ body.gamify .updbar{border-radius:0;border:2px solid #a3e635;background:#0b0f14;
 .essgroup #btnUpload{border-top-left-radius:0;border-bottom-left-radius:0;margin-left:-1px;font-size:19px;line-height:1}
 .top .mem-only:last-of-type{display:flex;align-items:center;gap:8px}
 body.gamify .essgroup .esel,body.gamify .essgroup #btnUpload{border-radius:0}
+body.gamify .essgroup #btnUpload{margin-left:6px}
 body.gamify #btnHelp{border-radius:0;width:30px;height:30px}
 /* icon buttons stay square and centred in the retro theme (no text padding) */
 body.gamify .top .ibtn{padding:0;display:inline-grid;place-items:center;line-height:0;font-size:0}
