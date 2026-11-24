@@ -840,6 +840,20 @@ body.gamify .tab{padding:7px 9px}
 body.gamify .card-head{margin:10px 10px 8px;flex-wrap:wrap;row-gap:8px}
 body.gamify .card-head .btn{padding:6px 7px}
 }
+/* tap-to-pick: no empty answer box or word counter before the first pick */
+body.choice .typebox.empty{display:none}
+body.choice .foot:has(.wc){display:none}
+/* phones: just the card (and Don) */
+@media(max-width:640px){
+#colL,#colR,#panelsWrap,.hud,.queue{display:none!important}
+body.choice #tools{display:none!important}
+body.choice .card-head .spacer{display:none}
+.ch-row{grid-template-columns:1fr;gap:8px}
+.ch{display:flex;align-items:center;gap:12px;min-height:52px;padding:10px 14px;text-align:left;font-size:18px;overflow-wrap:normal;word-break:normal}
+.ch .n{margin:0;flex:none;width:18px}
+body.gamify .ch{font-size:11px}
+.ch-tools .btn{padding:9px 12px}
+}
 </style>
 </head>
 <body>
@@ -1430,7 +1444,7 @@ prompt.classList.remove('enter');void prompt.offsetWidth;prompt.classList.add('e
 if(task.type==='build'){
 prompt.innerHTML=task.shown.map((p,i)=>i===task.shown.length-1?`<mark>${esc(p)}</mark>`:`<span class="old">${esc(p)}</span>`).join(' ')+
 (task.next?` <span class="nextc" title="Coming next: no need to memorise yet">${esc(task.next)}${task.k+1<task.n?' …':''}</span>`:'')+
-`<div class="phint">${task.k===1?'Read it, then type it. ':''}${SET.hide?'The prompt hides once you start typing.':''}</div>`;
+`<div class="phint">${task.k===1?(choiceOn()?'Read it, then pick it word by word. ':'Read it, then type it. '):''}${SET.hide?(choiceOn()?'It hides after your first pick.':'The prompt hides once you start typing.'):''}</div>`;
 }else{
 const first=items(task.text).filter(i=>i.norm).slice(0,2).map(i=>i.orig).join(' ');
 const title=task.type==='essay'?'Type the whole essay so far':task.type==='unit'?unitLabel(task):task.rep?`Type the full paragraph · round ${task.rep} of 2`:'Type the paragraph so far';
@@ -1753,7 +1767,7 @@ $('btnHint').onclick=hint;
 const IS_PHONE=matchMedia('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<600;
 const choiceOn=()=>SET.choice==null?IS_PHONE:!!SET.choice;
 let cIdx=0,cWords=[],VOCAB=null,VOCAB_FOR=null;
-function setChoice(on){SET.choice=on;save();$('sChoice').checked=on;applyChoice();if(phase==='type'){cIdx=0;typed='';ta.value='';renderTyped()}renderChoices();if(!on)focusTa()}
+function setChoice(on){SET.choice=on;save();$('sChoice').checked=on;applyChoice();if(phase==='type'){cIdx=0;typed='';ta.value='';renderTyped();renderPrompt();renderFoot()}renderChoices();if(!on)focusTa()}
 function applyChoice(){
 const on=choiceOn();document.body.classList.toggle('choice',on);
 ta.readOnly=on;ta.inputMode=on?'none':'text';if(on)ta.blur();
