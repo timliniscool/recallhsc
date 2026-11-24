@@ -28,7 +28,11 @@
 [hidden]{display:none!important}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-#bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+/* background canvas: sized to the LARGE viewport so mobile URL-bar show/hide never resizes or blanks it */
+html{background:#f3f8ff}
+html:has(body.gamify){background:#06080b}
+#bg{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:0;pointer-events:none;display:block}
+@supports(height:100lvh){#bg{height:100lvh}}
 body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(rgba(14,116,190,.16) 1px,transparent 1.2px);background-size:26px 26px;-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 0%,transparent 75%);mask-image:radial-gradient(ellipse at 50% 40%,#000 0%,transparent 75%)}
 .layer{position:relative;z-index:1}
 button{font:inherit;cursor:pointer}
@@ -173,6 +177,33 @@ body.gamify .prompt .nextc{color:#94a3b8;opacity:.3}
 .foot .wc{font-variant-numeric:tabular-nums}
 .resmsg{font-weight:600;font-size:13.5px}
 .resmsg.ok{color:#059669}.resmsg.bad{color:#dc2626}
+.choices{margin-top:12px}
+.ch-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ch{min-height:56px;padding:10px 8px;border:1px solid var(--line2);border-radius:14px;background:var(--surface);color:var(--ink);font:500 17px/1.25 var(--serif);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;overflow-wrap:anywhere;transition:transform .08s,background .15s,border-color .15s}
+.ch:hover{border-color:var(--sky);background:var(--tint)}
+.ch:active{transform:scale(.97)}
+.ch .n{display:block;font:600 10px var(--sans);color:var(--muted);margin-bottom:3px}
+.ch.right{background:var(--greensoft);border-color:var(--good)}
+.ch.wrong{background:var(--redsoft);border-color:var(--bad);animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.ch-tools{display:flex;align-items:center;gap:8px;margin-top:10px}
+body.choice .typebox{min-height:64px;cursor:default}
+body.choice #caret{display:none}
+body.gamify .ch{border-radius:0;border:2px solid var(--line2);font-family:var(--px);font-size:10px;line-height:1.5}
+body.gamify .ch .n{font-family:var(--px);font-size:7px}
+.peekview{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.18);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);pointer-events:none;animation:pvIn .12s ease-out}
+@keyframes pvIn{from{opacity:0}to{opacity:1}}
+.pv-in{width:min(760px,100%);max-height:min(78vh,720px);display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line2);border-radius:18px;box-shadow:0 24px 60px rgba(15,23,42,.22)}
+.pv-h{padding:14px 20px 8px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pv-b{padding:0 20px;overflow:auto;font-family:var(--serif);font-size:17px;line-height:1.65;color:var(--ink)}
+.pv-b p{margin:0 0 .8em}
+.pv-b mark{background:linear-gradient(transparent 12%,var(--tint) 12%,var(--tint) 92%,transparent 92%);color:var(--skyink);padding:0 2px;border-radius:3px}
+.pv-f{padding:8px 20px 12px;font-size:12px;color:var(--muted)}
+.peekb{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#btnBack:disabled{opacity:.45;cursor:default}
+body.gamify .pv-in{border-radius:0;border:2px solid var(--line2);box-shadow:6px 6px 0 rgba(0,0,0,.5)}
+body.gamify .pv-h,body.gamify .pv-f{font-family:var(--px);font-size:9px;letter-spacing:0}
+body.gamify .pv-b mark{background:#fef08a;color:#0b1324;border-radius:0}
 .toast{position:absolute;right:26px;top:62px;background:var(--ink);color:#fff;font-size:13px;padding:7px 12px;border-radius:10px;opacity:0;transform:translateY(-4px);transition:all .2s;pointer-events:none}
 .toast.show{opacity:1;transform:none}
 .hud{display:none;justify-content:center;gap:26px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -350,6 +381,13 @@ body.guide .mem-item{display:none}
 .esel{max-width:none!important;width:100%;height:38px;justify-content:space-between}
 .epop{min-width:0;width:calc(100vw - 24px);max-width:none}
 .menu-pop{max-width:calc(100vw - 24px)}
+/* card header: label + HUD on one line, the action buttons on their own line */
+.card-head,body.gamify .card-head{flex-wrap:wrap;row-gap:8px}
+.card-head .spacer{flex:1 0 100%;height:0;order:5}
+.card-head .btn{order:6}
+#btnBack{margin-right:auto}
+body.gamify .ghud{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.pv-b{font-size:16px}
 body.guide #essMenu,body.guide #btnUpload{display:none}
 }
 @media(pointer:coarse){.khint{display:none}}
@@ -644,9 +682,9 @@ body.gamify .ctx .rt{display:none}
 body.gamify .chip{white-space:nowrap}
 body.gamify .chip,body.gamify .rt{font-family:var(--px);font-size:9px;border-radius:0;background:#0b1324;color:#fef08a;box-shadow:3px 3px 0 rgba(11,19,36,.35);padding:6px 8px;letter-spacing:0;text-transform:none}
 body.gamify .ctx{font-family:var(--px);font-size:9px;color:#0b1324;text-shadow:1px 1px 0 rgba(255,255,255,.7)}
-body.gamify .card-head .btn{font-family:var(--px);font-size:8px;border-radius:0;border:2px solid #0b1324;box-shadow:2px 2px 0 #0b1324;padding:6px 8px;background:#fff;color:#0b1324}
-body.gamify .card-head .btn:hover{background:#ecfccb;color:#0b1324;border-color:#0b1324}
-body.gamify .card-head .btn:active{transform:translate(2px,2px);box-shadow:none}
+body.gamify :is(.card-head,.ch-tools) .btn{font-family:var(--px);font-size:8px;border-radius:0;border:2px solid #0b1324;box-shadow:2px 2px 0 #0b1324;padding:6px 8px;background:#fff;color:#0b1324}
+body.gamify :is(.card-head,.ch-tools) .btn:hover{background:#ecfccb;color:#0b1324;border-color:#0b1324}
+body.gamify :is(.card-head,.ch-tools) .btn:active{transform:translate(2px,2px);box-shadow:none}
 body.gamify .prompt{margin:0 12px;background:#fff;border:3px solid #0b1324;box-shadow:5px 5px 0 rgba(11,19,36,.35);font-family:var(--px);font-size:12px;line-height:2.1;padding:12px 14px;min-height:0;color:#0b1324}
 body.gamify .prompt mark{background:#fef08a;color:#0b1324;border-radius:0}
 body.gamify .prompt .old{color:#475569}
@@ -766,6 +804,14 @@ button:focus:not(:focus-visible){outline:none}
 .pet:hover .px{opacity:1}
 .pet.hidden{display:none}
 @media(max-width:720px){.pet canvas{width:72px;height:54px}.pet .bub{margin-bottom:32px}}
+/* phones & small tablets: the game theme keeps the same compact two-row top bar as the light theme */
+@media(max-width:1100px){body.gamify .brand{font-size:0;gap:0}}
+@media(max-width:640px){
+body.gamify .top{padding:8px 10px;row-gap:6px}
+body.gamify .tab{padding:7px 9px}
+body.gamify .card-head{margin:10px 10px 8px}
+body.gamify .card-head .btn{padding:6px 7px}
+}
 </style>
 </head>
 <body>
@@ -792,6 +838,7 @@ button:focus:not(:focus-visible){outline:none}
 <button class="mitem mem-item" data-more="manage">Manage essays</button>
 <button class="mitem mem-item" data-more="start">Choose start</button>
 <button class="mitem mem-item" data-more="upload">Upload essay</button>
+<button class="mitem mem-item" data-more="choice" id="mChoice">Tap-to-pick words</button>
 <hr class="mem-item">
 <button class="mitem" data-more="help">How it works</button>
 </div></div>
@@ -834,6 +881,7 @@ button:focus:not(:focus-visible){outline:none}
 <label class="set"><span>Essay checkpoints</span><input type="checkbox" class="sw" id="sEssay"></label>
 <label class="set"><span>Hide prompt on type</span><input type="checkbox" class="sw" id="sHide"></label>
 <label class="set"><span>Background motion</span><input type="checkbox" class="sw" id="sMotion"></label>
+<label class="set" title="Pick each next word from three choices instead of typing. On by default on phones."><span>Tap-to-pick words</span><input type="checkbox" class="sw" id="sChoice"></label>
 <div class="set stack"><span>Recall from</span><div class="seg" id="sScope"><button data-v="start">My start point</button><button data-v="begin">Essay beginning</button></div></div>
 <div class="set"><span></span><button class="btn small" id="btnReset">Reset progress</button></div>
 </section>
@@ -847,12 +895,16 @@ button:focus:not(:focus-visible){outline:none}
 <span class="ctx" id="ctx"></span>
 <span class="spacer"></span>
 <span class="ghud" id="ghud"></span>
+<button class="btn small" id="btnBack" title="Back to the previous step (Ctrl+Z when the box is empty)" aria-label="Back to the previous step">←</button>
+<button class="btn small peekb" id="btnPeekP" title="Hold to see the paragraph so far (hold Ctrl+P)">¶</button>
+<button class="btn small peekb" id="btnPeekE" title="Hold to see the whole essay so far (hold Ctrl+O)">Essay</button>
 <button class="btn small" id="btnHint" title="Reveal next word (Ctrl+H)">Peek word</button>
 <button class="btn small" id="btnSkip" title="Skip this task">Skip</button>
 </div>
 <div class="prompt" id="prompt"></div>
 <div class="typebox empty" id="typebox"><span class="phd" id="phd">Start typing…</span><span id="typed"></span><span id="mark">&#8203;</span><div id="caret"></div></div>
-<textarea id="ta" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+<div class="choices" id="choices" hidden><div class="ch-row" id="chRow"></div><div class="ch-tools"><button class="btn small" id="chUndo" title="Remove the last word">⌫ Undo word</button><span class="spacer"></span><button class="btn small" id="chKb" title="Switch to typing">⌨ Type instead</button></div></div>
+<textarea id="ta" name="recall-notes" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" aria-autocomplete="none" enterkeyhint="done" data-form-type="other" data-lpignore="true" data-1p-ignore data-bwignore></textarea>
 <div class="meter"><div class="meter-fill" id="meterFill"></div></div>
 <div class="foot" id="foot"></div>
 <div class="toast" id="toast"></div>
@@ -888,6 +940,7 @@ button:focus:not(:focus-visible){outline:none}
 </div>
 </main>
 
+<div class="peekview" id="peekView" hidden role="dialog" aria-live="polite"><div class="pv-in"><div class="pv-h"></div><div class="pv-b"></div><div class="pv-f">Let go to hide</div></div></div>
 <div class="modal" id="modal" hidden>
 <div class="sheet">
 <div class="sheet-head"><h2>Where do you want to start?</h2><span class="spacer"></span><button class="xbtn" id="bCloseStart" title="Close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
@@ -905,7 +958,8 @@ button:focus:not(:focus-visible){outline:none}
 <li><b>Pick an essay</b> from the top bar, or <b>+ Upload</b> your own. Paragraphs, topic sentences and quotes are found automatically.</li>
 <li><b>Type each chunk</b> you see. It hides as you type, then grows a chunk at a time until the sentence is done.</li>
 <li>You’ll then recall the <b>paragraph so far</b>, and the <b>whole essay</b> at each topic sentence and quote + analysis.</li>
-<li>Spelling and punctuation don’t matter. Miss too much? Read the corrections, then <kbd>Enter</kbd> retry or <kbd>Tab</kbd> skip.</li>
+<li>Spelling and punctuation don’t matter. You always see the marking: <kbd>Enter</kbd> continues, or on a miss retries (<kbd>Tab</kbd> skips).</li>
+<li>Hold <kbd class="k-ctl">Ctrl</kbd><kbd>P</kbd> to glance at the paragraph, <kbd class="k-ctl">Ctrl</kbd><kbd>O</kbd> for the whole essay. <kbd class="k-ctl">Ctrl</kbd><kbd>Z</kbd> on an empty box steps back.</li>
 </ol>
 <p class="sub" style="margin:10px 0 16px">Everything saves in this browser. The <b>Rubric guide</b> tab has module stats and exam tips.</p>
 <button class="btn primary" id="bHowto" style="width:100%;justify-content:center;padding:10px">Got it, let’s go</button>
@@ -991,28 +1045,55 @@ out.push(t.slice(start,j).trim());start=j;i=j-1;depth=0;sq=false;
 if(t.slice(start).trim())out.push(t.slice(start).trim());
 return out;
 }
-const hasQuote=s=>/“[^”]+”/.test(s)||/"[^"]+"/.test(s)||/(^|[\s(—–])‘[^’]{2,}’(?=[\s.,;:!?)]|$)/.test(s);
-/* First sentence of a paragraph = topic sentence. A quotation opens a unit; plain
-sentences after it are analysis; a short plain sentence just before a quote is a
-lead-in. Units cap at 4 sentences (2 without a quote). */
+/* IQTVE detection. English essays aren't a formula, so this reads cues rather than counting sentences:
+- topic sentence: first sentence of every paragraph (its own unit)
+- a quotation of 3+ words is evidence and anchors an IQTVE; a 1–2 word echo ("hollow") inside a sentence is analysis
+- one or two plain sentences right before a quote are its idea statement / lead-in
+- sentences opening like analysis ("The metaphor…", "This…", "Thus…") always attach as evaluation
+- a second quote with no evaluation in between joins the same IQTVE (evidence chains), max 2 quotes
+- each IQTVE holds roughly one quote; quote-free paragraphs (intro/conclusion) group in pairs */
+const quotedWords=s=>{let best=0;for(const m of s.matchAll(/“([^”]+)”|"([^"]+)"|(?:^|[\s(—–])‘([^’]+)’(?=[\s.,;:!?)]|$)/g)){const w=(m[1]||m[2]||m[3]||'').trim().split(/\s+/).filter(Boolean).length;if(w>best)best=w}return best};
+const TECH='irony|ironic|metaphor|metaphors|simile|juxtaposition|imagery|image|motif|symbol|symbolism|personification|tricolon|paradox|hyperbole|allusion|repetition|anaphora|epistrophe|contrast|tone|diction|phrase|line|verb|adjective|noun|use|effect|shift|structure|form|parallel|pun|oxymoron|binary|antithesis|word|words|rhetorical|question|enjambment|caesura|sibilance|alliteration|anecdote|dialogue|monologue|soliloquy|characterisation|setting|narration|narrator|voice|perspective|refrain|cumulation|listing|accumulation|emotive|connotation|connotations|truncated|fragment|imperative|modality|register|epithet|apostrophe|chiasmus';
+const ANALYSIS_RX=new RegExp(`^(?:[“"‘(]*)(?:this|these|that|those|such|thus|hence|here|therefore|consequently|ultimately|accordingly|in (?:doing so|turn|this way|effect)|as (?:such|a result)|by (?:doing so|this|contrast)|through (?:this|such|these)|so|indeed|evidently|clearly|crucially|notably|similarly|likewise|conversely|in contrast|(?:the|his|her|their|its|this|such|[a-z]+’s) (?:[a-z]+ ){0,2}(?:${TECH}))\\b`,'i');
+const VERB_RX=/\b(?:reveal|reveals|expose|exposes|suggest|suggests|implies|imply|highlight|highlights|underscore|underscores|emphasi[sz]es|convey|conveys|evoke|evokes|position|positions|invite|invites|recall|recalls|reflect|reflects|symboli[sz]es|signifies|illustrate|illustrates|demonstrate|demonstrates|depict|depicts|portray|portrays|represent|represents|reinforce|reinforces|recast|recasts|reduce|reduces|juxtapose|juxtaposes|foreground|foregrounds|capture|captures|accentuate|accentuates|elucidate|elucidates|delineate|delineates|epitomi[sz]es|encapsulate|encapsulates|critiques|satiri[sz]es|undermines|subverts|amplifies|evinces|exemplifies)\b/i;
+const outsideQuoteWords=s=>s.replace(/“[^”]*”|"[^"]*"|‘[^’]*’/g,' ').split(/\s+/).filter(w=>/\w/.test(w)).length;
+const hasQuote=s=>quotedWords(s)>0;
+const TECH_RX=new RegExp(`\\b(?:${TECH})\\b`,'i');
 function detectStructure(ss){
-const q=ss.map(hasQuote),roles=[],unitEnd=new Array(ss.length).fill(false);
+const n=ss.length,qw=ss.map(quotedWords),major=qw.map(w=>w>=3),roles=new Array(n),unitEnd=new Array(n).fill(false);
 let cur=null;
-const open=(i,role,isQ)=>{if(i>0)unitEnd[i-1]=true;cur={n:1,q:isQ,leadOnly:role==='lead'};roles[i]=role};
-ss.forEach((s,i)=>{
-if(i===0){roles[0]='ts';unitEnd[0]=true;cur=null;return}
-if(q[i]){
-if(cur&&cur.leadOnly){cur.n++;cur.q=true;cur.leadOnly=false;roles[i]='quote'}
-else open(i,'quote',true);
-return;
+// an integrated quote sentence with lots of commentary outside the quote marks already evaluates itself
+const selfEval=i=>major[i]&&outsideQuoteWords(ss[i])>=12?1:0; // reporting verbs ("Ovid recalls") don't count as evaluation
+const open=(i,role,state)=>{if(i>0)unitEnd[i-1]=true;cur={n:1,state,quotes:state==='quote'?1:0,evals:state==='quote'?selfEval(i):0,leads:role==='lead'?1:0};roles[i]=role};
+const add=(i,role,state)=>{cur.n++;roles[i]=role;if(state)cur.state=state;if(role==='analysis')cur.evals++;if(role==='quote')cur.quotes++;if(role==='lead')cur.leads++};
+for(let i=0;i<n;i++){
+const s=ss[i];
+if(i===0){roles[0]='ts';unitEnd[0]=true;cur=null;continue}
+const isAnalysis=ANALYSIS_RX.test(s)||VERB_RX.test(s)||(qw[i]>0&&!major[i]);
+const nextMajor=!!major[i+1],next2Major=!!major[i+2];
+if(major[i]){
+if(cur&&cur.state==='lead'){add(i,'quote','quote');cur.evals+=selfEval(i);continue} // idea statement → its quote
+if(cur&&cur.state==='quote'&&cur.evals===0&&cur.quotes<2&&!ANALYSIS_RX.test(s)){add(i,'quote','quote');cur.evals+=selfEval(i);continue} // evidence chain
+open(i,'quote','quote');continue;
 }
-const nextQ=!!q[i+1];
-if(!cur)open(i,nextQ?'lead':'context',false);
-else if(nextQ&&cur.n>=2&&s.split(/\s+/).length<=18)open(i,'lead',false);
-else if(cur.n>=(cur.q?4:2))open(i,nextQ?'lead':'context',false);
-else{cur.n++;cur.leadOnly=false;roles[i]=cur.q?'analysis':'context'}
-});
-unitEnd[ss.length-1]=true;
+if(!cur){open(i,nextMajor||(next2Major&&!isAnalysis)?'lead':'context',nextMajor||(next2Major&&!isAnalysis)?'lead':'context');continue}
+if(cur.state==='quote'||cur.state==='analysis'){
+if(cur.evals===0){add(i,'analysis','analysis');continue}                           // first sentence after a quote evaluates it
+if(isAnalysis&&cur.n<6){add(i,'analysis','analysis');continue}                     // further evaluation
+// only start the next IQTVE's idea statement once this one has been properly evaluated
+if(cur.evals>=2&&(nextMajor||(next2Major&&!isAnalysis))){open(i,'lead','lead');continue}
+if(cur.n<5){add(i,'analysis','analysis');continue}                                  // extra evaluation / link
+open(i,'context','context');continue;
+}
+if(cur.state==='lead'){                                                              // multi-sentence idea statement
+if(nextMajor&&cur.leads<2){add(i,'lead','lead');continue}
+cur.state='context';add(i,'context');continue;
+}
+// quote-free stretch (intro / conclusion / context)
+if(nextMajor){open(i,'lead','lead');continue}
+if(cur.n>=2)open(i,'context','context');else add(i,'context');
+}
+unitEnd[n-1]=true;
 return{roles,unitEnd};
 }
 /* Meaning-based chunker: scores each gap between words (punctuation > quotation edge >
@@ -1128,9 +1209,22 @@ if(cp)since=0;
 sents.push({p,s,text:t,wc,role:m==='heading'?'heading':m==='lines'?'line':'prose',unitEnd:cp,cp});
 });
 });
-return{paras,sents,pstart,total:sents.reduce((a,x)=>a+x.wc,0),kind:kind||'essay'};
+return{paras,sents,pstart,total:sents.reduce((a,x)=>a+x.wc,0),kind:kind||'essay',formulaic:isFormulaic(sents)};
 }
-let PARAS=[],SENTS=[],PSTART=[],TOTALW=1;
+/* Formulaic IQTVE essays (Idea. Quote. Technique. Evaluation. — or QTVE, IQTVEVE…) set the idea out in its own
+sentence and drop the quote in with a short lead-in. Integrated essays weave quotes into their own claims, so
+their units are labelled neutrally instead. */
+function isFormulaic(sents){
+let units=0,hits=0,u=[];
+const flush=()=>{const qi=u.findIndex(x=>x.role==='quote');
+if(qi>=0&&u[0].s>0){units++;const q=u[qi].text,after=u[qi+1]&&u[qi+1].text||'';
+const idea=qi>0&&u[0].role==='lead',bareQuote=outsideQuoteWords(q)<=9,named=TECH_RX.test(q)||TECH_RX.test(after.split(/\s+/).slice(0,8).join(' '));
+if((idea&&(bareQuote||named))||(bareQuote&&named))hits++}
+u=[]};
+sents.forEach((x,i)=>{if(x.role===undefined)return;if(u.length&&u[0].p!==x.p)flush();u.push(x);if(x.unitEnd)flush()});flush();
+return units>=3&&hits/units>=.6;
+}
+let PARAS=[],SENTS=[],PSTART=[],TOTALW=1,FORMULAIC=false;
 
 /* ---------- fuzzy alignment ---------- */
 function lev(a,b){
@@ -1199,6 +1293,7 @@ return{startG:Math.max(0,num(st.startG)|0),g:Math.max(0,num(st.g)|0),ti:Math.max
 started:!!st.started,nS:num(st.nS),stats:o,game:g};
 }
 let SET={...DEFSET,...(ls.get('settings')||{})};
+if(typeof SET.choice!=='boolean')SET.choice=null;
 SET.hidden=(Array.isArray(SET.hidden)?SET.hidden:[]).filter(x=>typeof x==='string');
 ['delay','strict','phrase'].forEach(k=>{SET[k]=num(SET[k])||DEFSET[k]});
 let LIB=cleanLib(ls.get('lib'));
@@ -1210,7 +1305,7 @@ const save=()=>{if(S)S.nS=SENTS.length;ls.set('state.'+ACTIVE,S);ls.set('setting
 function loadEssay(id){
 if(!allEssays().some(e=>e.id===id))id=allEssays()[0].id;let text=essayText(id);
 ACTIVE=id;
-({paras:PARAS,sents:SENTS,pstart:PSTART,total:TOTALW}=parseEssay(text,essayKind(id)));
+({paras:PARAS,sents:SENTS,pstart:PSTART,total:TOTALW,formulaic:FORMULAIC}=parseEssay(text,essayKind(id)));
 TOTALW=TOTALW||1;
 S=cleanState(ls.get('state.'+id))||DEFSTATE();
 if(S.g>SENTS.length)S.g=0;
@@ -1223,6 +1318,10 @@ const newLive=()=>({keys:0,bs:0,ins:[],gaps:[],hes:0,longest:0,samples:[],peak:0
 const $=id=>document.getElementById(id);
 const ta=$('ta'),typebox=$('typebox'),typedEl=$('typed'),mark=$('mark'),caret=$('caret'),prompt=$('prompt'),foot=$('foot');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// Apple keyboards (Mac, iPad Magic Keyboard): shortcuts use Control (⌃), never ⌘, so ⌘H/⌘P/⌘O keep their system meaning
+const IS_APPLE=/Mac|iPhone|iPad|iPod/.test(navigator.platform||'')||/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>0;
+const CTRL=IS_APPLE?'⌃':'Ctrl';
+let passT=0; // pending auto-advance after a passed build chunk
 const ROLE={ts:'Topic sentence',quote:'Quote',analysis:'Analysis',lead:'Lead-in',context:'Point',heading:'Heading',line:'Line',prose:'Prose'};
 const RCLS={ts:'ts',quote:'quote',analysis:'an',lead:'lead',context:'context',heading:'ts',line:'lead',prose:'context'};
 
@@ -1236,16 +1335,21 @@ const x=SENTS[g],ph=chunkSentence(x.text,SET.phrase),q=[];
 ph.forEach((_,k)=>q.push({type:'build',k:k+1,n:ph.length,shown:ph.slice(0,k+1),next:ph[k+1]||'',text:ph.slice(0,k+1).join(' '),a:g,b:g}));
 const floor=SET.scope==='start'?Math.min(S.startG,g):0;
 const pa=Math.max(PSTART[x.p],floor),last=x.s===PARAS[x.p].length-1,pt=rangeText(pa,g),solo=PARAS[x.p].length===1;
+// the IQTVE (unit) this sentence belongs to: from the sentence after the previous unit end, up to here
+let us=g;while(us>pa&&!SENTS[us-1].unitEnd)us--;
+const unitHasQuote=()=>{for(let k=us;k<=g;k++)if(SENTS[k].role==='quote')return true;let e=g;while(e<SENTS.length-1&&!SENTS[e].unitEnd&&SENTS[e+1].p===x.p)e++;for(let k=g+1;k<=e;k++)if(SENTS[k].role==='quote')return true;return false};
 if(!solo){
+if(us<g)q.push({type:'unit',text:rangeText(us,g),a:us,b:g,iq:unitHasQuote()&&x.role!=='ts',done:x.unitEnd});
 if(last){q.push({type:'para',rep:1,text:pt,a:pa,b:g});q.push({type:'para',rep:2,text:pt,a:pa,b:g})}
-else q.push({type:'para',text:pt,a:pa,b:g});
+else if(x.unitEnd||x.role==='ts')q.push({type:'para',text:pt,a:pa,b:g}); // link the finished IQTVE into the paragraph
 }
 if(SET.essay&&x.cp)q.push({type:'essay',text:rangeText(floor,g),a:floor,b:g});
 const out=[];
 for(const t of q){
 const prev=out[out.length-1];
 if(prev&&!t.rep&&prev.text===t.text)continue;
-if(t.type==='essay'&&out.some(o=>o.type==='para'&&o.text===t.text))continue;
+if(t.type==='essay'&&out.some(o=>(o.type==='para'||o.type==='unit')&&o.text===t.text))continue;
+if(t.type==='para'&&!t.rep&&out.some(o=>o.type==='unit'&&o.text===t.text))continue;
 out.push(t);
 }
 out.forEach(t=>t.T=tokens(t.text));
@@ -1258,18 +1362,28 @@ queue=buildQueue(S.g);
 if(S.ti>=queue.length)S.ti=0;
 task=queue[S.ti];
 if(fresh)tries=0;
-phase='type';typed='';ta.value='';t0=0;L=newLive();
+clearTimeout(passT);passT=0;
+phase='type';typed='';ta.value='';t0=0;L=newLive();cIdx=0;
 typebox.classList.remove('ok','bad');
-renderHead();renderPrompt();renderTyped();renderFoot();renderQueue();renderSide();renderLive();Game.task(task);
+renderHead();renderPrompt();renderTyped();renderFoot();renderQueue();renderSide();renderLive();Game.task(task);renderChoices();
 focusTa();save();
 }
-function focusTa(){if($('upModal').hidden&&$('modal').hidden&&$('essayModal').hidden&&$('howto').hidden&&SET.view==='mem')ta.focus({preventScroll:true})}
+function focusTa(){if(typeof choiceOn==='function'&&choiceOn())return;if($('upModal').hidden&&$('modal').hidden&&$('essayModal').hidden&&$('howto').hidden&&SET.view==='mem')ta.focus({preventScroll:true})}
 function renderHead(){
 const x=SENTS[S.g],chip=$('chip');
-chip.className='chip'+(task.type==='para'?' para':task.type==='essay'?' essay':'');
-chip.textContent=task.type==='build'?`Build · chunk ${task.k}/${task.n}`:task.type==='para'?(task.rep?`Paragraph ×2 · ${task.rep}/2`:'Paragraph so far'):'Full essay checkpoint';
+chip.className='chip'+(task.type==='para'||task.type==='unit'?' para':task.type==='essay'?' essay':'');
+chip.textContent=task.type==='build'?`Build · chunk ${task.k}/${task.n}`:task.type==='unit'?unitLabel(task,true):task.type==='para'?(task.rep?`Paragraph ×2 · ${task.rep}/2`:'Paragraph so far'):'Whole essay so far';
 $('ctx').innerHTML=`¶${x.p+1} · Sentence ${x.s+1} of ${PARAS[x.p].length} <span class="rt ${RCLS[x.role]}">${ROLE[x.role]}</span>`;
-$('btnHint').style.display='';$('btnSkip').style.display='';
+for(const b of ['btnHint','btnSkip','btnBack','btnPeekP','btnPeekE'])$(b).style.display='';
+$('btnBack').disabled=S.g===0&&S.ti===0;
+}
+// "IQTVE" for quote + evaluation units in essays; neutral wording for intros, conclusions and creative pieces
+function unitLabel(t,short){
+const creative=essayKind(ACTIVE)==='creative';
+const iq=t.iq&&!creative&&FORMULAIC,ev=t.iq&&!creative&&!FORMULAIC;
+const name=creative?'passage':iq?'IQTVE':ev?'quote + analysis':'section';
+if(short)return (creative?'Passage':iq?'IQTVE':ev?'Quote + analysis':'Section')+(t.done?'':' so far');
+return `Type the ${name}${t.done?'':' so far'}`;
 }
 function describeRange(t){
 const A=SENTS[t.a],B=SENTS[t.b];
@@ -1285,7 +1399,7 @@ prompt.innerHTML=task.shown.map((p,i)=>i===task.shown.length-1?`<mark>${esc(p)}<
 `<div class="phint">${task.k===1?'Read it, then type it. ':''}${SET.hide?'The prompt hides once you start typing.':''}</div>`;
 }else{
 const first=items(task.text).filter(i=>i.norm).slice(0,2).map(i=>i.orig).join(' ');
-const title=task.type==='essay'?'Type the whole essay so far':task.rep?`Type the full paragraph · round ${task.rep} of 2`:'Type the paragraph so far';
+const title=task.type==='essay'?'Type the whole essay so far':task.type==='unit'?unitLabel(task):task.rep?`Type the full paragraph · round ${task.rep} of 2`:'Type the paragraph so far';
 prompt.innerHTML=`<div class="recall"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
 <div><h3>${title}</h3><p>From memory · ${describeRange(task)} · ${task.T.length} words</p><p>Begins: <span class="cue">${esc(first)}…</span></p></div></div>`;
 }
@@ -1308,14 +1422,14 @@ if(over>typebox.scrollTop)typebox.scrollTop=over;
 }
 function renderFoot(extra){
 if(phase==='type'){
-foot.innerHTML=`<span class="wc"></span><span class="spacer"></span><span class="khint"><kbd>Enter</kbd> check · <kbd>Ctrl</kbd>+<kbd>H</kbd> peek</span>`;
+foot.innerHTML=`<span class="wc"></span><span class="spacer"></span><span class="khint"><kbd>Enter</kbd> check · <kbd>${CTRL}</kbd><kbd>H</kbd> word · hold <kbd>${CTRL}</kbd><kbd>P</kbd> ¶ · hold <kbd>${CTRL}</kbd><kbd>O</kbd> essay</span>`;
 renderTyped();
 }else foot.innerHTML=extra;
 }
 function renderQueue(){
 $('queue').innerHTML='<span class="lbl">This sentence</span>'+queue.map((t,i)=>{
-const l=t.type==='build'?t.k:t.type==='para'?(t.rep?`¶ ×2 · ${t.rep}`:'¶ so far'):'Essay';
-const tt=t.type==='build'?`Chunk ${t.k}/${t.n}: ${t.shown[t.shown.length-1]}`:t.type==='para'?'Paragraph recall':'Full essay recall';
+const l=t.type==='build'?t.k:t.type==='unit'?unitLabel(t,true):t.type==='para'?(t.rep?`¶ ×2 · ${t.rep}`:'¶ so far'):'Essay';
+const tt=t.type==='build'?`Chunk ${t.k}/${t.n}: ${t.shown[t.shown.length-1]}`:t.type==='unit'?unitLabel(t):t.type==='para'?'Paragraph recall':'Whole essay recall';
 return `<button class="q ${i<S.ti?'done':''} ${i===S.ti?'cur':''}" data-i="${i}" title="${esc(tt)}">${l}</button>`;
 }).join('');
 }
@@ -1358,16 +1472,63 @@ if(!$('upModal').hidden)return;
 if(!$('essayModal').hidden){if(e.key==='Escape')closeEssay();return}
 if(!$('modal').hidden){if(e.key==='Escape')$('bCloseStart').click();return}
 if(e.target.closest&&e.target.closest('.panel[data-panel=settings],.menu-pop'))return;
+// shortcuts use e.code so they still work when Option/Alt or a non-US layout changes e.key
+const ctl=e.ctrlKey&&!e.altKey,K=e.code;
+if(ctl&&(K==='KeyP'||K==='KeyO')){e.preventDefault();if(!e.repeat)peek(K==='KeyP'?'para':'essay');return}
+if((ctl||e.metaKey&&!e.altKey)&&K==='KeyZ'&&!e.shiftKey){
+// typing still in the box → normal undo; otherwise step back
+if(phase==='type'&&ta.value.length&&document.activeElement===ta)return;
+e.preventDefault();back();return;
+}
+if(phase==='type'&&choiceOn()&&!e.ctrlKey&&!e.metaKey&&!e.altKey){
+if(/^Digit[1-3]$/.test(K)){e.preventDefault();pick($('chRow').children[+K.slice(5)-1]);return}
+if(e.key==='Backspace'){e.preventDefault();$('chUndo').click();return}
+}
 if(phase==='type'){
 if(e.key==='Enter'){e.preventDefault();if(typed.trim())check()}
-else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='h'){e.preventDefault();hint()}
+else if(ctl&&K==='KeyH'){e.preventDefault();hint()}
 else if(document.activeElement!==ta&&e.key.length===1&&!e.ctrlKey&&!e.metaKey)focusTa();
 }else if(phase==='fail'){
 if(e.key==='Enter'){e.preventDefault();retry()}
 else if(e.key==='Tab'){e.preventDefault();skip()}
 else if(document.activeElement===ta)e.preventDefault();
-}else if(phase==='ok'&&document.activeElement===ta)e.preventDefault();
+}else if(phase==='ok'||phase==='review'){
+if(e.key==='Enter'){e.preventDefault();advance()}
+else if(document.activeElement===ta)e.preventDefault();
+}
 });
+document.addEventListener('keyup',e=>{if(peekOn&&(e.code==='KeyP'||e.code==='KeyO'||e.key==='Control'))unpeek()});
+window.addEventListener('blur',()=>{if(peekOn)unpeek()});
+
+/* ---------- hold-to-peek: paragraph / whole essay so far, the part being tested in blue ---------- */
+let peekOn=null;
+function peek(kind){
+if(!task||phase==='done'||!SENTS.length)return;
+const x=SENTS[S.g],a=kind==='para'?PSTART[x.p]:0,b=S.g;
+let html='',cur=-1;
+for(let g=a;g<=b;g++){
+const s=SENTS[g];
+if(s.p!==cur){if(cur>=0)html+='</p>';html+='<p>';cur=s.p}
+// the current sentence is only revealed up to what the student has been shown so far
+let t=s.text;if(g===S.g&&task.type==='build')t=task.text;
+const hl=g>=task.a&&g<=task.b;
+html+=(hl?`<mark>${esc(t)}</mark>`:esc(t))+' ';
+}
+html+='</p>';
+const o=$('peekView');
+o.querySelector('.pv-h').textContent=kind==='para'?`Paragraph ${x.p+1} so far`:'Whole essay so far';
+o.querySelector('.pv-b').innerHTML=html;
+o.hidden=false;peekOn=kind;
+const m=o.querySelector('mark:last-of-type');if(m)m.scrollIntoView({block:'nearest'});
+}
+function unpeek(){peekOn=null;$('peekView').hidden=true;focusTa()}
+for(const [id,k] of [['btnPeekP','para'],['btnPeekE','essay']]){
+const b=$(id);
+b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);peek(k)});
+for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>{if(peekOn)unpeek()});
+b.addEventListener('contextmenu',e=>e.preventDefault());
+}
+$('btnBack').onclick=back;
 
 /* ---------- live telemetry ---------- */
 function liveCalc(){
@@ -1454,11 +1615,11 @@ if(o.op==='sub'){const k=U[o.u]+'→'+w;st.typos[k]=(st.typos[k]||0)+1}
 if(task.type!=='build'){st.slipSum+=firstErr<0?1:firstErr/task.T.length;st.slipN++}
 if(U.length&&task.T.length){st.firstLetterN++;if(U[0][0]===task.T[0][0])st.firstLetter++}
 const h=new Date().getHours();st.hours[h]=st.hours[h]||[0,0];st.hours[h][0]+=r.acc;st.hours[h][1]++;
-const tm=st.taskMs[task.type];tm[0]+=secs/Math.max(1,task.T.length);tm[1]++;
+const tm=st.taskMs[task.type==='unit'?'para':task.type];tm[0]+=secs/Math.max(1,task.T.length);tm[1]++;
 const pass=r.acc*100>=SET.strict;
 if(tries===1){if(task.type==='build'){st.bldAtt++;if(pass)st.bldPass++}else{st.recAtt++;if(pass)st.recPass++}}else st.retries++;
 st.hist.push([Math.round(r.acc*100),pass?1:0]);if(st.hist.length>60)st.hist.shift();
-const pct=Math.round(r.acc*100),card=$('card');
+const pct=Math.round(r.acc*100),card=$('card');$('choices').hidden=true;
 card.classList.remove('flash-ok','flash-bad');void card.offsetWidth;
 if(pass){
 st.pass++;st.tasks++;if(task.type==='essay')st.cps++;
@@ -1468,9 +1629,20 @@ phase='ok';typebox.classList.add('ok');card.classList.add('flash-ok');
 Pet.event(task.type==='essay'?'checkpoint':task.rep===2?'para':L.peak>75?'fast':'pass');
 Game.pass(task,r.ok);
 if(SET.motion&&window.bgBurst){const r2=card.getBoundingClientRect();bgBurst(r2.left+r2.width/2,r2.top+r2.height/2)}
-renderFoot(`<span class="resmsg ok">✓ ${pct===100?'Perfect':pct+'% match'}</span><span>${wpm} wpm</span><span>${(secs/Math.max(1,task.T.length)).toFixed(2)} s/word</span><span class="spacer"></span><span>${tries>1?'Got it on try '+tries:''}</span>`);
+showDiff(r,U,true);
+const stats=`<span class="resmsg ok">✓ ${pct===100?'Perfect':pct+'% match'}</span><span>${wpm} wpm</span><span>${(secs/Math.max(1,task.T.length)).toFixed(2)} s/word</span>${tries>1?`<span>Try ${tries}</span>`:''}<span class="spacer"></span>`;
 save();renderSide();
-setTimeout(()=>{card.classList.remove('flash-ok');next()},SET.delay*1000);
+if(task.type==='build'){
+// chunks: show the marking for the set delay, then move on (Enter moves on straight away)
+renderFoot(stats+`<button class="btn small" id="bCont">Next <kbd>Enter</kbd></button>`);
+$('bCont').onclick=advance;
+passT=setTimeout(advance,SET.delay*1000);
+}else{
+// longer recalls: stay on the marking until the student is ready
+phase='review';
+renderFoot(stats+`<button class="btn small" id="bAgain">Again</button><button class="btn primary small" id="bCont">Continue <kbd>Enter</kbd></button>`);
+$('bCont').onclick=advance;$('bAgain').onclick=retry;
+}
 }else{
 const g=firstErr<0?task.b:sentenceAtToken(task,firstErr);st.fails[g]=(st.fails[g]||0)+1;
 phase='fail';typebox.classList.add('bad');card.classList.add('flash-bad');Pet.event('fail');Game.fail();
@@ -1481,7 +1653,7 @@ $('bRetry').onclick=retry;$('bSkip').onclick=skip;
 save();renderSide();
 }
 }
-function showDiff(r,U){
+function showDiff(r,U,passed){
 const its=items(task.text),cmp=[];its.forEach((it,i)=>{if(it.norm)cmp.push(i)});
 let html='',ptr=0;
 const plain=it=>it.br?'<span class="br"></span>':`<span class="w">${esc(it.orig)}</span> `;
@@ -1497,11 +1669,27 @@ ptr=ii+1;
 }
 flush(its.length);
 prompt.classList.remove('veil');
-prompt.innerHTML=`<div class="diff">${html}</div><div class="legend"><span><i style="background:#fde68a"></i>wrong word (yours struck)</span><span><i style="background:#fecaca"></i>missed</span><span><i style="background:#e2e8f0"></i>extra</span>${r.trail?'<span><i class="lg-ahead"></i>typed ahead (not counted)</span>':''}<span>Read for as long as you like.</span></div>`;
+const has=k=>r.ops.some((o,i)=>o.op===k&&(k!=='ins'||i<r.ops.length-r.trail));
+const keys=[has('sub')&&'<span><i style="background:#fde68a"></i>wrong word (yours struck)</span>',has('del')&&'<span><i style="background:#fecaca"></i>missed</span>',has('ins')&&'<span><i style="background:#e2e8f0"></i>extra</span>',r.trail&&'<span><i class="lg-ahead"></i>typed ahead (not counted)</span>'].filter(Boolean).join('');
+const note=passed?(keys?'Passed: still worth a glance at the slips.':'Word perfect.'):'Read for as long as you like.';
+prompt.innerHTML=`<div class="diff">${html}</div><div class="legend">${keys}<span>${note}</span></div>`;
 }
-function retry(){phase='type';typed='';ta.value='';t0=0;L=newLive();typebox.classList.remove('bad','ok');$('card').classList.remove('flash-bad');renderPrompt();renderFoot();focusTa()}
-function skip(){next()}
-function next(){S.ti++;if(S.ti>=queue.length){S.g++;S.ti=0}loadTask()}
+function advance(){clearTimeout(passT);passT=0;$('card').classList.remove('flash-ok');if(phase==='ok'||phase==='review')next()}
+/* Back one step (Ctrl+Z on an empty box, or the ← button). In the box itself Ctrl+Z keeps its normal
+job of undoing typing; it only steps back once there is nothing left to undo, or while marking is shown. */
+function back(){
+if(phase==='done'||!SENTS.length)return;
+clearTimeout(passT);passT=0;clearTimeout(autoT);
+if(S.ti>0)S.ti--;
+else if(S.g>0){S.g--;S.ti=buildQueue(S.g).length-1}
+else return;
+loadTask();
+const t=$('toast');t.textContent='Back to: '+(task.type==='build'?`chunk ${task.k}/${task.n}`:$('chip').textContent);t.classList.add('show');
+clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1400);
+}
+function retry(){clearTimeout(passT);passT=0;phase='type';typed='';ta.value='';t0=0;L=newLive();cIdx=0;typebox.classList.remove('bad','ok');$('card').classList.remove('flash-bad');renderPrompt();renderFoot();renderChoices();focusTa()}
+function skip(){clearTimeout(passT);passT=0;next()}
+function next(){clearTimeout(passT);passT=0;S.ti++;if(S.ti>=queue.length){S.g++;S.ti=0}loadTask()}
 function hint(){
 if(phase!=='type')return;
 const its=items(task.text).filter(i=>i.norm),n=tokens(typed).length,w=its[Math.min(n,its.length-1)];
@@ -1511,11 +1699,88 @@ clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);
 focusTa();
 }
 $('btnHint').onclick=hint;
-$('btnSkip').onclick=()=>{if(phase==='type'||phase==='fail')skip()};
+
+/* ---------- tap-to-pick mode (phones): choose each next word from three ---------- */
+const IS_PHONE=matchMedia('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<600;
+const choiceOn=()=>SET.choice==null?IS_PHONE:!!SET.choice;
+let cIdx=0,cWords=[],VOCAB=null,VOCAB_FOR=null;
+function setChoice(on){SET.choice=on;save();$('sChoice').checked=on;applyChoice();if(phase==='type'){cIdx=0;typed='';ta.value='';renderTyped()}renderChoices();if(!on)focusTa()}
+function applyChoice(){
+const on=choiceOn();document.body.classList.toggle('choice',on);
+ta.readOnly=on;ta.inputMode=on?'none':'text';if(on)ta.blur();
+$('mChoice').textContent=on?'Switch to typing':'Tap-to-pick words';
+$('phd').textContent=on?'Tap the next word below…':'Start typing…';
+renderChoices();
+}
+// essay vocabulary: each word's display form, and which words follow which (for believable decoys)
+function vocab(){
+if(VOCAB_FOR===SENTS)return VOCAB;
+const words=new Map(),follow=new Map();let prev=null;
+for(const x of SENTS)for(const it of items(x.text)){if(!it.norm)continue;
+const disp=it.orig.replace(/^[“"‘(]+|[”"’),.;:!?]+$/g,'');
+if(!words.has(it.norm)&&disp)words.set(it.norm,disp);
+if(prev){if(!follow.has(prev))follow.set(prev,new Set());follow.get(prev).add(it.norm)}prev=it.norm}
+VOCAB={words,follow,list:[...words.keys()]};VOCAB_FOR=SENTS;return VOCAB;
+}
+const SUFX=['ing','ed','ly','tion','sion','ment','ness','ity','ous','ive','al','er','est','s'];
+const sufOf=w=>SUFX.find(x=>w.length>x.length+2&&w.endsWith(x))||'';
+// decoys come from the essay itself: same word class (function vs content word), same ending,
+// similar length, and words that really follow the previous word somewhere else in the essay
+function decoys(right,prevNorm,n=2){
+const V=vocab(),r=right.norm,fn=FN.has(r),suf=sufOf(r),cap=/^[A-Z]/.test(right.orig.replace(/^[“"‘(]+/,''));
+const fol=prevNorm&&V.follow.get(prevNorm),scored=[];
+for(const w of V.list){
+if(w===r||lev(w,r)<=1)continue;
+let sc=Math.random()*1.5;
+sc+=FN.has(w)===fn?3:-4;
+if(suf&&w.endsWith(suf))sc+=2;
+sc-=Math.abs(w.length-r.length)*.35;
+if(fol&&fol.has(w))sc+=2.5;
+if(/^[A-Z]/.test(V.words.get(w))===cap)sc+=.8;
+scored.push([sc,w]);
+}
+scored.sort((a,b)=>b[0]-a[0]);
+const pool=scored.slice(0,8),out=[];
+while(out.length<n&&pool.length){const k=Math.floor(Math.random()*Math.min(4,pool.length));out.push(V.words.get(pool.splice(k,1)[0][1]))}
+for(const f of ['the','and','which','through','as','of'])if(out.length<n&&f!==r&&!out.includes(f))out.push(f);
+return out;
+}
+function renderChoices(){
+const box=$('choices'),on=choiceOn()&&phase==='type'&&!!task&&SET.view==='mem';
+box.hidden=!on;if(!on)return;
+cWords=items(task.text).filter(i=>i.norm);
+if(cIdx>=cWords.length){box.hidden=true;return}
+const right=cWords[cIdx],prev=cIdx?cWords[cIdx-1].norm:(task.a>0?tokens(SENTS[task.a-1].text).pop():null);
+const disp=right.orig.replace(/^[“"‘(]+|[”"’),.;:!?]+$/g,'')||right.orig;
+const opts=[{t:disp,ok:true},...decoys(right,prev).map(t=>({t,ok:false}))];
+for(let i=opts.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]]}
+$('chRow').innerHTML=opts.map((o,i)=>`<button class="ch" data-ok="${o.ok?1:0}" data-w="${esc(o.t)}"><span class="n">${i+1}</span>${esc(o.t)}</button>`).join('');
+$('chUndo').disabled=cIdx===0;
+}
+// every tap adds a word, right or wrong, so the normal marking shows exactly which picks were off
+function pick(btn){
+if(phase!=='type'||!btn||btn.classList.contains('right')||btn.classList.contains('wrong'))return;
+const now=performance.now();if(!t0)t0=now;
+if(lastKey){const gap=now-lastKey;if(gap<20000)S.stats.time+=gap/1000;if(L.keys>0){L.gaps.push(gap);if(L.gaps.length>80)L.gaps.shift();if(gap>1200)L.hes++;L.longest=Math.max(L.longest,gap)}}
+lastKey=now;L.keys++;L.ins.push(now);
+const ok=btn.dataset.ok==='1',w=ok?cWords[cIdx].orig:btn.dataset.w;
+btn.classList.add(ok?'right':'wrong');
+if(!ok){const c=$('chRow').querySelector('[data-ok="1"]');if(c)c.classList.add('right')}
+typed=(typed?typed+' ':'')+w;ta.value=typed;cIdx++;
+if(task.type==='build'&&SET.hide)prompt.classList.add('veil');
+renderTyped();Pet.event('type');Game.progress(cIdx/cWords.length);
+setTimeout(()=>{if(phase!=='type')return;if(cIdx>=cWords.length){$('choices').hidden=true;check()}else renderChoices()},ok?90:650);
+}
+$('chRow').addEventListener('click',e=>pick(e.target.closest('.ch')));
+$('chUndo').onclick=()=>{if(phase!=='type'||!cIdx)return;cIdx--;L.bs++;const w=typed.split(' ');w.pop();typed=w.join(' ');ta.value=typed;renderTyped();renderChoices()};
+$('chKb').onclick=()=>setChoice(false);
+$('btnSkip').onclick=()=>{if(phase!=='done')skip()};
+document.querySelectorAll('.k-ctl').forEach(k=>k.textContent=CTRL);
+$('btnHint').title=`Reveal the next word (${CTRL}H)`;$('btnPeekP').title=`Hold to see the paragraph so far (hold ${CTRL}P)`;$('btnPeekE').title=`Hold to see the whole essay so far (hold ${CTRL}O)`;$('btnBack').title=`Back to the previous step (${CTRL}Z when the box is empty)`;
 function endScreen(title,msg,btn,fn){
 phase='done';task=null;
 $('chip').className='chip';$('chip').textContent=title;$('ctx').textContent='';
-$('btnHint').style.display='none';$('btnSkip').style.display='none';
+for(const b of ['btnHint','btnSkip','btnBack','btnPeekP','btnPeekE'])$(b).style.display='none';clearTimeout(passT);
 prompt.innerHTML=`<div class="done-wrap"><h2>${title}</h2><p style="font-family:var(--sans);color:var(--muted)">${msg}</p></div>`;
 typedEl.textContent='';$('queue').innerHTML='';$('meterFill').style.width='0';
 foot.innerHTML=`<span class="spacer"></span><button class="btn primary small" id="bEnd">${btn}</button>`;
@@ -1594,7 +1859,7 @@ document.querySelector('.mem').dataset.cols=cols;
 document.body.classList.toggle('focus',!!SET.focus);
 $('pet').classList.toggle('hidden',SET.hidden.includes('pet'));
 Game.set(!!SET.gamify);
-if(window.bgPulse)bgPulse(-999,-999,'0,0,0',.01); // forces one background redraw so the theme swaps even with motion off
+if(window.bgRepaint)bgRepaint(); // theme swap repaints immediately, even with motion off
 $('btnFocus').classList.toggle('on',!!SET.focus);
 const T=(attr,on,name)=>`<label><span>${name}</span><input type="checkbox" class="sw" ${attr} ${on?'checked':''}></label>`;
 $('panelMenu').innerHTML=`<div class="ehead">Panels</div>`+PANELS.map(p=>T(`data-p="${p.dataset.panel}"`,!SET.hidden.includes(p.dataset.panel),p.dataset.name)).join('')+
@@ -1604,7 +1869,19 @@ requestAnimationFrame(()=>{placeCaret();drawSpark()});
 save();
 }
 PANELS.forEach(p=>p.querySelector('.x').onclick=()=>{SET.hidden.push(p.dataset.panel);applyPanels()});
-$('btnPanels').onclick=e=>{e.stopPropagation();$('panelMenu').hidden=!$('panelMenu').hidden};
+function fitPop(el){
+if(!el||el.hidden)return;
+el.style.left=el.style.right=el.style.maxHeight='';el.style.transformOrigin='';
+const pr=el.offsetParent?el.offsetParent.getBoundingClientRect():{left:0,right:innerWidth},m=10;let r=el.getBoundingClientRect();
+if(r.left<m||r.right>innerWidth-m){
+const w=Math.min(r.width,innerWidth-2*m),left=Math.max(m,Math.min(r.left,innerWidth-m-w));
+el.style.right='auto';el.style.left=(left-pr.left)+'px';el.style.transformOrigin='top left';r=el.getBoundingClientRect();
+}
+const room=innerHeight-r.top-m;if(r.height>room){el.style.maxHeight=Math.max(160,room)+'px';el.style.overflowY='auto'}
+}
+addEventListener('resize',()=>['panelMenu','moreMenu','essPop'].forEach(id=>fitPop($(id))));
+document.addEventListener('pointerdown',e=>{if(e.target.closest('.menu'))return;for(const id of ['panelMenu','moreMenu','essPop'])$(id).hidden=true;$('essBtn').classList.remove('open')},true);
+$('btnPanels').onclick=e=>{e.stopPropagation();const p=$('panelMenu');p.hidden=!p.hidden;$('moreMenu').hidden=true;$('essPop').hidden=true;fitPop(p)};
 $('panelMenu').addEventListener('click',e=>e.stopPropagation());
 $('panelMenu').addEventListener('change',e=>{
 const t=e.target;
@@ -1620,9 +1897,9 @@ applyPanels();
 });
 document.addEventListener('click',()=>{$('panelMenu').hidden=true});
 $('btnFocus').onclick=()=>{SET.focus=!SET.focus;applyPanels();focusTa()};
-$('btnMore').onclick=e=>{e.stopPropagation();const m=$('moreMenu');m.hidden=!m.hidden;$('panelMenu').hidden=true;$('essPop').hidden=true};
+$('btnMore').onclick=e=>{e.stopPropagation();const m=$('moreMenu');m.hidden=!m.hidden;$('panelMenu').hidden=true;$('essPop').hidden=true;fitPop(m)};
 $('moreMenu').addEventListener('click',e=>{const b=e.target.closest('[data-more]');if(!b)return;$('moreMenu').hidden=true;
-({manage:()=>openEssay(),start:openModal,upload:openUpload,help:showHowto})[b.dataset.more]()});
+({manage:()=>openEssay(),start:openModal,upload:openUpload,help:showHowto,choice:()=>setChoice(!choiceOn())})[b.dataset.more]()});
 document.addEventListener('click',()=>{$('moreMenu').hidden=true});
 $('petX').onclick=()=>{SET.hidden.push('pet');applyPanels()};
 
@@ -1655,10 +1932,10 @@ const n=st.learned.filter(Boolean).length,m=id===ACTIVE?SENTS.length:Math.max(n,
 function renderSwitcher(){
 $('essName').textContent=essayTitle(ACTIVE);
 $('essPop').innerHTML=`<div class="ehead">Your essays</div>`+allEssays().map((e,i)=>{const p=pctOf(e.id);
-return `<button class="eitem ${e.id===ACTIVE?'on':''}" data-sw="${e.id}"${i<9?` title="Shortcut: Alt + ${i+1}"`:''}><span class="edot"></span><span class="t">${esc(e.title)}</span>${essayKind(e.id)==='creative'?'<span class="kind">creative</span>':''}<span class="bar"><i style="width:${p}%"></i></span><span class="p">${p}%</span></button>`}).join('')+
+return `<button class="eitem ${e.id===ACTIVE?'on':''}" data-sw="${e.id}"${i<9?` title="Shortcut: ${IS_APPLE?'⌥':'Alt + '}${i+1}"`:''}><span class="edot"></span><span class="t">${esc(e.title)}</span>${essayKind(e.id)==='creative'?'<span class="kind">creative</span>':''}<span class="bar"><i style="width:${p}%"></i></span><span class="p">${p}%</span></button>`}).join('')+
 `<hr><div class="act"><button class="btn small primary" data-act="up">+ Upload</button><button class="btn small" data-act="manage">Manage</button></div>`;
 }
-$('essBtn').onclick=e=>{e.stopPropagation();renderSwitcher();const p=$('essPop');p.hidden=!p.hidden;$('essBtn').classList.toggle('open',!p.hidden);$('panelMenu').hidden=true;if(!p.hidden)(p.querySelector('.eitem.on')||p.querySelector('.eitem')).focus()};
+$('essBtn').onclick=e=>{e.stopPropagation();renderSwitcher();const p=$('essPop');p.hidden=!p.hidden;$('essBtn').classList.toggle('open',!p.hidden);$('panelMenu').hidden=true;$('moreMenu').hidden=true;fitPop(p);if(!p.hidden)(p.querySelector('.eitem.on')||p.querySelector('.eitem')).focus()};
 $('essPop').addEventListener('click',e=>{
 e.stopPropagation();const b=e.target.closest('[data-sw],[data-act]');if(!b)return;
 $('essPop').hidden=true;$('essBtn').classList.remove('open');
@@ -1739,7 +2016,7 @@ toast(`Switched to “${essayTitle(id)}”`);
 if(!S.started)openModal();
 }
 function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2000)}
-document.addEventListener('keydown',e=>{if(e.altKey&&/^[1-9]$/.test(e.key)){const t=allEssays()[+e.key-1];if(t){e.preventDefault();switchEssay(t.id)}}});
+document.addEventListener('keydown',e=>{const d=/^Digit([1-9])$/.exec(e.code);if(e.altKey&&!e.ctrlKey&&!e.metaKey&&d){const t=allEssays()[+d[1]-1];if(t){e.preventDefault();switchEssay(t.id)}}});
 
 $('mgList').addEventListener('click',e=>{
 const o=e.target.closest('[data-open]'),ed=e.target.closest('[data-edit]'),d=e.target.closest('[data-del]');
@@ -1855,6 +2132,7 @@ if(rebuild)el.onchange=()=>{S.ti=0;if(phase!=='done')loadTask()}};
 R('sDelay','delay',v=>v+'s');R('sStrict','strict',v=>v+'%');R('sPhrase','phrase',v=>v+'w',true);
 const C=(id,key)=>{const el=$(id);el.checked=SET[key];el.onchange=()=>{SET[key]=el.checked;save();if(key==='essay'){S.ti=0;if(phase!=='done')loadTask()}else if(key==='hide'&&phase==='type')renderPrompt()}};
 C('sEssay','essay');C('sHide','hide');C('sMotion','motion');
+$('sChoice').checked=choiceOn();$('sChoice').onchange=e=>setChoice(e.target.checked);
 const seg=()=>$('sScope').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===SET.scope));seg();
 $('sScope').onclick=e=>{const b=e.target.closest('button');if(!b||b.dataset.v===SET.scope)return;SET.scope=b.dataset.v;seg();S.ti=0;save();if(phase!=='done')loadTask()};
 $('btnReset').onclick=()=>{if(confirm('Reset progress and stats for this essay?')){S=DEFSTATE();save();loadTask();openModal()}};
@@ -1868,8 +2146,19 @@ const parts=Array.from({length:70},()=>({x:Math.random(),y:Math.random(),v:.0000
 const rip=[],sparks=[];
 // The soft colour field is drawn on a tiny offscreen canvas and scaled up (it's blurry anyway): ~30x fewer pixels to fill.
 const bc=document.createElement('canvas'),bx=bc.getContext('2d');let BW,BH;
-function size(){W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;c.style.width=W+'px';c.style.height=H+'px';x.setTransform(dpr,0,0,dpr,0,0);BW=bc.width=Math.ceil(W/8);BH=bc.height=Math.ceil(H/8)}
-size();addEventListener('resize',size);
+// Reallocate only when the canvas's CSS box really changes (width change or a taller viewport). Height-only
+// shrinks from the mobile address bar are ignored, and every reallocation repaints at once (no blank frame).
+function size(force){
+const r=c.getBoundingClientRect(),nw=Math.ceil(r.width),nh=Math.ceil(r.height);
+if(!force&&nw===W&&nh<=H)return;
+W=nw;H=Math.max(nh,force?0:H||0);
+c.width=Math.ceil(W*dpr);c.height=Math.ceil(H*dpr);x.setTransform(dpr,0,0,dpr,0,0);
+BW=bc.width=Math.ceil(W/8);BH=bc.height=Math.ceil(H/8);
+still=false;lastF=0;paint(performance.now());
+}
+let resizeT=0;
+addEventListener('resize',()=>{cancelAnimationFrame(resizeT);resizeT=requestAnimationFrame(()=>size())});
+addEventListener('orientationchange',()=>setTimeout(()=>size(true),250));
 if(matchMedia('(prefers-reduced-motion: reduce)').matches&&ls.get('settings')==null)SET.motion=false;
 let lastF=0;
 window.bgPulse=(px,py,col='56,189,248',a=.35)=>{rip.push({x:px,y:py,t:0,c:col,a});if(rip.length>14)rip.shift()};
@@ -1877,10 +2166,14 @@ window.bgBurst=(px,py)=>{for(let i=0;i<26;i++){const an=Math.random()*6.28,sp=1.
 let still=false;
 function frame(t){
 requestAnimationFrame(frame);
-if(document.hidden)return;
+if(document.hidden||!W)return;
 const busy=rip.length||sparks.length;
 if(!SET.motion&&!busy){if(still)return;still=true}else still=false;
 if(t-lastF<(busy?16:33))return;lastF=t; // 30fps when calm, 60fps while ripples are animating
+paint(t);
+}
+function paint(t){
+if(!W||!H)return;
 const s=SET.motion?t/1000:0,dark=document.body.classList.contains('gamify');
 const DARKC=['101,163,13','163,230,53','124,58,237','21,128,61','34,197,94'];
 bx.fillStyle=dark?'#06080b':'#f3f8ff';bx.fillRect(0,0,BW,BH);
@@ -1904,6 +2197,8 @@ x.beginPath();x.arc(r.x,r.y,rad,0,7);x.strokeStyle=`rgba(${r.c},${al})`;x.lineWi
 for(let i=sparks.length-1;i>=0;i--){const p=sparks[i];p.t+=1/60;p.x+=p.vx;p.y+=p.vy;p.vx*=.96;p.vy*=.96;const al=1-p.t/1.1;if(al<=0){sparks.splice(i,1);continue}
 x.beginPath();x.arc(p.x,p.y,2.2*al+.4,0,7);x.fillStyle=`rgba(16,185,129,${al*.8})`;x.fill()}
 }
+window.bgRepaint=()=>{still=false;lastF=0;paint(performance.now())};
+size(true);
 requestAnimationFrame(frame);
 })();
 
@@ -2204,7 +2499,7 @@ hello:['locked in? let’s go','we lock in today','quiet on the creek. study tim
 for(const k in NOW)LINES[k]=(LINES[k]||[]).concat(NOW[k]);
 let sessionStart=performance.now(),longSaid=0;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
-function say(t,force){const now=performance.now();if(!force&&now-lastSay<14000)return;lastSay=now;bub.textContent=t;bub.classList.add('show');clearTimeout(bubT);bubT=setTimeout(()=>bub.classList.remove('show'),3400)}
+function say(t,force){const now=performance.now();if(!force&&now-lastSay<6500)return;lastSay=now;bub.textContent=t;bub.classList.add('show');clearTimeout(bubT);bubT=setTimeout(()=>bub.classList.remove('show'),3400)}
 function setState(s){state=s;stT=0;bites=0;if(s==='study')syms=[]}
 function px(X,Y,c){x.fillStyle=PAL[c]||c;x.fillRect(X,Y,1,1)}
 function sprite(rows,ox,oy){rows.forEach((r,j)=>{for(let i=0;i<r.length;i++)if(r[i]!=='.')px(ox+i,oy+j,r[i])})}
@@ -2262,7 +2557,7 @@ if(state==='eat'&&stT%9===0){bites++;for(let i=0;i<3;i++)crumbs.push({x:17+Math.
 if(state==='study'&&stT%7===0)syms.push({t:pick(['π','∑','x²','√','∞','+','=','∫','dx','3']),x:6+Math.random()*16,y:9,a:1});
 if(state==='study'&&stT>90&&idle>4000)setState('idle');
 if(idle<8000&&performance.now()-sessionStart>1800000*(longSaid+1)){longSaid++;say(pick(LINES.long),true)}
-if(state==='idle'&&stT===70&&Math.random()<.35)say(pick(LINES.idle));
+if(state==='idle'&&(stT===50||stT%240===0)&&Math.random()<.7)say(pick(LINES.idle));
 if(state==='scroll'&&stT>110)setState('idle');
 if(state==='swim'&&stT>120)setState('idle');
 if(state==='fly'&&stT===120)say(pick(LINES.back),true);
@@ -2270,7 +2565,7 @@ if(state==='fly'&&stT>150)setState('idle');
 if(state==='idle'&&stT>140){
 const r=Math.random(),acts=[['eat',.3],['study',.55],['scroll',.72],['fly',.86],['swim',1]];
 const act=acts.find(a=>r<a[1])[0];setState(act);
-const p={eat:.4,study:.4,scroll:.6,fly:1,swim:.7}[act];if(Math.random()<p)say(pick(LINES[act]),act==='fly');
+const p={eat:.75,study:.75,scroll:.85,fly:1,swim:.9}[act];if(Math.random()<p)say(pick(LINES[act]),act==='fly');
 }
 syms.forEach(s=>{s.y-=.35;s.a-=.025});syms=syms.filter(s=>s.a>0);
 crumbs.forEach(c=>{c.vy+=.12;c.y+=c.vy;c.x+=c.vx});crumbs=crumbs.filter(c=>c.y<23);
@@ -2284,7 +2579,7 @@ return{
 event(e){
 lastAct=performance.now();
 if(e==='type'){if(state==='sleep'||state==='idle')setState('study');return}
-if(e==='pass'){mood='pass';moodT=14;flap=10;if(Math.random()<.45)say(pick(LINES.pass))}
+if(e==='pass'){mood='pass';moodT=14;flap=10;if(Math.random()<.65)say(pick(LINES.pass))}
 if(e==='fail'){mood='fail';moodT=30;if(Math.random()<.6)say(pick(LINES.fail),true)}
 if(e==='para'){mood='pass';moodT=20;flap=14;say(pick(LINES.para),true)}
 if(e==='checkpoint'){mood='pass';moodT=24;flap=18;for(let i=0;i<4;i++)hearts.push({x:4+Math.random()*14,y:6,a:1});say(pick(LINES.checkpoint),true)}
@@ -2496,7 +2791,7 @@ function stop(){cancelAnimationFrame(raf);raf=0}
 new ResizeObserver(()=>{if(on)resize()}).observe(cv);
 return{
 set(v){on=v;document.body.classList.toggle('gamify',v);if(v)requestAnimationFrame(start);else stop()},
-task(t){if(!t)return;target=t.type==='essay'?'castle':t.type==='para'?'flag':'step';prog=0;
+task(t){if(!t)return;target=t.type==='essay'?'castle':(t.type==='para'||t.type==='unit')?'flag':'step';prog=0;
 const a=platInfo(G().level),b=platInfo(G().level+1);face=(b.x+b.w/2)>=(a.x+a.w/2)?1:-1},
 progress(p){prog=Math.max(0,Math.min(1,p))},
 pass(t,okWords){
@@ -2535,6 +2830,7 @@ bindSettings();
 loadEssay(ACTIVE);
 renderSwitcher();
 applyPanels();
+applyChoice();
 loadTask();
 setView(SET.view);
 if(!ls.get('seen'))showHowto();
