@@ -1692,9 +1692,22 @@ function skip(){clearTimeout(passT);passT=0;next()}
 function next(){clearTimeout(passT);passT=0;S.ti++;if(S.ti>=queue.length){S.g++;S.ti=0}loadTask()}
 function hint(){
 if(phase!=='type')return;
-const its=items(task.text).filter(i=>i.norm),n=tokens(typed).length,w=its[Math.min(n,its.length-1)];
+// align what's typed against the target (like the marking does), so a skipped or extra word
+// doesn't throw the count off: the next word is the one after the last word you actually matched
+const its=items(task.text).filter(i=>i.norm),U=tokens(typed);
+let n=0,missed=null;
+if(U.length){
+// try target prefixes near the typed length and keep the one that matches most words
+let r=null;
+for(let k=Math.max(1,U.length-4);k<=Math.min(task.T.length,U.length+4);k++){const x=align(task.T.slice(0,k),U);if(!r||x.ok>r.ok)r=x}
+let j=-1;
+for(const o of r.ops)if(o.op==='ok'||o.op==='sub')j=Math.max(j,o.t);
+n=j+1;
+const d=r.ops.find(o=>o.op==='del'&&o.t<j);if(d)missed=its[d.t];
+}
+const w=its[Math.min(n,its.length-1)];
 if(!w)return;
-const t=$('toast');t.textContent='Next word: '+w.orig;t.classList.add('show');
+const t=$('toast');t.textContent='Next word: '+w.orig+(missed?` · you skipped “${missed.orig}” earlier`:'');t.classList.add('show');
 clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);
 focusTa();
 }
