@@ -205,6 +205,7 @@ body.gamify .ch .n{font-family:var(--px);font-size:7px}
 .pv-b{padding:0 20px;overflow:auto;font-family:var(--serif);font-size:17px;line-height:1.65;color:var(--ink)}
 .pv-b p{margin:0 0 .8em}
 .pv-b mark{background:linear-gradient(transparent 12%,var(--tint) 12%,var(--tint) 92%,transparent 92%);color:var(--skyink);padding:0 2px;border-radius:3px}
+.pv-ahead{color:var(--muted)}
 .pv-f{padding:8px 20px 12px;font-size:12px;color:var(--muted)}
 .peekb{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 /* task toolbar: one quiet pill of icon buttons */
@@ -1032,7 +1033,7 @@ body.gamify .iconbtn:hover{background:#151c25;color:#d9f99d}
 <button class="tb" id="btnBack" aria-label="Back one step" data-tip="Back" data-k="Z"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
 <i class="tsep"></i>
 <button class="tb peekb" id="btnPeekP" aria-label="Hold to see the paragraph so far" data-tip="Hold: paragraph" data-k="P"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4v16"/><path d="M17 4v16"/><path d="M19 4H9.5a4.5 4.5 0 0 0 0 9H13"/></svg></button>
-<button class="tb peekb" id="btnPeekE" aria-label="Hold to see the whole essay so far" data-tip="Hold: whole essay" data-k="O"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg></button>
+<button class="tb peekb" id="btnPeekE" aria-label="Hold to see the whole essay" data-tip="Hold: whole essay" data-k="O"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg></button>
 <button class="tb" id="btnHint" aria-label="Show the next word" data-tip="Next word" data-k="H"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.1 14c.2-1 .7-1.7 1.5-2.5A6 6 0 1 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/></svg></button>
 <i class="tsep"></i>
 <button class="tb" id="btnSkip" aria-label="Skip this step" data-tip="Skip"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 4 10 8-10 8z"/><path d="M19 5v14"/></svg></button>
@@ -1701,22 +1702,22 @@ window.addEventListener('blur',()=>{if(peekOn)unpeek()});
 let peekOn=null;
 function peek(kind){
 if(!task||phase==='done'||!SENTS.length)return;
-const x=SENTS[S.g],a=kind==='para'?PSTART[x.p]:0,b=S.g;
+const x=SENTS[S.g],whole=kind!=='para',a=whole?0:PSTART[x.p],b=whole?SENTS.length-1:S.g; // the essay peek shows everything
 let html='',cur=-1;
 for(let g=a;g<=b;g++){
 const s=SENTS[g];
 if(s.p!==cur){if(cur>=0)html+='</p>';html+='<p>';cur=s.p}
 // the current sentence is only revealed up to what the student has been shown so far
-let t=s.text;if(g===S.g&&task.type==='build')t=(task.pre?task.pre+' ':'')+task.text;
+let t=s.text;if(!whole&&g===S.g&&task.type==='build')t=(task.pre?task.pre+' ':'')+task.text;
 const hl=g>=task.a&&g<=task.b;
-html+=(hl?`<mark>${esc(t)}</mark>`:esc(t))+' ';
+html+=(hl?`<mark>${esc(t)}</mark>`:g>S.g?`<span class="pv-ahead">${esc(t)}</span>`:esc(t))+' ';
 }
 html+='</p>';
 const o=$('peekView');
-o.querySelector('.pv-h').textContent=kind==='para'?`Paragraph ${x.p+1} so far`:'Whole essay so far';
+o.querySelector('.pv-h').textContent=kind==='para'?`Paragraph ${x.p+1} so far`:'Whole essay';
 o.querySelector('.pv-b').innerHTML=html;
 o.hidden=false;peekOn=kind;
-const m=o.querySelector('mark:last-of-type');if(m)m.scrollIntoView({block:'nearest'});
+const m=o.querySelector('mark');if(m)m.scrollIntoView({block:whole?'center':'nearest'});
 }
 function unpeek(){peekOn=null;$('peekView').hidden=true;document.querySelectorAll('.tb.held').forEach(b=>b.classList.remove('held'));focusTa()}
 for(const [id,k] of [['btnPeekP','para'],['btnPeekE','essay']]){
@@ -1992,7 +1993,7 @@ if(!matchMedia('(pointer:coarse)').matches)document.querySelectorAll('.tb[data-k
 (()=>{
 const K=(...k)=>k.map(x=>`<kbd>${x}</kbd>`).join('');
 const row=(l,k)=>`<div class="krow"><span>${l}</span><span>${k}</span></div>`;
-$('keysPop').innerHTML='<div class="kh">While typing</div>'+row('Check',K('Enter'))+row('Next word',K(CTRL,'H'))+row('Hold: paragraph so far',K(CTRL,'P'))+row('Hold: whole essay so far',K(CTRL,'O'))+row('Back one step <small>(empty box)</small>',K(CTRL,'Z'))+
+$('keysPop').innerHTML='<div class="kh">While typing</div>'+row('Check',K('Enter'))+row('Next word',K(CTRL,'H'))+row('Hold: paragraph so far',K(CTRL,'P'))+row('Hold: whole essay',K(CTRL,'O'))+row('Back one step <small>(empty box)</small>',K(CTRL,'Z'))+
 '<div class="kh">After marking</div>'+row('Continue / retry',K('Enter'))+row('Skip',K('Tab'))+
 '<div class="kh">Anywhere</div>'+row('Switch essay',K(IS_APPLE?'⌥':'Alt','1–9'))+row('This list',K(CTRL,'/'));
 })();
