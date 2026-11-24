@@ -1,0 +1,68 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      rls:
+        description: Run the Row Level Security check against the configured Supabase project
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      PW_CHANNEL: chrome
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Static checks (service worker stamp, syntax)
+        run: |
+          npm run check:sw
+          for f in $(git ls-files 'js/*.js' 'js/**/*.js' sw.js); do node --check "$f"; done
+      - name: Unit tests (algorithms, marking modes, worker manager, sync)
+        run: npm run test:unit
+      - name: Browser tests (installed Google Chrome on the runner)
+        run: npx playwright test --project=e2e
+      - name: Accessibility tests (axe-core)
+        run: npx playwright test --project=a11y
+      - name: Engine benchmark (informational)
+        run: npm run test:performance
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+  rls:
+    # Needs a real Supabase project with two password-enabled test users. Never uses production student accounts.
+    if: github.event_name == 'workflow_dispatch' && inputs.rls
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/rls-check.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          RLS_A_EMAIL: ${{ secrets.RLS_A_EMAIL }}
+          RLS_A_PASSWORD: ${{ secrets.RLS_A_PASSWORD }}
+          RLS_B_EMAIL: ${{ secrets.RLS_B_EMAIL }}
+          RLS_B_PASSWORD: ${{ secrets.RLS_B_PASSWORD }}
