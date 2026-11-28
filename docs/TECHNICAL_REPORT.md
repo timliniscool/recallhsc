@@ -32,7 +32,7 @@ Status key: **Done + tested** · **Done, externally unverified** (needs a real S
 - `manifest.webmanifest`, `sw.js`, `icons/*`
 - `supabase/migrations/20261124000000_recallhsc_sync.sql`
 - `tests/{unit,e2e,a11y,performance,fixtures,helpers}/*`
-- `tools/{serve,capture-golden,split-monolith,stamp-sw,make-icons}.cjs`, `tools/rls-check.mjs`, `tools/patches/*`
+- `tools/{serve,capture-golden,stamp-sw,make-icons}.cjs`, `tools/rls-check.mjs`
 - `.github/workflows/ci.yml`, `package.json`, `package-lock.json`, `playwright.config.js`, `.gitignore`
 - `docs/*`
 
