@@ -9,14 +9,14 @@
    Scope: only requests under this worker's own directory (/recallhsc/ on GitHub Pages). */
 'use strict';
 const VERSION='2.0.0';
-const ASSET_HASH='74a84ca56cb5';
+const ASSET_HASH='d9a14bc4a4d0';
 const SHELL='recallhsc-shell-'+VERSION+'-'+ASSET_HASH;
 const FONTS='recallhsc-fonts-v1';
 const PRECACHE=[
   './','index.html','manifest.webmanifest',
   'js/engine/text.js','js/engine/chunker.js','js/engine/parser.js','js/engine/marking.js','js/engine/policies.js','js/engine/recall.js',
   'js/workers/worker-manager.js','js/workers/compute.worker.js',
-  'js/app.js','js/pet.js','js/game.js','js/boot.js','js/a11y/dialogs.js','js/pwa/pwa.js','js/analytics.js','js/handwriting/handwriting.js','js/sync/config.js','js/sync/conflict.js','js/sync/sync.js',
+  'js/app.js','js/pet.js','js/game.js','js/boot.js','js/a11y/dialogs.js','js/pwa/pwa.js','js/analytics.js','js/beta-invite.js','js/handwriting/handwriting.js','js/sync/config.js','js/sync/conflict.js','js/sync/sync.js',
   'js/booklet-data.js',
   'icons/icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','icons/apple-touch-icon.png','icons/favicon-32.png',
   'img/adapt-5.png','img/adapt-6.png',
@@ -55,7 +55,9 @@ self.addEventListener('fetch',e=>{
   if(url.href.startsWith(FONT_CSS)){e.respondWith(staleWhileRevalidate(req,FONTS));return}
   if(url.href.startsWith(FONT_FILES)){e.respondWith(cacheFirst(req,FONTS));return}
   if(url.origin!==scope.origin||!url.pathname.startsWith(scope.pathname))return; // outside our scope: browser handles it
-  if(url.pathname.startsWith(scope.pathname+'beta/'))return; // the beta site has its own service worker and files
+  // the beta site has its own service worker and files: /recallhsc/beta and /recallhsc/beta/… go to the network
+  // (without the slash, GitHub Pages redirects to /beta/)
+  if(url.pathname===scope.pathname+'beta'||url.pathname.startsWith(scope.pathname+'beta/'))return;
   if(req.mode==='navigate'){e.respondWith(navigate(req));return}
   e.respondWith(shell(req));
 });
