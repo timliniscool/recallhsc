@@ -409,7 +409,7 @@ async function quickRead(){
   const lines=lineGroups();if(!lines.length)return '';
   const blobs=await Promise.all(lines.map(lineImage));
   const r=await checkLines(lines.map((L,i)=>({key:L.key,blob:blobs[i],width:L.x1-L.x0})),task.text,null);
-  return r.texts.join(' ').replace(/s+/g,' ').trim();
+  return r.texts.join(' ').replace(/\s+/g,' ').trim();
 }
 if(typeof hint==='function'){
   const plainHint=hint;

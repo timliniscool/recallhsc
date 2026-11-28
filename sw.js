@@ -10,8 +10,11 @@
    Scope: only requests under this worker's own directory (/recallhsc/ on GitHub Pages). */
 'use strict';
 const VERSION='2.0.0';
-const ASSET_HASH='44a172951b6a';
-const SHELL='recallhsc-shell-'+VERSION+'-'+ASSET_HASH;
+const ASSET_HASH='01eeca0eedfc';
+// main (/recallhsc/) and beta (/recallhsc/beta/) share one origin and so one Cache Storage: each site's shell cache is
+// named after its own scope, so updating one never deletes the other's offline copy
+const SITE=new URL(self.registration.scope).pathname.replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'')||'root';
+const SHELL='recallhsc-shell-'+SITE+'@'+VERSION+'-'+ASSET_HASH; // '@' ends the site name, so 'recallhsc@' never matches 'recallhsc-beta@'
 const FONTS='recallhsc-fonts-v1';
 // the handwriting reader's model (~107 MB, models/): its own cache, kept across app updates and replaced only when
 // the model changes. Bump this together with MODEL_VERSION in js/handwriting/handwriting.js.
@@ -40,8 +43,9 @@ self.addEventListener('install',e=>{
 
 self.addEventListener('activate',e=>{
   e.waitUntil((async()=>{
-    // remove only this app's old shells; other caches on the origin are left alone
-    for(const k of await caches.keys())if((k.startsWith('recallhsc-shell-')&&k!==SHELL)||(k.startsWith('recallhsc-model-')&&k!==MODEL))await caches.delete(k);
+    // remove only this site's old shells (and the unscoped shell names used before sites were separated);
+    // the other site's shell and other caches on the origin are left alone
+    for(const k of await caches.keys())if((((k.startsWith('recallhsc-shell-'+SITE+'@')&&k!==SHELL)||/^recallhsc-shell-\d/.test(k)))||(k.startsWith('recallhsc-model-')&&k!==MODEL))await caches.delete(k);
     await self.clients.claim();
   })());
 });

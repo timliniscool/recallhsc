@@ -272,6 +272,15 @@ test('hint while handwriting reads what is written so far, then shows the word a
   await expect(page.locator('#toast')).toContainText('Next word');
 });
 
+test("the hint's reading keeps every letter (whitespace is tidied, not the letter s)",async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));
+  await stroke(page,'pen',0);
+  // the stand-in reader reads back the expected words exactly, so the hint's text must match them letter for letter
+  const [read,want]=await page.evaluate(async()=>[await HW._quickRead(),task.text.replace(/\s+/g,' ').trim()]);
+  expect(want).toMatch(/s/);expect(read).toBe(want);
+});
+
 test('the download bar shows only the first time; later loads are silent',async({page})=>{
   await page.addInitScript(()=>{const Real=window.Worker;window.Worker=function(url,o){if(!String(url).includes('hw.worker'))return new Real(url,o);
     const w={onmessage:null,terminate(){},postMessage(m){if(m.type==='load')setTimeout(()=>w.onmessage&&w.onmessage({data:{type:'progress',loaded:30,total:100}}),10)}};return w}});
