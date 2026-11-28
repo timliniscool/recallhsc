@@ -130,6 +130,9 @@ if(S.g>SENTS.length)S.g=0;
 // repair: long (two-half) sentences already moved past used to stay uncounted unless the whole-sentence recall
 // was passed too, so the % and sentence map lagged behind. Count every one behind the current position.
 for(let g=Math.min(S.startG,S.g);g<Math.min(S.g,SENTS.length);g++)if(g>=S.startG&&!S.learned[g]&&splitSentence(SENTS[g].text))S.learned[g]=true;
+// repair: map clicks used to move the start point, which cut earlier parts out of essay recalls. If everything before
+// the start point is learnt, the student knows it, so recalls go back to covering the whole essay.
+if(S.startG>0&&S.startG<=SENTS.length){let all=true;for(let k=0;k<S.startG;k++)if(!S.learned[k]){all=false;break}if(all)S.startG=0}
 adoptPos();
 }
 
@@ -746,7 +749,10 @@ $('memKv').innerHTML=filled.length<3
 $('map').innerHTML=PARAS.map((ss,p)=>`<div class="maprow"><span class="pl">¶${p+1}</span><div class="dots">${ss.map((t,s)=>{const g=PSTART[p]+s,x=SENTS[g];
 return `<button class="dot ${S.learned[g]?'l':''} ${x.role==='ts'?'ts':''} ${x.unitEnd?'ue':''} ${g===S.g&&phase!=='done'?'cur':''}" data-g="${g}" title="${ROLE[x.role]}: ${esc(t.slice(0,90))}…"></button>`}).join('')}</div></div>`).join('');
 }
-$('map').addEventListener('click',e=>{const d=e.target.closest('.dot');if(d)setStart(+d.dataset.g)});
+// picking a sentence on the map just goes there (to relearn it, say). It doesn't change the start point, so essay
+// recalls still cover everything from where the student started; going back before that start point moves it back.
+$('map').addEventListener('click',e=>{const d=e.target.closest('.dot');if(d)jumpTo(+d.dataset.g)});
+function jumpTo(g){if(g<S.startG)S.startG=g;S.g=g;S.ti=0;S.started=true;closeModal();loadTask()}
 
 /* ---------- panels / focus ---------- */
 const PANELS=[...document.querySelectorAll('.panel[data-panel]')];

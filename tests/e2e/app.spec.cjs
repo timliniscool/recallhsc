@@ -255,3 +255,18 @@ test('progress saved before the fix: long sentences already moved past are count
   expect(await page.evaluate(()=>S.learned[1])).toBe(true);
   expect(await page.evaluate(()=>pctOf(ACTIVE))).toBeGreaterThan(0);
 });
+
+test('picking a sentence on the map goes there without cutting earlier parts out of essay recalls',async({page})=>{
+  await openApp(page,{seed:{'state.sample':{startG:0,g:8,ti:0,learned:[true,true,true,true,true,true,true,true],started:true}}});
+  await page.evaluate(()=>{renderSide&&renderSide()});
+  await page.evaluate(()=>document.querySelector('#map .dot[data-g="3"]').click());
+  expect(await page.evaluate(()=>[S.g,S.startG])).toEqual([3,0]); // position moves, start point stays
+  // an essay checkpoint from here covers the whole essay so far
+  const essay=await page.evaluate(()=>{for(let g=3;g<SENTS.length;g++){const q=buildQueue(g).find(t=>t.type==='essay');if(q)return [q.a,q.b]}return null});
+  if(essay)expect(essay[0]).toBe(0);
+});
+
+test('progress where a map click had moved the start point is repaired when everything before it is learnt',async({page})=>{
+  await openApp(page,{seed:{'state.sample':{startG:5,g:5,ti:0,learned:[true,true,true,true,true],started:true}}});
+  expect(await page.evaluate(()=>S.startG)).toBe(0);
+});
