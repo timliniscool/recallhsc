@@ -9,7 +9,7 @@
    Scope: only requests under this worker's own directory (/recallhsc/ on GitHub Pages). */
 'use strict';
 const VERSION='2.0.0';
-const ASSET_HASH='095ac360464a';
+const ASSET_HASH='5db49da76e0e';
 const SHELL='recallhsc-shell-'+VERSION+'-'+ASSET_HASH;
 const FONTS='recallhsc-fonts-v1';
 const PRECACHE=[
@@ -30,7 +30,8 @@ self.addEventListener('install',e=>{
     // cache:'reload' bypasses the HTTP cache so a new version never precaches stale files
     await c.addAll(PRECACHE.map(u=>new Request(u,{cache:'reload'})));
   })());
-  // no skipWaiting here: the page decides when to switch (never mid-answer)
+  // no skipWaiting here: the page decides when to switch. Right after it opens it switches straight away;
+  // once the student is using it, it offers an Update button instead (see js/pwa/pwa.js)
 });
 
 self.addEventListener('activate',e=>{
