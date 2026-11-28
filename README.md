@@ -15,6 +15,8 @@ Type it, recall it, own it, in the browser, offline, for free.
 ![Accessibility](https://img.shields.io/badge/WCAG-2.2_AA_aim-8b5cf6)
 ![No cookies](https://img.shields.io/badge/cookies-none-64748b)
 
+**[How it works under the hood →](TECHNICAL.md)** · architecture, algorithms, marking and the handwriting AI
+
 <img src="docs/images/recallhsc.png" alt="RecallHSC: a chunk being typed from memory, with live telemetry and the memory profile beside it" width="900">
 
 </div>
