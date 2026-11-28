@@ -27,12 +27,25 @@ const RESCUE_LOOKALIKE=0.001; // ...or fit it somewhat AND look like what was re
 const RESCUE_DROPPED=0.05;    // expected words the reader dropped or merged away come back when they fit the ink this well
 const NEAR=2.5;               // ...or are within this much (log-probability per token, ~12x) of the reader's own guess
 // letter-level likeness of two word groups: 1 = identical, 0 = nothing in common (edit distance, case and punctuation ignored)
+// Letters that look alike in handwriting cost only a fraction of a mistake: l can look like i, 1, ) or |; a like o
+// or u; n like m, r or h; and some pairs of letters like one (rn/m, cl/d, ii/u, vv/w, li/h).
+const LOOK=[['l','i','1','j','t','f'],['a','o','u','e','c'],['n','m','r','h','u'],['e','c'],['s','5','z'],['g','q','y','9'],
+  ['b','h','6','k'],['d','a','cl'],['v','u','y'],['w','vv','uu'],['m','rn','nn'],['u','ii','n','v'],['h','li','b','n'],['o','0','a','c'],['t','f','l','+'],['k','h','x'],['p','q','b'],['z','2','s']];
+const lookCost=(x,y)=>{if(x===y)return 0;for(const g of LOOK)if(g.includes(x)&&g.includes(y))return .3;return 1};
 function similar(a,b){
-  a=a.toLowerCase().replace(/[^a-z0-9]/g,'');b=b.toLowerCase().replace(/[^a-z0-9]/g,'');
+  const keep=s=>s.toLowerCase().replace(/[)|]/g,'l').replace(/[^a-z0-9+]/g,''); // ) and | read as l
+  a=keep(a);b=keep(b);
   if(!a||!b)return 0;
-  let prev=Array.from({length:b.length+1},(_,j)=>j);
-  for(let i=1;i<=a.length;i++){const cur=[i];for(let j=1;j<=b.length;j++)cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));prev=cur}
-  return 1-prev[b.length]/Math.max(a.length,b.length);
+  const n=a.length,m=b.length,D=[];
+  for(let i=0;i<=n;i++){D.push(new Float32Array(m+1));D[i][0]=i}for(let j=0;j<=m;j++)D[0][j]=j;
+  for(let i=1;i<=n;i++)for(let j=1;j<=m;j++){
+    let v=Math.min(D[i-1][j]+1,D[i][j-1]+1,D[i-1][j-1]+lookCost(a[i-1],b[j-1]));
+    // one letter written like two (or two like one): rn↔m, cl↔d, vv↔w…
+    if(i>=2)v=Math.min(v,D[i-2][j-1]+lookCost(a.slice(i-2,i),b[j-1]));
+    if(j>=2)v=Math.min(v,D[i-1][j-2]+lookCost(a[i-1],b.slice(j-2,j)));
+    D[i][j]=v;
+  }
+  return 1-D[n][m]/Math.max(n,m);
 }
 env.allowLocalModels=false;
 env.useBrowserCache=true;
@@ -148,7 +161,7 @@ async function check(m){
         const tf=performance.now();const f_=await fit(vs[L],before,want);perf.fit+=performance.now()-tf;perf.fits++;
         // messy handwriting: accept the expected words when they fit the ink well, or fit it somewhat and look like
         // what was read (e.g. "place" read as "slave"). A genuinely different word fits ~0.0001 and looks different.
-        let ok=gs.length?(f_>=RESCUE||(f_>=RESCUE_LOOKALIKE&&similar(seen,want)>=0.5)):f_>=RESCUE_DROPPED;
+        let ok=gs.length?(f_>=RESCUE||(f_>=RESCUE_LOOKALIKE&&similar(seen,want)>=0.58)):f_>=RESCUE_DROPPED;
         // cursive and very messy writing: compare the expected words with the reader's own guess on the same ink.
         // If the expected words are nearly as believable (within NEAR per token), the writing gets the benefit of the
         // doubt. A clearly different word is thousands of times less likely, so real mistakes still fail.

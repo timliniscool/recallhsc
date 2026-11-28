@@ -278,3 +278,11 @@ test('beta: Focus is on by default, without changing the main site’s saved set
   await page.evaluate(()=>save());
   expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('essayRecall2.settings')).focus)).toBe(false);
 });
+
+test('footer links to the privacy policy and the open-source code',async({page})=>{
+  await openApp(page);
+  await expect(page.locator('.flinks a[href="privacy.html"]')).toHaveText('Privacy policy');
+  await expect(page.locator('.flinks a[href="https://github.com/timliniscool/recallhsc"]')).toBeVisible();
+  const res=await page.goto('privacy.html');expect(res.status()).toBe(200);
+  await expect(page.locator('h1')).toHaveText('Privacy policy');
+});
