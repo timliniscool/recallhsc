@@ -124,7 +124,7 @@ cv.addEventListener('pointermove',e=>{
   let evs=e.getCoalescedEvents?e.getCoalescedEvents():[];if(!evs.length)evs=[e]; // some browsers return none
   const start=Math.max(0,cur.pts.length-1);
   for(const ev of evs)cur.pts.push(at(ev));
-  seg({pts:cur.pts.slice(start)});
+  seg({pts:cur.pts.slice(start),red:cur.red}); // keep the pen: red after marking, black before
 });
 const end=e=>{if(cur&&e.pointerType==='pen'){const was=cur;cur=null;if(!was.erase&&!was.red){clearTimeout(preT);preT=setTimeout(preEncode,600);
   // writing near the bottom: add ten more lines of paper
@@ -413,6 +413,6 @@ if(typeof hint==='function'){
   };
   hint=hwHint;const hb=$('btnHint');if(hb)hb.onclick=hwHint;
 }
-self.HW={_marks:()=>marks,_mkPlace:mkPlace,_quickRead:quickRead,_lastReport:()=>last,_sendSample:sendSample,_scribbled:scribbled,_rule:()=>[RULE,RULE0],setErase,_erase:eraseAt,task:reset,on:()=>on,setOn,setPaper,_strokes:()=>strokes,_lines:lineGroups,_pre:preEncode,_redraw:redraw,_img:lineImage};
+self.HW={_marks:()=>marks,_mkPlace:mkPlace,_quickRead:quickRead,_lastReport:()=>last,_sendSample:sendSample,_scribbled:scribbled,_rule:()=>[RULE,RULE0],setErase,_erase:eraseAt,task:reset,on:()=>on,hasInk:()=>on&&strokes.length>0,setOn,setPaper,_strokes:()=>strokes,_lines:lineGroups,_pre:preEncode,_redraw:redraw,_img:lineImage};
 setPaper(paper);apply();
 })();

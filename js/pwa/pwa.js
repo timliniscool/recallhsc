@@ -75,7 +75,7 @@ function restoreStash(){
 const OPENED=Date.now();
 function justOpened(){
   if(Date.now()-OPENED>8000)return false;
-  try{if(typeof typed==='string'&&typed.trim())return false;if(typeof phase!=='undefined'&&phase!=='type')return false}catch(_){}
+  try{if(typeof answering==='function'&&answering())return false;if(typeof typed==='string'&&typed.trim())return false;if(typeof phase!=='undefined'&&phase!=='type')return false}catch(_){}
   return true;
 }
 // Settings > App shows the running version (and whether this is the beta), to make support easy

@@ -110,7 +110,7 @@ if((inc.resetAt||0)>(S.resetAt||0)){S=inc;loadTask();return}   // a reset in the
 inc.learned.forEach((v,g)=>{if(v)S.learned[g]=true});
 // position: the most recent move wins (so going back in one tab sticks); older saves without a move time: furthest wins
 const newer=(inc.posAt||S.posAt)?(inc.posAt||0)>(S.posAt||0):(inc.g>S.g||(inc.g===S.g&&inc.ti>S.ti));
-if(newer&&(inc.g!==S.g||inc.ti!==S.ti)){S.g=inc.g;S.ti=inc.ti;S.posAt=inc.posAt||0;S.started=true;adoptPos();if(phase==='type'&&!typed)loadTask()}
+if(newer&&(inc.g!==S.g||inc.ti!==S.ti)){S.g=inc.g;S.ti=inc.ti;S.posAt=inc.posAt||0;S.started=true;adoptPos();if(!answering())loadTask()}
 if(inc.part&&(!S.part||inc.part.g>S.part.g||(inc.part.g===S.part.g&&inc.part.w>S.part.w)))S.part=inc.part;
 renderSide();
 });
@@ -146,6 +146,9 @@ adoptPos();
 /* ---------- task flow ---------- */
 let queue=[],task=null,phase='type',typed='',t0=0,tries=0,lastKey=0,idleT=0,autoT=0;
 let L=null; // live telemetry for the current attempt
+/* The student is in the middle of something that a background reload of the step (cloud sync, another tab, an update)
+   must not throw away: a typed or HANDWRITTEN answer in progress, marking, or the marked result on screen. */
+function answering(){if(phase==='type')return!!((typeof typed==='string'&&typed.trim())||(self.HW&&HW.hasInk&&HW.hasInk()));return phase!=='done'}
 const newLive=()=>({keys:0,bs:0,ins:[],gaps:[],hes:0,longest:0,samples:[],peak:0,acc:null,accAt:0});
 const $=id=>document.getElementById(id);
 const ta=$('ta'),typebox=$('typebox'),typedEl=$('typed'),mark=$('mark'),caret=$('caret'),prompt=$('prompt'),foot=$('foot');

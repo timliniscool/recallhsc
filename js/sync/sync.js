@@ -150,7 +150,7 @@ const configured=typeof cfg.url==='string'&&/^https:\/\/[a-z0-9-]+\.supabase\.co
 const $=id=>document.getElementById(id);
 const store={get:k=>ls.get(k),set:(k,v)=>lsTry(k,v)};
 const deviceId=()=>{let d=ls.get('device');if(typeof d!=='string'||!/^[a-z0-9]{8,24}$/.test(d)){d=Math.random().toString(36).slice(2,12)+Date.now().toString(36);lsTry('device',d)}return d};
-const busy=()=>phase==='type'&&typeof typed==='string'&&typed.trim().length>0;
+const busy=()=>typeof answering==='function'?answering():phase==='type'&&typeof typed==='string'&&typed.trim().length>0; // includes handwriting on the sheet
 
 /* app adapter: how the engine reads and writes the app's essays, progress and settings */
 const app={
@@ -187,7 +187,7 @@ const app={
       for(const k of fields)if(p[k]!==undefined)S[k]=p[k];
       if(mid){S.g=pos[0];S.ti=pos[1]} // never yank the student off the answer they're typing
       adoptPos(); // a position that came from another device is not a new move on this one
-      save();renderSide();if(!mid&&phase!=='marking')loadTask();
+      save();renderSide();if(!mid)loadTask();
     }else{
       const cur=cleanState(ls.get('state.'+id))||DEFSTATE();
       for(const k of fields)if(p[k]!==undefined)cur[k]=p[k];
@@ -198,6 +198,7 @@ const app={
   setPrefs(p){let ch=false;for(const k of Object.keys(p))if(SET[k]!==p[k]){SET[k]=p[k];ch=true}if(ch){saveSettings();try{bindSettings()}catch(_){}}}
 };
 
+self.__syncApp=app; // for the tests: lets them apply a merge the way a real sync does
 let sb=null,engine=null,user=null,loading=null;
 // the signed-in access token, for features that send to the project (marking reports); null when signed out
 self.RecallCloudAuth=async()=>{if(!sb)return null;try{const r=await sb.auth.getSession();return r.data.session?r.data.session.access_token:null}catch(_){return null}};

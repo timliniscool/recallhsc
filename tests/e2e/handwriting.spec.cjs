@@ -289,3 +289,46 @@ test('starting to write the answer clears the markup on the sentence',async({pag
   await stroke(page,'pen',0);
   expect(await page.evaluate(()=>HW._marks().length)).toBe(0);
 });
+
+test('a cloud sync or another tab never wipes what is written on the sheet',async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));await page.waitForTimeout(300);
+  await stroke(page,'pen',0);await stroke(page,'pen',1);
+  expect(await page.evaluate(()=>HW._strokes().length)).toBe(2);
+  // a sync merge arrives (same position, as happens a few seconds after any save)
+  await page.evaluate(()=>{const st=__syncApp.getState(ACTIVE);__syncApp.setState(ACTIVE,{...st,rev:(st.rev|0)+1})});
+  expect(await page.evaluate(()=>HW._strokes().length)).toBe(2);
+  // another tab moved on: the answer being written stays
+  await page.evaluate(()=>{const k='essayRecall2.state.'+ACTIVE,v=JSON.parse(localStorage.getItem(k)||'{}');
+    dispatchEvent(new StorageEvent('storage',{key:k,newValue:JSON.stringify({...S,...v,ti:S.ti+1,posAt:Date.now()+5000})}))});
+  expect(await page.evaluate(()=>HW._strokes().length)).toBe(2);
+  // with an empty sheet a merge may still refresh the step
+  await page.evaluate(()=>HW.task());
+  expect(await page.evaluate(()=>answering())).toBe(false);
+});
+
+test('Don stays mostly quiet while handwriting; clicking him still gets an answer',async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));
+  await page.waitForFunction(()=>!$('petBub').classList.contains('show'),null,{timeout:8000}).catch(()=>{});
+  await page.waitForTimeout(5500); // past his hello
+  await stroke(page,'pen',0);
+  // Don's chance to speak while writing is small (1 in 50); with a mid-range roll he stays quiet
+  await page.evaluate(()=>{Math.random=()=>0.5});
+  const chatted=await page.evaluate(async()=>{let n=0;for(let i=0;i<30;i++){await new Promise(r=>setTimeout(r,100));if($('petBub').classList.contains('show'))n++}return n});
+  expect(chatted).toBe(0);
+  await page.locator('#petCv').click();
+  await expect(page.locator('#petBub')).toHaveClass(/show/);
+});
+
+test('the red marking pen draws red while you write, not black',async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));await page.waitForTimeout(300);
+  await stroke(page,'pen',0);
+  await page.evaluate(()=>document.body.classList.add('hwmarked')); // as after Check
+  await stroke(page,'pen',3,60);
+  // sample the live pixels of the new stroke before anything redraws
+  const px=await page.evaluate(()=>{const cv=$('hwCanvas'),c=cv.getContext('2d'),d=cv.width/cv.getBoundingClientRect().width,[R_,R0]=HW._rule();
+    const s=HW._strokes().at(-1);let red=0,dark=0;for(const[x,y] of s.pts){const p=c.getImageData(Math.round(x*d),Math.round(y*d),1,1).data;if(p[3]>80){if(p[0]>150&&p[1]<90)red++;else if(p[0]<60)dark++}}return{red,dark}});
+  expect(px.red).toBeGreaterThan(3);expect(px.dark).toBe(0);
+});

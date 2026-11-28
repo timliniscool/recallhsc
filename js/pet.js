@@ -76,9 +76,18 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 /* Pacing: one line every 20–30s at most. Lines are weighted towards pauses: mid-typing (a key in the last
 2s) only ~1 in 4 chances get through; after a submission or during a hesitation they almost always do.
 Clicking Don, and his hello, always get an answer. */
-let lastType=0,nextOk=0;
+let lastType=0,nextOk=0,lastPen=0;
+// Apple Pencil on the handwriting sheet counts as working (so Don doesn't fall asleep and say so mid-answer)
+const pen=e=>{if(e.pointerType==='pen'){lastPen=lastAct=performance.now();if(state==='sleep'||state==='idle')setState('study')}};
+document.addEventListener('pointerdown',pen,true);document.addEventListener('pointerup',pen,true);
+/* Handwriting (Apple Pencil sheet on): Don is quiet most of the time, by chance rather than a timer. Each moment he
+would speak only gets through 1 time in 50 while the pencil is moving (touched in the last 3 seconds) and 1 in 16
+during a pause, so lines come at random, roughly every few minutes. Clicking him still always gets an answer. */
+const writing=()=>!!(self.HW&&HW.on&&HW.on());
 function say(t,force){const now=performance.now();
-if(force!=="always"){if(now<nextOk)return;if(now-lastType<2000&&Math.random()>.25)return}
+if(force!=="always"){if(now<nextOk)return;
+  if(writing()){if(Math.random()>(now-lastPen<3000?.02:.06))return}
+  else if(now-lastType<2000&&Math.random()>.25)return}
 nextOk=now+20000+Math.random()*10000;lastSay=now;bub.textContent=t;bub.classList.add('show');clearTimeout(bubT);bubT=setTimeout(()=>bub.classList.remove('show'),3400)}
 function setState(s){state=s;stT=0;bites=0;if(s==='study')syms=[]}
 function px(X,Y,c){x.fillStyle=PAL[c]||c;x.fillRect(X,Y,1,1)}
