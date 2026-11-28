@@ -23,7 +23,7 @@ test('service worker installs, precaches the app, and RecallHSC works offline',a
   const scope=await page.evaluate(async()=>(await navigator.serviceWorker.getRegistration()).scope);
   expect(scope).toMatch(/\/recallhsc\/$/);
   const cached=await page.evaluate(async()=>{const k=(await caches.keys()).find(k=>k.startsWith('recallhsc-shell-'));const c=await caches.open(k);return(await c.keys()).map(r=>new URL(r.url).pathname)});
-  for(const f of ['/recallhsc/index.html','/recallhsc/js/app.js','/recallhsc/js/workers/compute.worker.js','/recallhsc/js/booklet-data.js','/recallhsc/manifest.webmanifest'])expect(cached).toContain(f);
+  for(const f of ['/recallhsc/index.html','/recallhsc/js/app.js','/recallhsc/js/workers/compute.worker.js','/recallhsc/js/toolkit.vault.json','/recallhsc/manifest.webmanifest'])expect(cached).toContain(f);
   await context.setOffline(true);
   await page.reload();
   await page.waitForFunction(()=>typeof task!=='undefined'&&task);
@@ -31,7 +31,7 @@ test('service worker installs, precaches the app, and RecallHSC works offline',a
   const big=await page.evaluate(async()=>(await COMPUTE.run('mark',{text:RAW,typed:RAW},{size:9999})).pct); // worker offline
   expect(big).toBe(100);
   await page.evaluate(()=>{setView('guide')});await expect(page.locator('#viewGuide, .gwrap').first()).toBeVisible(); // rubric guide offline
-  const pdf=await page.evaluate(async()=>(await bookletBlob()).size);expect(pdf).toBeGreaterThan(10000); // booklet offline
+  const vault=await page.evaluate(async()=>(await (await fetch('js/toolkit.vault.json')).json()).kdf);expect(vault).toBe('PBKDF2-SHA256'); // toolkit (encrypted) offline
   await context.setOffline(false);
 });
 

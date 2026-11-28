@@ -278,3 +278,14 @@ test('the download bar shows only the first time; later loads are silent',async(
   await page.waitForTimeout(400);
   await expect(page.locator('#hwLoad')).toBeHidden();
 });
+
+test('starting to write the answer clears the markup on the sentence',async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));await page.waitForTimeout(300);
+  await page.evaluate(()=>{const mk=document.querySelector('.hwmarkup'),r=mk.getBoundingClientRect();
+    const ev=(n,x)=>mk.dispatchEvent(new PointerEvent(n,{pointerType:'pen',pointerId:22,clientX:r.left+x,clientY:r.top+r.height/2,pressure:.5,bubbles:true,cancelable:true}));
+    ev('pointerdown',20);ev('pointermove',80);ev('pointerup',80)});
+  expect(await page.evaluate(()=>HW._marks().length)).toBe(1);
+  await stroke(page,'pen',0);
+  expect(await page.evaluate(()=>HW._marks().length)).toBe(0);
+});

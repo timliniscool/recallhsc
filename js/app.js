@@ -1444,7 +1444,8 @@ if(m.old)h+=`<section class="gsec"><h2>${m.oldTitle} <span class="tag old">legac
 h+=`<p class="src">${m.src} Figures and idea summaries adapted from Art of Smart’s HSC 2027 module pages and rewritten for this guide.</p>`;
 return h;
 }
-const TIPS=``; /* NSBHS toolkit: removed from history (now encrypted in js/toolkit.vault.json) */
+/* Exam tips, the Adaptation guide, the Mod C exemplars and the writing booklet are the NSBHS toolkit. They are
+   stored encrypted (js/toolkit.vault.json) and unlocked with the access password: see js/toolkit.js. */
 
 function bookletHtml(){
 return `<section class="gsec ghero"><div class="kick">Practice paper</div><h1>Writing booklet</h1><p>A 9-page lined booklet for timed practice. It’s built into the page, so it works offline.</p></section>
@@ -1453,26 +1454,23 @@ return `<section class="gsec ghero"><div class="kick">Practice paper</div><h1>Wr
 <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" id="bDl">Download PDF</button><button class="btn" id="bOpen">Open in new tab</button></div>
 <p class="src" style="margin-top:12px">Print a few and do timed responses by hand. In the exam, how fast you write is the real limit.</p></div></div></section>`;
 }
-/* the booklet PDF lives in js/booklet-data.js and loads the first time it is needed (cached for offline use) */
-let bookletP=null;
-function loadBooklet(){return bookletP||(bookletP=new Promise((res,rej)=>{if(self.BOOKLET_B64)return res();const s=document.createElement('script');s.src='js/booklet-data.js';s.onload=()=>res();s.onerror=()=>{bookletP=null;rej(new Error('booklet'))};document.head.appendChild(s)}))}
-async function bookletBlob(){await loadBooklet();const b=atob(self.BOOKLET_B64),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new Blob([u],{type:'application/pdf'})}
+/* the booklet PDF comes from the unlocked toolkit */
+async function bookletBlob(){const b64=self.TOOLKIT&&self.TOOLKIT.booklet;if(!b64)throw new Error('locked');const b=atob(b64),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new Blob([u],{type:'application/pdf'})}
 const GNAV=[['common','Common Module','Texts & Human Experiences'],['modA','Module A','Textual Conversations'],['modB','Module B','Critical Study of Literature'],['modC','Module C','The Craft of Writing'],['tips','Exam tips','PEPSS/PECIL, SAQ, themes, Mod C'],['adapt','Adaptation guide','SAQ, phrases, every module'],['exemplars','Mod C exemplars','Read them, or memorise one'],['booklet','Writing booklet','Download the PDF']];
-const DOCS=JSON.parse(document.getElementById('docs').textContent);
+const DOCS=()=>(self.TOOLKIT&&self.TOOLKIT.docs)||{ex:[]};
 const chipList=a=>`<div class="chips">${a.map(x=>`<span>${x}</span>`).join('')}</div>`;
 const qList=(title,qs,hard)=>`<details class="qset"><summary><b>${title}</b><small>${qs.length+(hard?hard.length:0)} questions</small></summary><ol>${qs.map(q=>`<li>${q}</li>`).join('')}</ol>${hard?`<div class="rlab">Extra challenging</div><ol start="${qs.length+1}">${hard.map(q=>`<li>${q}</li>`).join('')}</ol>`:''}</details>`;
 const dell=items=>`<ul class="dell">${items.map(x=>`<li>${x}</li>`).join('')}</ul>`;
-const ADAPT=``; /* NSBHS toolkit: removed from history (now encrypted in js/toolkit.vault.json) */
 
-function adaptHtml(){return ADAPT}
+function adaptHtml(){return self.TOOLKIT?self.TOOLKIT.adapt:''}
 function exemplarsHtml(){
 return `<section class="gsec ghero"><div class="kick">Module C</div><h1>Mod C exemplars</h1><p>Imaginative and discursive pieces, with reflections. Read one, or hit <b>Memorise</b> to add it to your essays.</p></section>
-${DOCS.ex.map((d,i)=>`<details class="gsec doc ex"><summary><span class="exn">${i+1}</span><span class="ext"><b>${esc(d.title)}</b><small>${esc(d.form)} · ${d.words} words</small></span><button class="btn primary small" data-mem="${i}">Memorise</button></summary>${d.html}</details>`).join('')}`;
+${DOCS().ex.map((d,i)=>`<details class="gsec doc ex"><summary><span class="exn">${i+1}</span><span class="ext"><b>${esc(d.title)}</b><small>${esc(d.form)} · ${d.words} words</small></span><button class="btn primary small" data-mem="${i}">Memorise</button></summary>${d.html}</details>`).join('')}`;
 }
 function bindExemplars(){
 document.querySelectorAll('[data-mem]').forEach(b=>b.onclick=e=>{
 e.preventDefault();e.stopPropagation();
-const d=DOCS.ex[+b.dataset.mem];
+const d=DOCS().ex[+b.dataset.mem];
 let e2=LIB.find(x=>x.src===d.title);
 if(!e2){e2={id:'e'+Date.now().toString(36),title:d.title,text:d.text,kind:'creative',src:d.title,updated:Date.now()};LIB.unshift(e2);ls.set('lib',LIB)}
 renderSwitcher();setView('mem');switchEssay(e2.id);
@@ -1482,7 +1480,9 @@ function renderGuide(){
 const nb=([id,a,b])=>`<button data-g="${id}" class="${SET.gsec===id?'on':''}">${a}<small>${b}</small></button>`;
 $('gnav').innerHTML=`<div class="gnh">Modules · rubric &amp; trial stats</div>`+GNAV.slice(0,4).map(nb).join('')+`<div class="gnh">Toolkit</div>`+GNAV.slice(4).map(nb).join('');
 const g=SET.gsec;
-$('gmain').innerHTML=g==='tips'?TIPS:g==='booklet'?bookletHtml():g==='adapt'?adaptHtml():g==='exemplars'?exemplarsHtml():renderModule(GUIDE[g]||GUIDE.common);
+const toolkit=['tips','booklet','adapt','exemplars'].includes(g);
+if(toolkit&&!self.TOOLKIT&&self.Toolkit){$('gmain').innerHTML=self.Toolkit.lockedHtml();self.Toolkit.bindLock(()=>renderGuide());return}
+$('gmain').innerHTML=g==='tips'?self.TOOLKIT.tips:g==='booklet'?bookletHtml():g==='adapt'?adaptHtml():g==='exemplars'?exemplarsHtml():renderModule(GUIDE[g]||GUIDE.common);
 requestAnimationFrame(()=>document.querySelectorAll('.bf').forEach(el=>el.style.width=el.dataset.w+'%'));
 if(g==='exemplars')bindExemplars();
 if(g==='booklet'){

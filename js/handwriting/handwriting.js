@@ -116,6 +116,7 @@ cv.addEventListener('pointerdown',e=>{
   // after marking, the pen becomes a red marking pen: annotations only, never read or marked
   if(document.body.classList.contains('hwmarked')){cur={id:++sid,pts:[at(e)],red:true};strokes.push(cur);seg(cur);return}
   cur={id:++sid,pts:[at(e)]};strokes.push(cur);seg(cur);say('');clearReading();clearTimeout(preT);
+  if(marks.length){marks=[];mkx.clearRect(0,0,mk.width,mk.height)} // starting the answer clears the markup on the sentence
 });
 cv.addEventListener('pointermove',e=>{
   if(!cur||e.pointerType!=='pen')return;e.preventDefault();
