@@ -81,7 +81,7 @@ function justOpened(){
 // Settings > App shows the running version (and whether this is the beta), to make support easy
 function showVersion(){
   const el=$('verLine');if(!el)return;
-  const beta=/\/beta\//.test(location.pathname);
+  const beta=/\/beta(\/|$)/.test(location.pathname);
   const set=v=>{el.textContent=`Version ${v||'(not installed yet)'}${beta?' · beta':''}`};
   set('');
   const c=navigator.serviceWorker&&navigator.serviceWorker.controller;if(!c)return;
