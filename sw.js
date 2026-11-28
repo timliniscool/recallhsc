@@ -9,8 +9,11 @@
    Scope: only requests under this worker's own directory (/recallhsc/ on GitHub Pages). */
 'use strict';
 const VERSION='2.0.0';
-const ASSET_HASH='b4c7fd97a927';
-const SHELL='recallhsc-shell-'+VERSION+'-'+ASSET_HASH;
+const ASSET_HASH='61c4a1ce1dfc';
+// main (/recallhsc/) and beta (/recallhsc/beta/) share one origin and so one Cache Storage: each site's shell cache is
+// named after its own scope, so updating one never deletes the other's offline copy
+const SITE=new URL(self.registration.scope).pathname.replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'')||'root';
+const SHELL='recallhsc-shell-'+SITE+'@'+VERSION+'-'+ASSET_HASH; // '@' ends the site name, so 'recallhsc@' never matches 'recallhsc-beta@'
 const FONTS='recallhsc-fonts-v1';
 const PRECACHE=[
   './','index.html','manifest.webmanifest',
@@ -36,8 +39,9 @@ self.addEventListener('install',e=>{
 
 self.addEventListener('activate',e=>{
   e.waitUntil((async()=>{
-    // remove only this app's old shells; other caches on the origin are left alone
-    for(const k of await caches.keys())if(k.startsWith('recallhsc-shell-')&&k!==SHELL)await caches.delete(k);
+    // remove only this site's old shells (and the unscoped shell names used before sites were separated);
+    // the other site's shell and other caches on the origin are left alone
+    for(const k of await caches.keys())if(((k.startsWith('recallhsc-shell-'+SITE+'@')&&k!==SHELL)||/^recallhsc-shell-\d/.test(k)))await caches.delete(k);
     await self.clients.claim();
   })());
 });

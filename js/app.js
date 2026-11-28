@@ -44,7 +44,10 @@ const num=v=>{v=Number(v);return Number.isFinite(v)?v:0};
 function cleanLib(list){
 return (Array.isArray(list)?list:[]).filter(e=>e&&okId(e.id)&&e.id!=='sample'&&typeof e.text==='string').slice(0,200).map(e=>({
 id:e.id,title:String(e.title||'Essay').slice(0,60),text:e.text.slice(0,200000),kind:e.kind==='creative'?'creative':'essay',
-src:typeof e.src==='string'?e.src.slice(0,80):undefined,updated:num(e.updated)}));
+src:typeof e.src==='string'?e.src.slice(0,80):undefined,updated:num(e.updated),
+// sync bookkeeping (js/sync): the text's revision hash and its edit version. Kept, so a reload doesn't reset the
+// version and let an older title from another device win
+rev:typeof e.rev==='string'&&/^r[0-9a-f]{1,32}$/.test(e.rev)?e.rev:undefined,ver:Number.isInteger(e.ver)&&e.ver>=0&&e.ver<1e9?e.ver:undefined}));
 }
 function cleanState(st){
 if(!st||typeof st!=='object')return null;
@@ -991,7 +994,7 @@ const notice=(message,title)=>askConfirm(message,{title:title||'RecallHSC',ok:'O
 async function mgDelete(id){
 const list=allEssays();if(list.length<=1)return;
 if(!await askConfirm(`“${essayTitle(id)}” and your progress on it will be deleted from this device (unless you’ve got a backup).`,{title:'Delete this essay?',ok:'Delete',danger:true}))return;
-if(id==='sample')ls.set('sampleGone',1);else{LIB=LIB.filter(x=>x.id!==id);ls.set('lib',LIB)}
+if(id==='sample')ls.set('sampleGone',1);else{LIB=LIB.filter(x=>x.id!==id);lsTry('lib',LIB)}
 ls.del('state.'+id);
 if(id===ACTIVE){const next=allEssays()[0];ACTIVE='';loadEssay(next.id);save();loadTask();if(!S.started)$('modal').hidden=true}
 renderSwitcher();mgList();mgShow('list');toast('Essay deleted');
@@ -1021,11 +1024,12 @@ const txt=$('mgText').value.trim();if(!txt)return;
 const title=($('mgTitle').value.trim()||titleOf(mdClean(txt))).slice(0,60);
 if(editId==='sample'){
 const id='e'+Date.now().toString(36);LIB.unshift({id,title:title===SAMPLE_TITLE?'My copy · Bart for President':title,text:txt,kind:editKind,updated:Date.now()});
-ls.set('lib',LIB);renderSwitcher();switchEssay(id);return;
+lsTry('lib',LIB);renderSwitcher();switchEssay(id);return;
 }
 const e=LIB.find(x=>x.id===editId);if(!e)return;
 const reset=e.text.replace(/\s+/g,' ').trim()!==txt.replace(/\s+/g,' ').trim()||(e.kind||'essay')!==editKind;
-e.text=txt;e.title=title;e.kind=editKind;e.updated=Date.now();ls.set('lib',LIB);
+if(e.title!==title)e.ver=(e.ver|0)+1; // a rename alone doesn't change the text's revision, so it needs its own version bump to win a sync
+e.text=txt;e.title=title;e.kind=editKind;e.updated=Date.now();lsTry('lib',LIB);
 if(reset){ls.del('state.'+e.id);if(e.id===ACTIVE){loadEssay(e.id);loadTask()}}
 renderSwitcher();mgList();mgShow('list');toast('Saved');
 };
@@ -1135,7 +1139,7 @@ const txt=$('upText').value.trim();if(!txt)return;
 const id='e'+Date.now().toString(36);
 LIB.unshift({id,title:($('upTitle').value.trim()||titleOf(mdClean(txt))).slice(0,60),text:txt,kind:UP.kind,updated:Date.now()});
 const onb=ONBOARD;ONBOARD=false;$('upCancel').textContent=$('upCancel').dataset.label||$('upCancel').textContent;
-ls.set('lib',LIB);$('upModal').hidden=true;renderSwitcher();
+lsTry('lib',LIB);$('upModal').hidden=true;renderSwitcher();
 self.track&&track('upload');
 if(onb){save();loadEssay(id);renderSwitcher();setStart(0);toast('Saved. Off you go')}else switchEssay(id);
 };
@@ -1462,7 +1466,7 @@ document.querySelectorAll('[data-mem]').forEach(b=>b.onclick=e=>{
 e.preventDefault();e.stopPropagation();
 const d=DOCS().ex[+b.dataset.mem];
 let e2=LIB.find(x=>x.src===d.title);
-if(!e2){e2={id:'e'+Date.now().toString(36),title:d.title,text:d.text,kind:'creative',src:d.title,updated:Date.now()};LIB.unshift(e2);ls.set('lib',LIB)}
+if(!e2){e2={id:'e'+Date.now().toString(36),title:d.title,text:d.text,kind:'creative',src:d.title,updated:Date.now()};LIB.unshift(e2);lsTry('lib',LIB)}
 renderSwitcher();setView('mem');switchEssay(e2.id);
 });
 }

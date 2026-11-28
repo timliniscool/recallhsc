@@ -123,7 +123,7 @@ The current task reloads only if the student is not in the middle of an answer (
 
 | Request | Strategy |
 |---|---|
-| App shell (35 files on beta, 34 on main) | precached as one versioned set and served cache-first |
+| App shell (35 files on beta, 34 on main) | precached as one versioned set, in a cache named after the site (`recallhsc-shell-<site>@<version>-<hash>`), and served cache-first |
 | Page navigations | cached `index.html`. Other `.html` pages such as the privacy page are served as themselves. Offline with nothing cached: a short notice |
 | Google Fonts | stylesheet stale-while-revalidate, font files cache-first |
 | `models/` (beta) | cache-first in a separate **`recallhsc-model-<version>`** cache that survives app updates |
@@ -283,11 +283,14 @@ A 32 × 24 pixel sprite on a canvas, updated every **110 ms**. Don has a small *
 
 ## 10. Known limitations
 
-These are documented honestly, as found while preparing this document:
+These are documented honestly:
 
-- **Service worker caches across sites.** Main and beta share one origin. Each site's service worker deletes *every* app-shell cache except its own when it activates, so updating one site can drop the other's offline copy until it is next visited online.
-- **Essay version counter.** The essay sanitiser does not keep the sync version counter (`ver`), so it restarts after a page reload. A title change made on one device can then lose to an older title from the cloud.
-- **Library edits sync late.** Adding, editing or deleting an essay schedules a sync only when the next progress save happens (or at the 5-minute timer), not immediately.
 - **Sync rereads everything.** Each pass reads whole tables. The `updated_at` indexes allow incremental pulls, but the client doesn't use them yet.
 - **Device clocks matter.** Position conflicts are decided by device clocks (`posAt`), so a device with a badly wrong clock can win a position conflict.
-- **Handwriting hint bug.** The hint while handwriting tidies the read text with `/s+/` where it should use `/\s+/`, so runs of the letter "s" become spaces in the hint.
+
+Fixed since this document was first written (each with a regression test):
+
+- **Offline caches across sites.** Main and beta share one origin. Each site's shell cache is now named after its own scope (`recallhsc-shell-recallhsc@…`, `recallhsc-shell-recallhsc-beta@…`), so updating one site no longer deletes the other's offline copy ([`tests/unit/sw-caches.test.cjs`](../tests/unit/sw-caches.test.cjs)).
+- **Essay version counter.** The essay sanitiser now keeps the sync revision and version (`rev`, `ver`) across reloads, and renaming an essay bumps its version, so a newer title no longer loses to an older one from the cloud.
+- **Library edits sync straight away.** Adding, editing, copying or deleting an essay now notifies sync immediately.
+- **Handwriting hint** (beta). The hint's reading no longer turns runs of the letter "s" into spaces.

@@ -278,3 +278,22 @@ test('footer links to the privacy policy and the open-source code',async({page})
   const res=await page.goto('privacy.html');expect(res.status()).toBe(200);
   await expect(page.locator('h1')).toHaveText('Privacy policy');
 });
+
+test('library: sync bookkeeping survives a reload, a rename bumps the version, every library change reaches sync',async({page})=>{
+  const lib=[{id:'e1',title:'Old title',text:'One two three four. Five six seven eight.',kind:'essay',rev:'rabc123',ver:3},
+    {id:'e2',title:'Junk',text:'Nine ten eleven twelve.',kind:'essay',rev:'NOT A REV',ver:-1}];
+  await openApp(page,{seed:{lib}});
+  // kept through the load (before, the sanitiser dropped them, so the version restarted at 0 after every reload)
+  expect(await page.evaluate(()=>LIB.map(e=>[e.id,e.rev,e.ver]))).toEqual([['e1','rabc123',3],['e2',undefined,undefined]]);
+  await page.evaluate(()=>{window.__hook=[];self.RecallSyncHook=k=>__hook.push(k)});
+  // rename only: the text's revision doesn't change, so the version must, or another device's older title wins
+  await page.evaluate(()=>{mgEdit('e1');$('mgTitle').value='New title';$('mgSave').click()});
+  expect(await page.evaluate(()=>{const e=LIB.find(x=>x.id==='e1');return[e.title,e.ver]})).toEqual(['New title',4]);
+  expect(await page.evaluate(()=>__hook.filter(k=>k==='lib').length)).toBe(1);
+  // making your own copy of the sample also reaches sync straight away
+  await page.evaluate(()=>{mgEdit('sample');$('mgSave').click()});
+  expect(await page.evaluate(()=>__hook.filter(k=>k==='lib').length)).toBe(2);
+  // and the version is still there after a reload
+  await page.reload();await page.waitForFunction(()=>typeof LIB!=='undefined');
+  expect(await page.evaluate(()=>{const e=LIB.find(x=>x.id==='e1');return[e.title,e.rev,e.ver]})).toEqual(['New title','rabc123',4]);
+});
