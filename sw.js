@@ -54,6 +54,7 @@ self.addEventListener('fetch',e=>{
   if(url.href.startsWith(FONT_CSS)){e.respondWith(staleWhileRevalidate(req,FONTS));return}
   if(url.href.startsWith(FONT_FILES)){e.respondWith(cacheFirst(req,FONTS));return}
   if(url.origin!==scope.origin||!url.pathname.startsWith(scope.pathname))return; // outside our scope: browser handles it
+  if(url.pathname.startsWith(scope.pathname+'beta/'))return; // the beta site has its own service worker and files
   if(req.mode==='navigate'){e.respondWith(navigate(req));return}
   e.respondWith(shell(req));
 });
