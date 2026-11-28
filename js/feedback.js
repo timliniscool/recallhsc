@@ -7,7 +7,8 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const foot=$('foot');if(!foot)return;
-const cfg=()=>self.RECALL_CLOUD&&self.RECALL_CLOUD.url&&self.RECALL_CLOUD.anonKey?self.RECALL_CLOUD:null;
+// shown once the project's feedback table exists (RECALL_CLOUD.feedback in js/sync/config.js)
+const cfg=()=>self.RECALL_CLOUD&&self.RECALL_CLOUD.url&&self.RECALL_CLOUD.anonKey&&self.RECALL_CLOUD.feedback?self.RECALL_CLOUD:null;
 const device=()=>{const ua=navigator.userAgent||'';return /iPad/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>0)?'iPad':/iPhone|Android.+Mobile/.test(ua)?'phone':/Android/.test(ua)?'tablet':'desktop'};
 const isHW=()=>document.body.classList.contains('hw');
 

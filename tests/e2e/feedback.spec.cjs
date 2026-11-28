@@ -6,7 +6,7 @@ const {openApp,answer}=require('../helpers/page.cjs');
 test('a "Report marking" link under the result sends the step, answer and note (no name or email)',async({page})=>{
   let sent=null,headers=null;
   await page.route('**/rest/v1/feedback',async route=>{sent=JSON.parse(route.request().postData());headers=route.request().headers();await route.fulfill({status:201,body:''})});
-  await openApp(page);
+  await openApp(page);await page.evaluate(()=>{RECALL_CLOUD.feedback=true});
   expect(await answer(page,t=>t.split(' ').slice(0,1).join(' ')+' wrong words here')).toBe('fail');
   await expect(page.locator('#foot .fblink')).toBeVisible();
   await page.locator('#foot .fblink').click();
@@ -23,10 +23,16 @@ test('a "Report marking" link under the result sends the step, answer and note (
 
 test('if sending fails, the form stays open to try again',async({page})=>{
   await page.route('**/rest/v1/feedback',route=>route.fulfill({status:500,body:''}));
-  await openApp(page);
+  await openApp(page);await page.evaluate(()=>{RECALL_CLOUD.feedback=true});
   await answer(page,t=>'nothing like it');
   await page.locator('#foot .fblink').click();
   await page.locator('#fbSend').click();
   await expect(page.locator('#fbSend')).toHaveText('Try again');
   await expect(page.locator('#fbModal')).toBeVisible();
+});
+
+test('until the feedback table exists, no report link is shown',async({page})=>{
+  await openApp(page);
+  await answer(page,t=>'nothing like it');
+  await expect(page.locator('#foot .fblink')).toHaveCount(0);
 });

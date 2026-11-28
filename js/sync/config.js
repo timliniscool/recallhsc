@@ -7,4 +7,6 @@
 self.RECALL_CLOUD={
   url:'https://fcnqhlcumstgoyfovuzt.supabase.co',
   anonKey:'sb_publishable_YLDb1WPZSDEAeE5LlKs86g_yF-Du1py',
+  // true once supabase/migrations/20261128000000_recallhsc_feedback.sql has been applied (shows Report marking)
+  feedback:false,
 };
