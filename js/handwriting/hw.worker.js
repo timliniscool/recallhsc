@@ -18,7 +18,7 @@
      {type:'progress', loaded, total} | {type:'ready', device}
      {type:'line', id, i, text, ok}   (ok: the line matched the expected words)
      {type:'result', id, texts, oks, ms} | {type:'error', id, message} */
-import {env, AutoProcessor, AutoTokenizer, VisionEncoderDecoderModel, RawImage, Tensor} from '../vendor/transformers/transformers.min.js';
+import {env, AutoProcessor, AutoTokenizer, VisionEncoderDecoderModel, RawImage, Tensor, LogitsProcessor} from '../vendor/transformers/transformers.min.js';
 
 const MODEL='Xenova/trocr-small-handwritten';
 const START=2,EOS=2;      // TrOCR starts and ends every line with token 2
@@ -95,10 +95,61 @@ function logProb(logits,pos,token){
   return d[o+token]-mx-Math.log(s);
 }
 // read one line from its cached encoding (the decoder keeps its working memory between words: a few ms per word)
-async function readLine(v){
+/* Guided reading: while reading a line, if the next expected word (or the rest of it) is already among the reader's
+   top guesses and close to its favourite, give it a nudge. Messy-but-right writing then reads as the right word, and
+   one misread letter no longer drags the rest of the line off course. A clearly different word isn't near the top,
+   so it's read as written and the marking catches it. */
+const GUIDE_TOPK=8,GUIDE_MARGIN=5,GUIDE_BOOST=4;
+const nrmW=w=>w.toLowerCase().replace(/[^a-z0-9']/g,'');
+class Guide extends LogitsProcessor{
+  constructor(tok,words,ptr){super();this.tok=tok;this.words=words;this.ptr=ptr;this.cache=new Map();this.boosts=0}
+  toks(j,first){const k=j+(first?'f':'n');if(!this.cache.has(k))this.cache.set(k,Array.from(this.tok.encode((first?'':' ')+this.words[j],{add_special_tokens:false})).map(Number));return this.cache.get(k)}
+  _call(input_ids,logits){
+    const gen=Array.from(input_ids[0]).map(Number).slice(1);
+    const said=gen.length?this.tok.decode(gen,{skip_special_tokens:true}).trim().split(/\s+/).filter(Boolean):[];
+    // where are we in the expected words? every finished word moves us on (allowing for one skipped word)
+    let j=this.ptr;
+    for(let w=0;w<Math.max(0,said.length-1)&&j<this.words.length;w++){
+      if(j+1<this.words.length&&nrmW(said[w])!==nrmW(this.words[j])&&nrmW(said[w])===nrmW(this.words[j+1]))j+=2;else j++;
+    }
+    if(j>=this.words.length)return logits;
+    const want=[];
+    for(const jj of [j,j+1]){
+      if(jj>=this.words.length)break;
+      const T=this.toks(jj,said.length<=1&&jj===this.ptr);
+      // part-way through this word's pieces?
+      let k=0;
+      for(let m=Math.min(T.length-1,gen.length);m>=1;m--){let ok=true;for(let q=0;q<m;q++)if(gen[gen.length-m+q]!==T[q]){ok=false;break}if(ok){k=m;break}}
+      if(k>0){want.push(T[k]);break}   // mid-word: the next piece of this word
+      want.push(T[0]);                 // at a word boundary: this word (and, more weakly, the next one)
+    }
+    const V=logits.dims[logits.dims.length-1],d=logits.data,o=d.length-V;
+    let mx=-Infinity;for(let v=0;v<V;v++)if(d[o+v]>mx)mx=d[o+v];
+    want.forEach((t,i)=>{
+      if(t==null||t<0||t>=V)return;const x=d[o+t];if(x<mx-GUIDE_MARGIN)return;
+      let above=0;for(let v=0;v<V&&above<GUIDE_TOPK;v++)if(d[o+v]>x)above++;
+      if(above<GUIDE_TOPK){d[o+t]=x+(i===0?GUIDE_BOOST:GUIDE_BOOST/2);this.boosts++}
+    });
+    return logits;
+  }
+}
+async function readLine(v,guide){
   const {model,tok}=await load();
-  const out=await model.generate({pixel_values:v.pv,encoder_outputs:v.enc,max_new_tokens:48});
+  const opts={pixel_values:v.pv,encoder_outputs:v.enc,max_new_tokens:48};
+  if(guide&&guide.words.length&&guide.ptr<guide.words.length)opts.logits_processor=[new Guide(tok,guide.words,guide.ptr)];
+  const out=await model.generate(opts);
   return tok.decode(Array.from(out.tolist()[0]).map(Number),{skip_special_tokens:true}).trim();
+}
+// after reading a line: how many expected words did it cover? (best in-order match of what was read)
+function advance(E,ptr,readWords){
+  const g=readWords.map(nrmW).filter(Boolean);if(!g.length)return ptr;
+  let best=ptr+g.length,bv=-1e9;
+  for(let k=1;k<=Math.min(E.length-ptr,g.length+6);k++){
+    const e=E.slice(ptr,ptr+k).map(nrmW),dp=Array(g.length+1).fill(0);
+    for(let x=1;x<=e.length;x++){let prev=0;for(let y=1;y<=g.length;y++){const t=dp[y];dp[y]=e[x-1]===g[y-1]?prev+1:Math.max(dp[y],dp[y-1]);prev=t}}
+    const val=dp[g.length]-Math.abs(k-g.length)*.35;if(val>bv){bv=val;best=ptr+k}
+  }
+  return Math.min(E.length,best);
 }
 // how well do these exact words fit this line, after the given words? (geometric-mean token probability)
 async function fit(v,before,words){
@@ -130,11 +181,13 @@ async function check(m){
   const t0=performance.now();
   await load();
   const E=String(m.expected||'').trim().split(/\s+/).filter(Boolean);
+  let ptr=0; // where the next line starts in the expected words (for guided reading)
   // 1. read every line (already encoded while writing, except usually the last)
   const vs=[],lines=[],perf={enc:0,read:0,fit:0,fits:0};
   for(let i=0;i<m.lines.length;i++){
     const L=m.lines[i];let t=performance.now();const v=await encode(L.key,L.blob);perf.enc+=performance.now()-t;vs.push(v);
-    t=performance.now();const text=await readLine(v);perf.read+=performance.now()-t;lines.push(text.split(/\s+/).filter(Boolean));
+    t=performance.now();const text=await readLine(v,{words:E,ptr});perf.read+=performance.now()-t;lines.push(text.split(/\s+/).filter(Boolean));
+    ptr=advance(E,ptr,lines[lines.length-1]);
     postMessage({type:'line',id:m.id,i,text,ok:null});
   }
   // 2. rescue misreads: where what was read differs from the expected words, check whether the expected words fit

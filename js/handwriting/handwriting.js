@@ -264,8 +264,9 @@ async function read(){
   say(ready?'Reading your writing…':'Getting the handwriting reader ready…');
   try{
     const blobs=await Promise.all(lines.map(lineImage));
+    const rawRead=[];last=null;
     markLine(0,'now');
-    const r=await checkLines(lines.map((L,i)=>({key:L.key,blob:blobs[i],width:L.x1-L.x0})),task.text,m=>{if(m.ok===null){markLine(m.i,'read',m.text||'·');markLine(m.i+1,'now');say(m.i+1<lines.length?`Reading your writing… line ${m.i+2} of ${lines.length}`:'Checking against your essay…')}else markLine(m.i,m.ok?'done':'fix',m.text||'·')});
+    const r=await checkLines(lines.map((L,i)=>({key:L.key,blob:blobs[i],width:L.x1-L.x0})),task.text,m=>{if(m.ok===null){rawRead[m.i]=m.text||'';markLine(m.i,'read',m.text||'·');markLine(m.i+1,'now');say(m.i+1<lines.length?`Reading your writing… line ${m.i+2} of ${lines.length}`:'Checking against your essay…')}else markLine(m.i,m.ok?'done':'fix',m.text||'·')});
     r.texts.forEach((t,i)=>markLine(i,r.oks[i]?'done':'fix',t||'·'));
     const text=r.texts.join(' ').replace(/\s+/g,' ').trim();
     if(!text){say('Couldn’t make out any words. Try writing a little larger, on the lines.');return}
@@ -285,6 +286,9 @@ async function read(){
     const hs=S.hw||(S.hw={att:0,pass:0,words:0,secs:0,strokes:0,bestWpm:0});
     hs.att++;if(phase==='ok'||phase==='review'){hs.pass++;if(self.track)track('hw-pass')}hs.words+=words;hs.secs+=secs;hs.strokes+=nStrokes;hs.bestWpm=Math.max(hs.bestWpm,wpm);
     save();if(typeof renderSide==='function')renderSide();
+    // for a marking report (and the beta's writing samples): the pictures of each line, what was read, what was marked
+    last={images:await Promise.all(blobs.map(toDataURL)),read:rawRead.join(' / '),final:text,ok:phase==='ok'||phase==='review'};
+    sendSample(last);
     const f=$('foot');
     if(f){const s=document.createElement('span');s.className='hwstats';s.textContent=`✍ ${wpm} wpm · ${sps} strokes/s · ${Math.round(secs)}s · handwriting: ${hs.pass}/${hs.att} passed, best ${Math.round(hs.bestWpm)} wpm`;f.insertBefore(s,f.querySelector('.spacer')||null)}
     if(self.announce)announce(`Handwriting: ${wpm} words per minute, ${sps} strokes per second.`);
@@ -293,6 +297,26 @@ async function read(){
   }finally{busy=false;$('hwDone').disabled=false;pad.classList.remove('busy')}
 }
 
+/* ---------- writing samples (beta): help improve the reader ----------
+   Signed-in users only; on unless switched off in Settings > App. At most 120 a day from one device.
+   Sends the line pictures, what was read and marked, and the expected words, write-only to the feedback table. */
+let last=null;
+const toDataURL=b=>new Promise(res=>{const r=new FileReader();r.onload=()=>res(String(r.result));r.onerror=()=>res('');r.readAsDataURL(b)});
+const SAMPLES='essayRecall2.hwSamples';
+const samplesOn=()=>get(SAMPLES)!=='off';
+async function sendSample(s){
+  try{
+    if(!samplesOn()||!s||!s.images.length)return;
+    const c=self.RECALL_CLOUD;if(!c||!c.url||!c.anonKey||!c.feedback)return;
+    const t=self.RecallCloudAuth?await self.RecallCloudAuth():null;if(!t)return; // signed-in users only
+    const day=new Date().toISOString().slice(0,10),n=JSON.parse(get('essayRecall2.hwSampleDay')||'{}');
+    if(n.d===day&&n.c>=120)return;put('essayRecall2.hwSampleDay',JSON.stringify({d:day,c:(n.d===day?n.c:0)+1}));
+    await fetch(c.url.replace(/\/$/,'')+'/rest/v1/feedback',{method:'POST',headers:{'apikey':c.anonKey,'Authorization':'Bearer '+t,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({kind:'hw_sample',mode:typeof attemptMode!=='undefined'?String(attemptMode).slice(0,20):null,task_type:task?String(task.type).slice(0,20):null,
+        expected:String(task?task.text:'').slice(0,20000),answer:String(s.final||'').slice(0,20000),read_text:String(s.read||'').slice(0,20000),ok:!!s.ok,
+        images:s.images.slice(0,40),device:'iPad',app_version:'beta'})});
+  }catch(_){} // samples are best-effort: never interrupt studying
+}
 /* ---------- on/off, paper, per-task reset ---------- */
 function setPaper(p){paper=p==='blank'?'blank':'lined';put(PAPER,paper==='blank'?'blank':null);sheet.classList.toggle('lined',paper==='lined');$('hwPaper').textContent=paper==='lined'?'▢ Blank paper':'▤ Lined paper'; /* shows the paper you'd switch to */clearReading()}
 function apply(){
@@ -333,7 +357,8 @@ $('hwClear').onclick=async()=>{
 $('hwDone').onclick=read;
 // the first Apple Pencil touch anywhere offers handwriting
 document.addEventListener('pointerdown',e=>{if(e.pointerType==='pen'&&!penSeen){penSeen=true;put(SEEN,'1');apply();if(!on&&self.toast)toast('Apple Pencil found: tap ✍ Handwrite to write your answers by hand')}},true);
-{const row=$('hwRow');if(row)row.hidden=false;const s=$('sHw');if(s)s.onchange=()=>setOn(s.checked)}
-self.HW={_scribbled:scribbled,_rule:()=>[RULE,RULE0],setErase,_erase:eraseAt,task:reset,on:()=>on,setOn,setPaper,_strokes:()=>strokes,_lines:lineGroups,_pre:preEncode,_redraw:redraw,_img:lineImage};
+{const row=$('hwRow');if(row)row.hidden=false;const s=$('sHw');if(s)s.onchange=()=>setOn(s.checked);
+ const sr=$('hwSampleRow'),ss=$('sHwSamples');if(sr)sr.hidden=false;if(ss){ss.checked=samplesOn();ss.onchange=()=>put(SAMPLES,ss.checked?null:'off')}}
+self.HW={_lastReport:()=>last,_sendSample:sendSample,_scribbled:scribbled,_rule:()=>[RULE,RULE0],setErase,_erase:eraseAt,task:reset,on:()=>on,setOn,setPaper,_strokes:()=>strokes,_lines:lineGroups,_pre:preEncode,_redraw:redraw,_img:lineImage};
 setPaper(paper);apply();
 })();

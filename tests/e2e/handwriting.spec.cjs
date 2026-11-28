@@ -223,3 +223,26 @@ test('after marking, the pen turns into a red marking pen whose ink is never rea
   expect(await page.evaluate(()=>HW._strokes().map(s=>!!s.red))).toEqual([false,true]);
   expect(await page.evaluate(()=>HW._lines().length)).toBe(1); // only the black writing counts
 });
+
+test('reports from handwriting include pictures of the lines; samples go only when signed in and switched on',async({page})=>{
+  const posts=[];
+  await page.route('**/rest/v1/feedback',async route=>{posts.push(JSON.parse(route.request().postData()));await route.fulfill({status:201,body:''})});
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>{RECALL_CLOUD.feedback=true;self.RecallCloudAuth=async()=>null;HW.setOn(true)}); // signed out
+  await stroke(page,'pen',0);await page.locator('#hwDone').click();
+  await page.waitForFunction(()=>HW._lastReport()&&HW._lastReport().images.length===1);
+  expect(posts.filter(p=>p.kind==='hw_sample').length).toBe(0);              // signed out: no samples
+  await page.locator('#foot .fblink').click();await page.locator('#fbSend').click();
+  await expect.poll(()=>posts.filter(p=>p.kind==='marking').length).toBe(1);
+  const rep=posts.find(p=>p.kind==='marking');
+  expect(rep.reason).toBe('misread');expect(rep.images[0]).toMatch(/^data:image\/png;base64,/);
+  // signed in, samples on (the default): a sample is sent with each check
+  await page.evaluate(()=>{self.RecallCloudAuth=async()=>'token';retry()});
+  await stroke(page,'pen',0);await page.locator('#hwDone').click();
+  await expect.poll(()=>posts.filter(p=>p.kind==='hw_sample').length).toBe(1);
+  // switched off in Settings: none
+  await page.evaluate(()=>{localStorage.setItem('essayRecall2.hwSamples','off');retry()});
+  await stroke(page,'pen',0);await page.locator('#hwDone').click();
+  await page.waitForTimeout(800);
+  expect(posts.filter(p=>p.kind==='hw_sample').length).toBe(1);
+});

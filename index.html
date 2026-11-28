@@ -1136,6 +1136,21 @@ body.reduce .betainvite{animation:none}
 .bi-t{display:flex;flex-direction:column;flex:1 1 220px;min-width:0;line-height:1.35}.bi-t b{font-size:14px;color:#312e81}.bi-t small{font-size:12.5px;color:var(--ink2)}
 .bi-tag{font-size:9.5px;font-weight:700;letter-spacing:.08em;color:#fff;background:linear-gradient(115deg,#6366f1,#ec4899);border-radius:99px;padding:2px 6px;vertical-align:middle;margin-left:4px}
 .betainvite a.btn{text-decoration:none}
+/* report a marking mistake */
+.fblink{border:0;background:none;color:var(--muted);font:inherit;font-size:12.5px;cursor:pointer;padding:4px 6px;border-radius:8px}
+.fblink:hover,.fblink:focus-visible{color:var(--skyink);background:var(--hover)}
+#fbModal{z-index:72}
+.fbsheet{max-width:460px}
+.fbsheet h2{font-size:19px}
+.fbsub{margin:4px 0 12px;font-size:14px;color:var(--ink2)}
+.fbreasons{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.fbreasons label{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink2);padding:7px 10px;border:1px solid var(--line2);border-radius:10px;cursor:pointer}
+.fbreasons label:has(input:checked){border-color:var(--sky2);background:var(--skysoft)}
+.fbreasons label[hidden]{display:none}
+.fbnote{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink2)}
+.fbnote textarea{font:inherit;font-size:14px;border:1.5px solid var(--line2);border-radius:10px;padding:8px 10px;resize:vertical}
+.fbwhat{font-size:12px;color:var(--muted);margin:8px 0 14px}
+.fbwhat .fbhw[hidden]{display:none}
 /* footer links */
 .sitefoot{flex-direction:column;gap:6px}
 .flinks{display:flex;gap:8px;justify-content:center;font-size:12.5px;color:var(--muted)}
@@ -1394,6 +1409,7 @@ body.gamify .iconbtn:hover{background:#151c25;color:#d9f99d}
 <section class="sgroup" aria-labelledby="sgApp" id="appGroup"><h3 id="sgApp">App</h3>
 <div class="set"><span id="installTxt">Install RecallHSC to open it like an app, even offline.</span><button class="btn small" id="btnInstall">Install</button></div>
 <label class="set" id="hwRow" hidden><span>Handwriting with Apple Pencil <small>(practise writing answers by hand, like the exam)</small></span><input type="checkbox" class="sw" id="sHw"></label>
+<label class="set" id="hwSampleRow" hidden><span>Share handwriting samples <small>(beta, signed in only: pictures of your writing and what it should say, to improve the reader. <a href="privacy.html" target="_blank" rel="noopener">Privacy</a>)</small></span><input type="checkbox" class="sw" id="sHwSamples"></label>
 <p class="snote" id="verLine" aria-live="polite"></p>
 <label class="set" id="statsRow"><span>Anonymous usage stats <small>(page visits and features used; no cookies, never your essays)</small></span><input type="checkbox" class="sw" id="sStats"></label>
 <p class="snote" id="installHelp" hidden></p>
@@ -1504,5 +1520,6 @@ body.gamify .iconbtn:hover{background:#151c25;color:#d9f99d}
 <script src="js/analytics.js"></script>
 <script src="js/handwriting/handwriting.js"></script>
 <script src="js/beta-invite.js"></script>
+<script src="js/feedback.js"></script>
 </body>
 </html>

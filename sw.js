@@ -9,14 +9,14 @@
    Scope: only requests under this worker's own directory (/recallhsc/ on GitHub Pages). */
 'use strict';
 const VERSION='2.0.0';
-const ASSET_HASH='caf179f9e887';
+const ASSET_HASH='a3a69dc8a1b7';
 const SHELL='recallhsc-shell-'+VERSION+'-'+ASSET_HASH;
 const FONTS='recallhsc-fonts-v1';
 const PRECACHE=[
   './','index.html','manifest.webmanifest',
   'js/engine/text.js','js/engine/chunker.js','js/engine/parser.js','js/engine/marking.js','js/engine/policies.js','js/engine/recall.js',
   'js/workers/worker-manager.js','js/workers/compute.worker.js',
-  'js/app.js','js/pet.js','js/game.js','js/boot.js','js/a11y/dialogs.js','js/pwa/pwa.js','js/analytics.js','js/beta-invite.js','js/handwriting/handwriting.js','privacy.html','js/sync/config.js','js/sync/conflict.js','js/sync/sync.js',
+  'js/app.js','js/pet.js','js/game.js','js/boot.js','js/a11y/dialogs.js','js/pwa/pwa.js','js/analytics.js','js/beta-invite.js','js/feedback.js','js/handwriting/handwriting.js','privacy.html','js/sync/config.js','js/sync/conflict.js','js/sync/sync.js',
   'js/booklet-data.js',
   'icons/icon.svg','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','icons/apple-touch-icon.png','icons/favicon-32.png',
   'img/adapt-5.png','img/adapt-6.png',
