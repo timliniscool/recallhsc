@@ -1,0 +1,71 @@
+# Publishes the site to GitHub Pages:
+#   main -> https://timliniscool.github.io/recallhsc/
+#   beta -> https://timliniscool.github.io/recallhsc/beta/   (when the branch exists; not indexed by search engines)
+# Only the files the browser needs are published (no tests, tools, docs or package files).
+name: Pages
+
+on:
+  push:
+    branches: [main, beta]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+
+      - name: Check out beta (if it exists)
+        id: beta
+        run: |
+          if git ls-remote --exit-code --heads "https://github.com/${{ github.repository }}.git" beta >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.beta.outputs.exists == 'true'
+        with:
+          ref: beta
+          path: beta
+
+      - name: Assemble the site
+        run: |
+          set -euo pipefail
+          publish() { # $1 source checkout, $2 destination
+            mkdir -p "$2"
+            rsync -a --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='tests' --exclude='tools' \
+              --exclude='docs' --exclude='supabase' --exclude='package.json' --exclude='package-lock.json' \
+              --exclude='playwright.config.js' --exclude='test-results' --exclude='playwright-report' "$1/" "$2/"
+          }
+          publish main _site
+          rm -rf _site/beta
+          if [ -d beta ]; then
+            publish beta _site/beta
+            # keep the beta out of search results
+            sed -i 's|<head>|<head>\n<meta name="robots" content="noindex">|' _site/beta/index.html
+            rm -f _site/beta/robots.txt _site/beta/sitemap.xml _site/beta/google*.html
+          fi
+          touch _site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
