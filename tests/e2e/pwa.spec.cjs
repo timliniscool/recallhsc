@@ -23,7 +23,7 @@ test('service worker installs, precaches the app, and RecallHSC works offline',a
   const scope=await page.evaluate(async()=>(await navigator.serviceWorker.getRegistration()).scope);
   expect(scope).toMatch(/\/recallhsc\/$/);
   const cached=await page.evaluate(async()=>{const k=(await caches.keys()).find(k=>k.startsWith('recallhsc-shell-'));const c=await caches.open(k);return(await c.keys()).map(r=>new URL(r.url).pathname)});
-  for(const f of ['/recallhsc/index.html','/recallhsc/js/app.js','/recallhsc/js/workers/compute.worker.js','/recallhsc/js/booklet-data.js','/recallhsc/manifest.webmanifest'])expect(cached).toContain(f);
+  for(const f of ['/recallhsc/index.html','/recallhsc/js/app.js','/recallhsc/js/workers/compute.worker.js','/recallhsc/js/toolkit.vault.json','/recallhsc/manifest.webmanifest'])expect(cached).toContain(f);
   await context.setOffline(true);
   await page.reload();
   await page.waitForFunction(()=>typeof task!=='undefined'&&task);

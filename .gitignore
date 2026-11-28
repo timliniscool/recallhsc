@@ -3,3 +3,6 @@ test-results/
 playwright-report/
 .env
 .env.*
+
+# NSBHS toolkit in plain text: only the encrypted js/toolkit.vault.json is committed
+private/
