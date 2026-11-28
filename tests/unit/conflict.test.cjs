@@ -302,3 +302,25 @@ test('mergePrefs: dirty local wins, otherwise remote wins, garbage ignored',()=>
   assert.deepEqual(S.mergePrefs({},polluted,false),{a:2});
   assert.equal({}.x,undefined);
 });
+
+/* ------------------------------------------------------------------ position: most recent move wins */
+test('mergeProgress: going back to relearn sticks (local move is newer than the synced position)',()=>{
+  const local=prog({g:2,ti:0,posAt:2000,learned:[true,true,true,true,true,true]});
+  const remote=prog({g:6,ti:3,posAt:1000,learned:[true,true,true,true,true,true]});
+  const r=S.mergeProgress(local,remote,REV).progress;
+  assert.deepEqual([r.g,r.ti,r.posAt],[2,0,2000]);
+  assert.equal(r.learned.filter(Boolean).length,6,'learned sentences are kept');
+});
+test('mergeProgress: a newer move on another device wins, backwards or forwards',()=>{
+  const r=S.mergeProgress(prog({g:6,ti:1,posAt:1000}),prog({g:1,ti:0,posAt:5000}),REV).progress;
+  assert.deepEqual([r.g,r.ti,r.posAt],[1,0,5000]);
+});
+test('mergeProgress: older saves without move times still use the furthest position',()=>{
+  const r=S.mergeProgress(prog({g:2,ti:0}),prog({g:4,ti:1}),REV).progress;
+  assert.deepEqual([r.g,r.ti],[4,1]);
+});
+test('progress rows carry the move time inside game, and read it back',()=>{
+  const row=S.progressToRow(prog({g:3,ti:2,posAt:123456789}),'e1',REV,'dev');
+  assert.equal(row.game.posAt,123456789);
+  assert.equal(S.rowToProgress(Object.assign({},row,{learned:row.learned})).posAt,123456789);
+});

@@ -60,7 +60,7 @@ o.taskMs={};for(const t of['build','para','essay']){const v=s.taskMs&&s.taskMs[t
 const g=st.game&&typeof st.game==='object'?{level:Math.max(0,num(st.game.level)|0),coins:Math.max(0,num(st.game.coins)|0),marks:{}}:undefined;
 if(g&&st.game.marks&&typeof st.game.marks==='object')for(const[k,v]of Object.entries(st.game.marks))if(/^\d+$/.test(k)&&['step','flag','castle'].includes(v))g.marks[k]=v;
 return{startG:Math.max(0,num(st.startG)|0),g:Math.max(0,num(st.g)|0),ti:Math.max(0,num(st.ti)|0),learned:(Array.isArray(st.learned)?st.learned:[]).map(Boolean),
-started:!!st.started,nS:num(st.nS),stats:o,game:g,resetAt:num(st.resetAt),epoch:Math.max(0,num(st.epoch)|0),rev:typeof st.rev==='string'&&/^r[0-9a-f]{1,32}$/.test(st.rev)?st.rev:undefined,part:st.part&&typeof st.part==='object'?{g:Math.max(0,num(st.part.g)|0),w:Math.max(0,num(st.part.w)|0)}:null};
+started:!!st.started,nS:num(st.nS),stats:o,game:g,resetAt:num(st.resetAt),epoch:Math.max(0,num(st.epoch)|0),rev:typeof st.rev==='string'&&/^r[0-9a-f]{1,32}$/.test(st.rev)?st.rev:undefined,part:st.part&&typeof st.part==='object'?{g:Math.max(0,num(st.part.g)|0),w:Math.max(0,num(st.part.w)|0)}:null,posAt:Math.max(0,num(st.posAt))};
 }
 /* settings from storage or a backup file are untrusted: whitelist, type-check and clamp every field (idempotent) */
 function cleanSettings(raw){
@@ -101,14 +101,21 @@ if(!S||e.key!==NS+'state.'+ACTIVE||!e.newValue)return;
 let inc;try{inc=cleanState(JSON.parse(e.newValue))}catch(_){return}if(!inc)return;
 if((inc.resetAt||0)>(S.resetAt||0)){S=inc;loadTask();return}   // a reset in the other tab wins
 inc.learned.forEach((v,g)=>{if(v)S.learned[g]=true});
-if(inc.g>S.g||(inc.g===S.g&&inc.ti>S.ti)){S.g=inc.g;S.ti=inc.ti;S.started=true;if(phase==='type'&&!typed)loadTask()}
+// position: the most recent move wins (so going back in one tab sticks); older saves without a move time: furthest wins
+const newer=(inc.posAt||S.posAt)?(inc.posAt||0)>(S.posAt||0):(inc.g>S.g||(inc.g===S.g&&inc.ti>S.ti));
+if(newer&&(inc.g!==S.g||inc.ti!==S.ti)){S.g=inc.g;S.ti=inc.ti;S.posAt=inc.posAt||0;S.started=true;adoptPos();if(phase==='type'&&!typed)loadTask()}
 if(inc.part&&(!S.part||inc.part.g>S.part.g||(inc.part.g===S.part.g&&inc.part.w>S.part.w)))S.part=inc.part;
 renderSide();
 });
 let saveWarned=false;
 function lsTry(k,v){try{localStorage.setItem(NS+k,JSON.stringify(v));if(self.RecallSyncHook)try{RecallSyncHook(k)}catch(_){}return true}catch(e){
 if(!saveWarned){saveWarned=true;setTimeout(()=>{toast('Couldn’t save progress: browser storage is full or blocked');announce('Could not save progress: browser storage is full or blocked.',true)},0)}return false}}
-const save=()=>{if(S){S.nS=SENTS.length;lsTry('state.'+ACTIVE,S)}lsTry('settings',SET);lsTry('active',ACTIVE)};
+/* When the student moves (next step, back, a sentence picked on the map, a new start point), record the time,
+   so sync and other tabs can tell a deliberate move back from an older save. */
+let POS=null;
+function adoptPos(){if(S)POS={id:ACTIVE,g:S.g,ti:S.ti}} // take the current position as already known (loads, merges)
+function stampPos(){if(!S)return;if(POS&&POS.id===ACTIVE&&(POS.g!==S.g||POS.ti!==S.ti))S.posAt=Date.now();if(!POS||POS.id!==ACTIVE||POS.g!==S.g||POS.ti!==S.ti)adoptPos()}
+const save=()=>{if(S){stampPos();S.nS=SENTS.length;lsTry('state.'+ACTIVE,S)}lsTry('settings',SET);lsTry('active',ACTIVE)};
 const saveSettings=()=>{lsTry('settings',SET);lsTry('active',ACTIVE)};
 addEventListener('pagehide',()=>save());
 function loadEssay(id){
@@ -123,6 +130,7 @@ if(S.g>SENTS.length)S.g=0;
 // repair: long (two-half) sentences already moved past used to stay uncounted unless the whole-sentence recall
 // was passed too, so the % and sentence map lagged behind. Count every one behind the current position.
 for(let g=Math.min(S.startG,S.g);g<Math.min(S.g,SENTS.length);g++)if(g>=S.startG&&!S.learned[g]&&splitSentence(SENTS[g].text))S.learned[g]=true;
+adoptPos();
 }
 
 /* ---------- task flow ---------- */
@@ -238,7 +246,7 @@ const gap=now-lastKey;
 if(gap<20000)S.stats.time+=gap/1000;
 if(L.keys>0){L.gaps.push(gap);if(L.gaps.length>80)L.gaps.shift();if(gap>1200)L.hes++;L.longest=Math.max(L.longest,gap)}
 }
-lastKey=now;
+lastKey=now;window.__lastKey=now;
 const del=(e.inputType||'').startsWith('delete');
 L.keys++;if(del)L.bs++;else{const n=(e.data||' ').length;for(let i=0;i<n;i++)L.ins.push(now)}
 typed=ta.value.replace(/\s*\n\s*/g,' ');
@@ -1178,7 +1186,10 @@ $('btnReset').onclick=async()=>{if(await askConfirm('This essay’s progress and
 
 /* ---------- background: drifting aurora + particles + keystroke ripples ---------- */
 (function(){
-const c=$('bg'),x=c.getContext('2d');let W,H;const dpr=Math.min(1.5,devicePixelRatio||1);
+const c=$('bg'),x=c.getContext('2d');let W,H;
+// touch tablets/phones (iPad reports itself as a Mac with touch points): lighter background so typing stays smooth
+const TOUCH=matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>1;document.body.classList.toggle('touch',TOUCH);
+const dpr=TOUCH?1:Math.min(1.5,devicePixelRatio||1);
 const blobs=[{c:'56,189,248',r:.55,sx:.11,sy:.08,ox:.18,oy:.2,a:.30},{c:'125,211,252',r:.5,sx:.07,sy:.1,ox:.82,oy:.22,a:.32},{c:'167,139,250',r:.36,sx:.09,sy:.06,ox:.7,oy:.85,a:.16},{c:'14,165,233',r:.4,sx:.05,sy:.09,ox:.12,oy:.85,a:.18},{c:'186,230,253',r:.65,sx:.04,sy:.05,ox:.5,oy:.45,a:.35}];
 const parts=Array.from({length:70},()=>({x:Math.random(),y:Math.random(),v:.00003+Math.random()*.0001,r:.5+Math.random()*1.7,a:.12+Math.random()*.3,p:Math.random()*6}));
 const rip=[],sparks=[];
@@ -1187,27 +1198,29 @@ const bc=document.createElement('canvas'),bx=bc.getContext('2d');let BW,BH;
 // Reallocate only when the canvas's CSS box really changes (width change or a taller viewport). Height-only
 // shrinks from the mobile address bar are ignored, and every reallocation repaints at once (no blank frame).
 function size(force){
-const r=c.getBoundingClientRect(),nw=Math.ceil(r.width),nh=Math.ceil(r.height);
+const r=c.getBoundingClientRect(),nw=Math.ceil(r.width),nh=Math.ceil(r.height);OT=r.top;
 if(!force&&nw===W&&nh<=H)return;
 W=nw;H=Math.max(nh,force?0:H||0);
 c.width=Math.ceil(W*dpr);c.height=Math.ceil(H*dpr);x.setTransform(dpr,0,0,dpr,0,0);
 BW=bc.width=Math.ceil(W/8);BH=bc.height=Math.ceil(H/8);
 still=false;lastF=0;paint(performance.now());
 }
-let resizeT=0;
+let resizeT=0,OT=0; // OT: the canvas overhangs the top of the screen; page coordinates are shifted by it
 addEventListener('resize',()=>{cancelAnimationFrame(resizeT);resizeT=requestAnimationFrame(()=>size())});
 addEventListener('orientationchange',()=>setTimeout(()=>size(true),250));
 if(matchMedia('(prefers-reduced-motion: reduce)').matches&&ls.get('settings')==null)SET.motion=false;
 let lastF=0;
-window.bgPulse=(px,py,col='56,189,248',a=.35)=>{rip.push({x:px,y:py,t:0,c:col,a});if(rip.length>14)rip.shift()};
-window.bgBurst=(px,py)=>{for(let i=0;i<26;i++){const an=Math.random()*6.28,sp=1.5+Math.random()*4;sparks.push({x:px,y:py,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,t:0})}rip.push({x:px,y:py,t:0,c:'16,185,129',a:.4,big:1})};
+window.bgPulse=(px,py,col='56,189,248',a=.35)=>{if(TOUCH)return;rip.push({x:px,y:py-OT,t:0,c:col,a});if(rip.length>14)rip.shift()};
+window.bgBurst=(px,py)=>{py-=OT;for(let i=0;i<26;i++){const an=Math.random()*6.28,sp=1.5+Math.random()*4;sparks.push({x:px,y:py,vx:Math.cos(an)*sp,vy:Math.sin(an)*sp,t:0})}rip.push({x:px,y:py,t:0,c:'16,185,129',a:.4,big:1})};
 let still=false;
 function frame(t){
 requestAnimationFrame(frame);
 if(document.hidden||!W)return;
 const busy=rip.length||sparks.length;
 if(!motionOn()&&!busy){if(still)return;still=true}else still=false;
-if(t-lastF<(busy?16:33))return;lastF=t; // 30fps when calm, 60fps while ripples are animating
+// on touch devices the background holds still while you type (it competes with the keyboard for the GPU)
+if(TOUCH&&!sparks.length&&performance.now()-(window.__lastKey||0)<1500)return;
+if(t-lastF<(busy?16:TOUCH?66:33))return;lastF=t; // 30fps when calm (15 on touch), 60fps while ripples are animating
 paint(t);
 }
 function paint(t){

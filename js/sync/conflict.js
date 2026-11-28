@@ -188,7 +188,9 @@ function syncFields(p,isRemote){
     part:normPart(p.part),
     game:normGame(p.game,isRemote),
     started:!!p.started||(isRemote&&learnedOf(p).some(Boolean)),
-    epoch:int(p.epoch)
+    epoch:int(p.epoch),
+    // when the student last moved (ms). Stored inside the game JSON in the cloud row, so no schema change is needed.
+    posAt:int(p.posAt!==undefined?p.posAt:(isObj(p.game)?p.game.posAt:0))
   };
 }
 /* Key-order-independent structural equality for JSON-like values. */
@@ -220,8 +222,12 @@ function mergeProgress(local,remote,essayRev){
   }
   const n=Math.max(L.learned.length,R.learned.length),learned=new Array(n);
   for(let i=0;i<n;i++)learned[i]=!!(L.learned[i]||R.learned[i]);
-  const remoteAhead=R.g>L.g||(R.g===L.g&&R.ti>L.ti);
-  const pos=remoteAhead?{g:R.g,ti:R.ti}:{g:L.g,ti:L.ti};
+  // Position: the most recent move wins, so going back to relearn an earlier part sticks on every device.
+  // Learned sentences are never lost either way (they are merged above). Only when neither side has a move
+  // time (older versions) does the furthest position win, as before.
+  let pos;
+  if(L.posAt||R.posAt)pos=R.posAt>L.posAt?{g:R.g,ti:R.ti,posAt:R.posAt}:{g:L.g,ti:L.ti,posAt:L.posAt};
+  else{const remoteAhead=R.g>L.g||(R.g===L.g&&R.ti>L.ti);pos=remoteAhead?{g:R.g,ti:R.ti,posAt:0}:{g:L.g,ti:L.ti,posAt:0}}
   let part=null;
   for(const c of [L.part,R.part]){
     if(!c)continue;
@@ -233,11 +239,11 @@ function mergeProgress(local,remote,essayRev){
     coins:Math.max(L.game.coins,R.game.coins),
     marks:Object.assign({},R.game.marks,L.game.marks)
   };
-  const merged={learned,g:pos.g,ti:pos.ti,startG:L.startG,part,game,started:L.started||R.started,epoch:L.epoch};
+  const merged={learned,g:pos.g,ti:pos.ti,startG:L.startG,part,game,started:L.started||R.started,epoch:L.epoch,posAt:pos.posAt};
   // Did the remote contribute anything? Compare against local padded to the same flag length.
   const padded=L.learned.slice();while(padded.length<n)padded.push(false);
   const usedRemote=!sameFields(merged,{learned:padded,g:L.g,ti:L.ti,startG:L.startG,part:L.part,
-    game:L.game,started:L.started,epoch:L.epoch});
+    game:L.game,started:L.started,epoch:L.epoch,posAt:L.posAt});
   return {progress:Object.assign(base,merged,{rev:essayRev}),usedRemote,reason:usedRemote?'merged':'local-up-to-date'};
 }
 
@@ -245,7 +251,7 @@ function mergeProgress(local,remote,essayRev){
 function progressToRow(p,essayId,rev,deviceId){
   const src=isObj(p)?p:{},f=syncFields(src,false);
   return {essay_id:essayId,rev:rev||src.rev||'',epoch:f.epoch,learned:encodeLearned(f.learned),g:f.g,ti:f.ti,
-    start_g:f.startG,part:f.part,game:f.game,device_id:deviceId==null?null:String(deviceId)};
+    start_g:f.startG,part:f.part,game:f.posAt?Object.assign({},f.game,{posAt:f.posAt}):f.game,device_id:deviceId==null?null:String(deviceId)};
 }
 function rowToProgress(row){
   if(!isObj(row))return null;

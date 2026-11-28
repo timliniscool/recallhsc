@@ -105,7 +105,8 @@ function createSyncEngine(d){
       if(!res.progress)continue;
       if(res.usedRemote||!local||local.rev!==e.rev)app.setState(e.id,res.progress);
       const out=C.progressToRow(res.progress,e.id,e.rev,dev);
-      if(!row||JSON.stringify([row.learned,row.g,row.ti,row.epoch|0,row.start_g,row.part||null])!==JSON.stringify([out.learned,out.g,out.ti,out.epoch,out.start_g,out.part||null]))progRows.push(out);
+      const at=gm=>gm&&typeof gm==='object'&&gm.posAt||0;
+      if(!row||JSON.stringify([row.learned,row.g,row.ti,row.epoch|0,row.start_g,row.part||null,at(row.game)])!==JSON.stringify([out.learned,out.g,out.ti,out.epoch,out.start_g,out.part||null,at(out.game)]))progRows.push(out);
     }
     if(progRows.length)await cloud.upsertProgress(progRows);
 
@@ -180,11 +181,12 @@ const app={
   },
   getState:id=>id===ACTIVE?S:cleanState(ls.get('state.'+id)),
   setState(id,p){
-    const fields=['learned','g','ti','startG','part','game','epoch','rev','started','resetAt'];
+    const fields=['learned','g','ti','startG','part','game','epoch','rev','started','resetAt','posAt'];
     if(id===ACTIVE){
       const mid=busy(),pos=[S.g,S.ti];
       for(const k of fields)if(p[k]!==undefined)S[k]=p[k];
       if(mid){S.g=pos[0];S.ti=pos[1]} // never yank the student off the answer they're typing
+      adoptPos(); // a position that came from another device is not a new move on this one
       save();renderSide();if(!mid&&phase!=='marking')loadTask();
     }else{
       const cur=cleanState(ls.get('state.'+id))||DEFSTATE();
