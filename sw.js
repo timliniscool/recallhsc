@@ -64,6 +64,12 @@ self.addEventListener('fetch',e=>{
 
 async function navigate(req){
   const c=await caches.open(SHELL);
+  // other pages (e.g. privacy.html) are served as themselves; everything else is the app
+  const path=new URL(req.url).pathname;
+  if(path.endsWith('.html')&&!path.endsWith('/index.html')){
+    const page=await c.match(req,{ignoreSearch:true});if(page)return page;
+    try{return await fetch(req)}catch(err){}
+  }
   const hit=await c.match('index.html');
   if(hit)return hit;                       // installed: same version as the cached scripts
   try{return await fetch(req)}catch(err){return new Response('<h1>Offline</h1><p>Open RecallHSC once while online so it can be saved for offline use.</p>',{status:503,headers:{'content-type':'text/html; charset=utf-8'}})}
