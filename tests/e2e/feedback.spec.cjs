@@ -31,8 +31,8 @@ test('if sending fails, the form stays open to try again',async({page})=>{
   await expect(page.locator('#fbModal')).toBeVisible();
 });
 
-test('until the feedback table exists, no report link is shown',async({page})=>{
-  await openApp(page);
+test('with reports switched off in the config, no report link is shown',async({page})=>{
+  await openApp(page);await page.evaluate(()=>{RECALL_CLOUD.feedback=false});
   await answer(page,t=>'nothing like it');
   await expect(page.locator('#foot .fblink')).toHaveCount(0);
 });
