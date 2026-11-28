@@ -5,13 +5,17 @@
      sw.js, installs the new set alongside the old one, and waits. The page shows "An update is available";
      nothing reloads until the student taps Update. Old and new files are never mixed.
    - Google Fonts: stylesheet stale-while-revalidate, font files cache-first (open-licence fonts).
+   - Handwriting model (models/): cache-first in its own cache that survives app updates (named by model version).
    - Everything else (including any cloud-sync / Supabase requests): not intercepted, never cached.
    Scope: only requests under this worker's own directory (/recallhsc/ on GitHub Pages). */
 'use strict';
 const VERSION='2.0.0';
-const ASSET_HASH='3cc715ea4fd3';
+const ASSET_HASH='bcc9d20c0754';
 const SHELL='recallhsc-shell-'+VERSION+'-'+ASSET_HASH;
 const FONTS='recallhsc-fonts-v1';
+// the handwriting reader's model (~107 MB, models/): its own cache, kept across app updates and replaced only when
+// the model changes. Bump this together with MODEL_VERSION in js/handwriting/handwriting.js.
+const MODEL='recallhsc-model-r2';
 const PRECACHE=[
   './','index.html','manifest.webmanifest',
   'js/engine/text.js','js/engine/chunker.js','js/engine/parser.js','js/engine/marking.js','js/engine/policies.js','js/engine/recall.js',
@@ -37,7 +41,7 @@ self.addEventListener('install',e=>{
 self.addEventListener('activate',e=>{
   e.waitUntil((async()=>{
     // remove only this app's old shells; other caches on the origin are left alone
-    for(const k of await caches.keys())if(k.startsWith('recallhsc-shell-')&&k!==SHELL)await caches.delete(k);
+    for(const k of await caches.keys())if((k.startsWith('recallhsc-shell-')&&k!==SHELL)||(k.startsWith('recallhsc-model-')&&k!==MODEL))await caches.delete(k);
     await self.clients.claim();
   })());
 });
@@ -58,6 +62,7 @@ self.addEventListener('fetch',e=>{
   // the beta site has its own service worker and files: /recallhsc/beta and /recallhsc/beta/… go to the network
   // (without the slash, GitHub Pages redirects to /beta/)
   if(url.pathname===scope.pathname+'beta'||url.pathname.startsWith(scope.pathname+'beta/'))return;
+  if(url.pathname.startsWith(scope.pathname+'models/')){e.respondWith(cacheFirst(req,MODEL));return}
   if(req.mode==='navigate'){e.respondWith(navigate(req));return}
   e.respondWith(shell(req));
 });
