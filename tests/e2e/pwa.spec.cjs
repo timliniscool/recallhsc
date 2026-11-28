@@ -35,7 +35,7 @@ test('service worker installs, precaches the app, and RecallHSC works offline',a
   await context.setOffline(false);
 });
 
-test('a new version is offered, never forced; Update keeps the answer being typed',async({page})=>{
+test('while the site is in use, a new version is offered (never forced); Update keeps the answer being typed',async({page})=>{
   await openApp(page);
   await page.evaluate(()=>navigator.serviceWorker.ready);
   await page.reload();await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
@@ -52,5 +52,20 @@ test('a new version is offered, never forced; Update keeps the answer being type
   await expect.poll(()=>page.locator('#ta').inputValue()).toBe('Leadership is rarely');
   const hash=await page.evaluate(()=>new Promise(res=>{navigator.serviceWorker.addEventListener('message',e=>res(e.data.hash),{once:true});navigator.serviceWorker.controller.postMessage({type:'VERSION'})}));
   expect(hash).toBe('e2etestnew');
+  }finally{fs.writeFileSync(swPath,orig)}
+});
+
+test('opening the site switches to a newer version by itself (no button needed)',async({page})=>{
+  await openApp(page);
+  await page.evaluate(()=>navigator.serviceWorker.ready);
+  await page.reload();await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
+  const fs=require('fs'),swPath=require('path').join(__dirname,'..','..','sw.js'),orig=fs.readFileSync(swPath,'utf8');
+  fs.writeFileSync(swPath,orig.replace(/const ASSET_HASH='[^']*'/,"const ASSET_HASH='e2etestauto'"));
+  try{
+    await page.reload(); // the student opens the site again after a deploy
+    const hashNow=()=>page.evaluate(()=>new Promise(res=>{const c=navigator.serviceWorker.controller;if(!c)return res(null);
+      navigator.serviceWorker.addEventListener('message',e=>res(e.data.hash),{once:true});c.postMessage({type:'VERSION'});setTimeout(()=>res(null),1500)})).catch(()=>null);
+    await expect.poll(hashNow,{timeout:20000}).toBe('e2etestauto');
+    await expect(page.locator('#updBar')).toHaveCount(0);
   }finally{fs.writeFileSync(swPath,orig)}
 });

@@ -71,6 +71,23 @@ function restoreStash(){
     const ta=$('ta');ta.value=st.typed;ta.dispatchEvent(new Event('input'));if(self.toast)toast('Updated. Your answer is still here.');
   }catch(_){}
 }
+// "just opened": the first 8 seconds after the page loaded, and nothing typed yet
+const OPENED=Date.now();
+function justOpened(){
+  if(Date.now()-OPENED>8000)return false;
+  try{if(typeof typed==='string'&&typed.trim())return false;if(typeof phase!=='undefined'&&phase!=='type')return false}catch(_){}
+  return true;
+}
+// Settings > App shows the running version (and whether this is the beta), to make support easy
+function showVersion(){
+  const el=$('verLine');if(!el)return;
+  const beta=/\/beta\//.test(location.pathname);
+  const set=v=>{el.textContent=`Version ${v||'(not installed yet)'}${beta?' · beta':''}`};
+  set('');
+  const c=navigator.serviceWorker&&navigator.serviceWorker.controller;if(!c)return;
+  navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='VERSION')set(`${e.data.version} (${String(e.data.hash).slice(0,7)})`)});
+  c.postMessage({type:'VERSION'});
+}
 async function register(){
   if(!('serviceWorker' in navigator)||!/^https?:$/.test(location.protocol))return;
   // development: ?nosw turns the service worker off for this tab session (and removes it) so edits show immediately
@@ -78,11 +95,16 @@ async function register(){
   if(sessionStorage.getItem('essayRecall2.nosw')){for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister();for(const k of await caches.keys())if(k.startsWith('recallhsc-'))await caches.delete(k);return}
   try{
     reg=await navigator.serviceWorker.register('sw.js',{scope:'./'});
-    if(reg.waiting&&navigator.serviceWorker.controller)showUpdate(reg.waiting);
+    // Opening the site: a newer version found now (or within the first few seconds, before any typing) is switched to
+    // straight away, so every visit starts on the latest. Once the student is using the site, it offers Update instead.
+    const offer=w=>{if(!navigator.serviceWorker.controller)return;if(justOpened()){waiting=w;applyUpdate()}else showUpdate(w)};
+    if(reg.waiting)offer(reg.waiting);
     reg.addEventListener('updatefound',()=>{
       const w=reg.installing;if(!w)return;
-      w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)showUpdate(w);if(w.state==='activated')refreshUI()});
+      w.addEventListener('statechange',()=>{if(w.state==='installed')offer(w);if(w.state==='activated')refreshUI()});
     });
+    reg.update().catch(()=>{}); // look for a new version as the site opens
+    showVersion();
     // look for a new version now and then (and when the app comes back to the foreground)
     setInterval(()=>reg.update().catch(()=>{}),60*60*1000);
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{})});
