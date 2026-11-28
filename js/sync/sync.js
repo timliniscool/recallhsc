@@ -199,6 +199,8 @@ const app={
 };
 
 let sb=null,engine=null,user=null,loading=null;
+// the signed-in access token, for features that send to the project (marking reports); null when signed out
+self.RecallCloudAuth=async()=>{if(!sb)return null;try{const r=await sb.auth.getSession();return r.data.session?r.data.session.access_token:null}catch(_){return null}};
 function loadClient(){
   if(sb)return Promise.resolve(sb);
   if(!configured)return Promise.reject(new Error('Cloud sync is not configured'));
