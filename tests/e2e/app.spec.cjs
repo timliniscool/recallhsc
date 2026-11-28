@@ -270,3 +270,11 @@ test('progress where a map click had moved the start point is repaired when ever
   await openApp(page,{seed:{'state.sample':{startG:5,g:5,ti:0,learned:[true,true,true,true,true],started:true}}});
   expect(await page.evaluate(()=>S.startG)).toBe(0);
 });
+
+test('footer links to the privacy policy and the open-source code',async({page})=>{
+  await openApp(page);
+  await expect(page.locator('.flinks a[href="privacy.html"]')).toHaveText('Privacy policy');
+  await expect(page.locator('.flinks a[href="https://github.com/timliniscool/recallhsc"]')).toBeVisible();
+  const res=await page.goto('privacy.html');expect(res.status()).toBe(200);
+  await expect(page.locator('h1')).toHaveText('Privacy policy');
+});

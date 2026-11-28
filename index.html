@@ -1070,6 +1070,11 @@ body.reduce .betainvite{animation:none}
 .bi-t{display:flex;flex-direction:column;flex:1 1 220px;min-width:0;line-height:1.35}.bi-t b{font-size:14px;color:#312e81}.bi-t small{font-size:12.5px;color:var(--ink2)}
 .bi-tag{font-size:9.5px;font-weight:700;letter-spacing:.08em;color:#fff;background:linear-gradient(115deg,#6366f1,#ec4899);border-radius:99px;padding:2px 6px;vertical-align:middle;margin-left:4px}
 .betainvite a.btn{text-decoration:none}
+/* footer links */
+.sitefoot{flex-direction:column;gap:6px}
+.flinks{display:flex;gap:8px;justify-content:center;font-size:12.5px;color:var(--muted)}
+.flinks a{color:var(--muted);text-decoration:none;border-bottom:1px solid transparent}
+.flinks a:hover,.flinks a:focus-visible{color:var(--skyink);border-bottom-color:currentColor}
 /* in-app confirmation */
 #cfModal{z-index:70}
 .cfsheet{max-width:440px}
@@ -1408,7 +1413,7 @@ body.gamify .iconbtn:hover{background:#151c25;color:#d9f99d}
 </div>
 </div>
 
-<footer class="sitefoot layer"><span class="fmark">Recall<b>HSC</b></span></footer>
+<footer class="sitefoot layer"><span class="fmark">Recall<b>HSC</b></span><nav class="flinks" aria-label="About RecallHSC"><a href="privacy.html">Privacy policy</a><span aria-hidden="true">·</span><a href="https://github.com/timliniscool/recallhsc" target="_blank" rel="noopener">Open source on GitHub</a></nav></footer>
 <noscript><div style="position:fixed;inset:0;display:grid;place-items:center;background:#f4f9ff;font:16px system-ui;z-index:99">RecallHSC needs JavaScript turned on.</div></noscript>
 <script type="application/json" id="docs">{"ex":[]}</script>
 <div class="pet" id="pet"><button class="px" id="petX" title="Hide Don (bring back from Panels)">✕</button><canvas id="petCv" aria-hidden="true" width="32" height="24" title="Don the falcon · click for a cookie"></canvas><div class="bub" id="petBub"></div></div>
