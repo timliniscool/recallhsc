@@ -99,7 +99,9 @@ Quotations matter because HSC essays are built around evidence, and Strict-quote
 
   The rule is
 
-  $$\text{discursive} \iff ana < 0.3 \;\wedge\; [fp \ge 2.5] + [q \ge 2] + [refl \ge 2] \ge 2$$
+  ```math
+  \text{discursive} \iff ana < 0.3 \;\wedge\; [fp \ge 2.5] + [q \ge 2] + [refl \ge 2] \ge 2
+  ```
 
   For comparison, on the test fixtures the sample analytical essay scores *fp* = 0.44 and *ana* = 0.28, while the discursive fixture scores *fp* = 10.4, *q* = 2, *refl* = 4 and *ana* = 0.
 
@@ -128,7 +130,9 @@ A sentence counts as analysis if it matches either expression, or if it contains
 - it has a lead-in idea and either a bare quote (9 or fewer words outside the quotation) or a named technique in the quote or the first 8 words after it; or
 - it has both a bare quote and a named technique.
 
-$$\text{formulaic} \iff units \ge 3 \;\wedge\; \frac{hits}{units} \ge 0.6$$
+```math
+\text{formulaic} \iff units \ge 3 \;\wedge\; \frac{hits}{units} \ge 0.6
+```
 
 The flag only changes the unit's label ("IQTVE" or "Quote + analysis"). It does not change the tasks.
 
@@ -205,22 +209,22 @@ The punctuation rule is checked before the short-quote rule, so a comma inside a
 
 Let *max* be the maximum chunk length (Settings: default 4, clamped to 2–7) and let $\ell^* = \max(2, \min(3, max-1))$ be the ideal length: 3 when *max* is 4 or more, otherwise 2.
 
-$$
+```math
 c(L) = \begin{cases}
 7 & L = 1 \\
 99 & L > max \\
 0.7\,(L-\ell^*)^2 + 1.5\,[L > \ell^*+1] & \text{otherwise}
 \end{cases}
-$$
+```
 
 With $\ell^* = 3$: $c(1)=7,\ c(2)=0.7,\ c(3)=0,\ c(4)=0.7,\ c(5)=4.3,\ c(6)=7.8,\ c(7)=12.7$.
 
 The DP finds the cheapest segmentation of the first $j$ words. A cut after word $j-1$ earns that gap's score, and the end of the sentence earns nothing:
 
-$$
+```math
 B[0]=0,\qquad
 B[j] = \min_{1 \le L \le \min(max,\,j)} \Big( B[j-L] + c(L) - [j<n]\,G_{j-1} \Big)
-$$
+```
 
 `from[j]` stores the minimising $L$. A strict `<` comparison is used, so ties go to the shortest $L$. Backtracking from $j=n$ along `from` and reversing gives the chunks.
 
@@ -339,7 +343,9 @@ A long sentence (the sample essay, 28 words): `build half 1, 1..3/3; build half 
 - **Start point.** Students can start anywhere (`startG`). Every task's span is clipped to start no earlier than the start point. Choosing a sentence on the map either marks everything before it as known, or makes it the new start.
 - **Progress.** A pass on a task that covers whole sentences marks them `learned`. Passing every build chunk sets partial credit `S.part = {g, w}`. Progress is
 
-  $$\text{progress} = \frac{\sum_{g:\,learned} wc_g \;+\; \min(part.w,\ wc_{part.g})}{\sum_g wc_g}$$
+  ```math
+  \text{progress} = \frac{\sum_{g:\,learned} wc_g \;+\; \min(part.w,\ wc_{part.g})}{\sum_g wc_g}
+  ```
 
   Skipping a task never marks anything learned.
 
@@ -367,18 +373,18 @@ Marking has to answer one question: *did the student recall this text?* It must 
 
 `lev(a,b)` ([`marking.js:6-11`](../js/engine/marking.js)) is the classic unit-cost edit distance (Levenshtein, 1966; Wagner & Fischer, 1974), kept as two rolling rows:
 
-$$
+```math
 D_{i,0}=i,\quad D_{0,j}=j,\quad
 D_{i,j}=\min\big(D_{i-1,j}+1,\ D_{i,j-1}+1,\ D_{i-1,j-1}+[a_i\ne b_j]\big)
-$$
+```
 
 `fuzzy(a,b)` accepts a typed word if the distance is within a tolerance that grows with word length. $L$ is the length of the longer word:
 
-$$
+```math
 tol(L) = \begin{cases} 0 & L \le 2 \\ 1 & 3 \le L \le 6 \\ 2 & L \ge 7 \end{cases}
 \qquad
 \text{fuzzy}(a,b) \iff \big||a|-|b|\big| \le tol \;\wedge\; D(a,b) \le tol
-$$
+```
 
 The length check rejects most non-matches cheaply, before the O(k²) distance is computed. Some examples:
 
@@ -393,9 +399,9 @@ Short words must be exact, because one letter changes their meaning ("in"/"on").
 
 The target words $T_1..T_n$ and the typed words $U_1..U_m$ are aligned with a global alignment DP (Needleman & Wunsch, 1970) where every operation costs 1:
 
-$$
+```math
 A_{i,j} = \min\big(A_{i-1,j-1} + [\neg\,\text{match}(T_i,U_j)],\ \ A_{i-1,j}+1\ (\text{missed}),\ \ A_{i,j-1}+1\ (\text{extra})\big)
-$$
+```
 
 Backtracking from $(n,m)$ produces a list of operations:
 
@@ -408,16 +414,16 @@ Ties prefer the diagonal step, then a deletion, then an insertion. The implement
 
 **Scoring.** Let *ok* be the number of matches. A *trailing* extra word is one typed after the end of the target ("typing ahead"). An *interior* extra word is any other extra word.
 
-$$
+```math
 acc = \min\!\left(1,\ \frac{ok}{n + w\cdot interior}\right),\qquad
 w = \begin{cases}0.5 & \text{Standard, Exact, Strict quotes}\\ 1 & \text{Verbatim}\end{cases}
-$$
+```
 
 Trailing extras are free except in Verbatim. The task passes if
 
-$$
+```math
 100\cdot acc \ge strict \quad (\text{default } 88,\ \text{range } 60\text{–}100)
-$$
+```
 
 and, in Strict-quotes mode, if additionally no quoted word is wrong or missing.
 
@@ -511,10 +517,10 @@ With cloud sync on, counters are summed across devices, maxima are taken across 
 
 On phones (a coarse pointer and a short side under 600 px) the student can build an answer by tapping one of three words instead of typing. Random wrong options would be too easy to rule out, so `decoys()` ([`app.js`](../js/app.js)) chooses plausible ones **from the student's own essay**:
 
-$$
+```math
 score(w) = U(0,1.5) + \begin{cases}+3 & \text{same function/content class as the answer}\\ -4 & \text{otherwise}\end{cases}
 + 2\,[\text{shares the answer's suffix}] - 0.35\,\big||w|-|r|\big| + 2.5\,[\text{follows the previous word in the essay}] + 0.8\,[\text{same capitalisation}]
-$$
+```
 
 - Words within one edit of the answer are excluded, so a distractor is never a misspelling of the answer. The exception is the stricter modes below, where a misspelling is deliberately offered.
 - Suffixes: *ing, ed, ly, tion, sion, ment, ness, ity, ous, ive, al, er, est, s*.

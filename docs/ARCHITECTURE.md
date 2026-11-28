@@ -157,7 +157,9 @@ Sync is optional. Students sign in with a passwordless **magic link** (Supabase 
 
 Failed passes back off exponentially with jitter:
 
-$$t = \min(300\,\text{s},\ 2\,\text{s}\cdot 2^{\min(fails,8)}) \times U(0.5, 1.5)$$
+```math
+t = \min(300\,\text{s},\ 2\,\text{s}\cdot 2^{\min(fails,8)}) \times U(0.5, 1.5)
+```
 
 A pass makes one full reconciliation: library, then progress, then stats, then settings. Only one pass runs at a time.
 
