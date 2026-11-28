@@ -10,7 +10,7 @@
    Scope: only requests under this worker's own directory (/recallhsc/ on GitHub Pages). */
 'use strict';
 const VERSION='2.0.0';
-const ASSET_HASH='0b549799f685';
+const ASSET_HASH='bc8589ae9503';
 const SHELL='recallhsc-shell-'+VERSION+'-'+ASSET_HASH;
 const FONTS='recallhsc-fonts-v1';
 // the handwriting reader's model (~107 MB, models/): its own cache, kept across app updates and replaced only when

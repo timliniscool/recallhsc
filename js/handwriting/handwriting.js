@@ -323,7 +323,7 @@ async function sendSample(s){
     await fetch(c.url.replace(/\/$/,'')+'/rest/v1/feedback',{method:'POST',headers:{'apikey':c.anonKey,'Authorization':'Bearer '+t,'Content-Type':'application/json','Prefer':'return=minimal'},
       body:JSON.stringify({kind:'hw_sample',mode:typeof attemptMode!=='undefined'?String(attemptMode).slice(0,20):null,task_type:task?String(task.type).slice(0,20):null,
         expected:String(task?task.text:'').slice(0,20000),answer:String(s.final||'').slice(0,20000),read_text:String(s.read||'').slice(0,20000),ok:!!s.ok,
-        images:s.images.slice(0,40),device:'iPad',app_version:'beta'})});
+        images:s.images.slice(0,40),device:'iPad',app_version:'beta · reader '+MODEL_VERSION})}); // which model read it
   }catch(_){} // samples are best-effort: never interrupt studying
 }
 /* ---------- on/off, paper, per-task reset ---------- */
@@ -420,6 +420,6 @@ if(typeof hint==='function'){
   };
   hint=hwHint;const hb=$('btnHint');if(hb)hb.onclick=hwHint;
 }
-self.HW={_marks:()=>marks,_mkPlace:mkPlace,_quickRead:quickRead,_lastReport:()=>last,_sendSample:sendSample,_scribbled:scribbled,_rule:()=>[RULE,RULE0],setErase,_erase:eraseAt,task:reset,on:()=>on,hasInk:()=>on&&strokes.length>0,setOn,setPaper,_strokes:()=>strokes,_lines:lineGroups,_pre:preEncode,_redraw:redraw,_img:lineImage};
+self.HW={modelVersion:MODEL_VERSION,_marks:()=>marks,_mkPlace:mkPlace,_quickRead:quickRead,_lastReport:()=>last,_sendSample:sendSample,_scribbled:scribbled,_rule:()=>[RULE,RULE0],setErase,_erase:eraseAt,task:reset,on:()=>on,hasInk:()=>on&&strokes.length>0,setOn,setPaper,_strokes:()=>strokes,_lines:lineGroups,_pre:preEncode,_redraw:redraw,_img:lineImage};
 setPaper(paper);apply();
 })();

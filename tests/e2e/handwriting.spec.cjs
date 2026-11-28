@@ -236,10 +236,12 @@ test('reports from handwriting include pictures of the lines; samples go only wh
   await expect.poll(()=>posts.filter(p=>p.kind==='marking').length).toBe(1);
   const rep=posts.find(p=>p.kind==='marking');
   expect(rep.reason).toBe('misread');expect(rep.images[0]).toMatch(/^data:image\/png;base64,/);
+  expect(rep.app_version).toMatch(/^(beta|main) · reader r\d+$/); // which model read it
   // signed in, samples on (the default): a sample is sent with each check
   await page.evaluate(()=>{self.RecallCloudAuth=async()=>'token';retry()});
   await stroke(page,'pen',0);await page.locator('#hwDone').click();
   await expect.poll(()=>posts.filter(p=>p.kind==='hw_sample').length).toBe(1);
+  expect(posts.find(p=>p.kind==='hw_sample').app_version).toMatch(/^(beta|main) · reader r\d+$/);
   // switched off in Settings: none
   await page.evaluate(()=>{localStorage.setItem('essayRecall2.hwSamples','off');retry()});
   await stroke(page,'pen',0);await page.locator('#hwDone').click();

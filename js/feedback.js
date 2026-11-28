@@ -47,7 +47,8 @@ $('fbSend').onclick=async()=>{
     task_type:String(ctx.task_type||'').slice(0,20)||null,expected:String(ctx.expected||'').slice(0,20000),answer:String(ctx.answer||'').slice(0,20000),
     read_text:ctx.extra&&ctx.extra.read?String(ctx.extra.read).slice(0,20000):null,
     images:ctx.extra&&Array.isArray(ctx.extra.images)&&ctx.extra.images.length?ctx.extra.images.slice(0,40):null,
-    device:device(),app_version:/\/beta(\/|$)/.test(location.pathname)?'beta':'main'};
+    // the site, plus which handwriting reader model read it (for handwriting reports)
+    device:device(),app_version:(/\/beta(\/|$)/.test(location.pathname)?'beta':'main')+(ctx.extra&&ctx.extra.images&&self.HW&&HW.modelVersion?' · reader '+HW.modelVersion:'')};
   $('fbSend').disabled=true;$('fbSend').textContent='Sending…';
   try{
     const t=await token();
