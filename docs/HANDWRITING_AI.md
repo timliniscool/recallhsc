@@ -92,15 +92,15 @@ A debug switch, `?m=xenova` on the worker URL, loads the original upstream weigh
 
 Students cross words out. If that ink were read, it would turn into nonsense words. `scribbled()` therefore looks for strokes that **zig-zag back and forth over their own width**. A stroke is a candidate if it has at least 20 points and, where $len$ is its path length and $w$ its bounding-box width (at least 12):
 
-$$
+```math
 len \ge 6w \quad\wedge\quad sweeps \ge 8
-$$
+```
 
 A *sweep* is a horizontal run, in one direction, longer than $0.3\,w$. A candidate is ignored, together with any other stroke that lies at least 70% inside its bounding box (the crossed-out word), if it covers other ink or is **obvious**:
 
-$$
+```math
 len \ge 12w \;\wedge\; sweeps \ge 14
-$$
+```
 
 Ordinary cursive covers about 3–4 times its width and rarely reverses direction 8 times, so real words are not mistaken for crossings-out. An end-to-end test checks a looping cursive word against exactly this.
 
@@ -110,9 +110,9 @@ Strokes are grouped into lines before reading.
 
 **Lined paper.** Each point votes for a ruled line using a "band-majority" rule. With rule spacing $R$ (48–58 px, depending on sheet width), a point at height $y$ votes for line $L$ when
 
-$$
+```math
 r_L - 0.8R \;\le\; y \;\le\; r_L + 0.12R,\qquad r_L = R_0 + (L+1)R
-$$
+```
 
 A stroke belongs to the line with the most votes. This keeps the descenders of *g, p, y* and the ascenders of *h, l, t* with their own word, rather than splitting by a stroke's centre point.
 
@@ -162,9 +162,9 @@ RecallHSC knows what the student is *trying* to write: the expected essay text. 
 
 The guide keeps a pointer $j$ into the expected words. Each new line starts from the position where the previous line ended. That position is chosen by `advance()`, which picks the number of expected words $k$ that best explains the words read so far:
 
-$$
+```math
 k^* = \arg\max_k \Big(\text{LCS}(E[ptr..ptr{+}k),\ \text{read}) - 0.35\,\big|k - |\text{read}|\big|\Big)
-$$
+```
 
 where LCS is the length of the longest common subsequence. Within a line, every completed word read so far moves the pointer on by one, or by two if the word matches the expected word after next. That allows for one skipped word.
 
@@ -179,15 +179,15 @@ The expected word at the pointer is tokenised. A line's first word is tokenised 
 
 Let $z_t$ be the logit of candidate token $t$ and $z_{\max}$ the largest logit at this step. The boost applies only if the model **already considers the token plausible**:
 
-$$
+```math
 z_t \ge z_{\max} - 5 \quad\text{and}\quad \big|\{v : z_v > z_t\}\big| < 8
-$$
+```
 
 That is, the token is within 5 logits of the top and already in the top 8. Then
 
-$$
+```math
 z_t \leftarrow z_t + \begin{cases} 4 & \text{primary} \\ 2 & \text{secondary} \end{cases}
-$$
+```
 
 A logit boost of $\Delta$ multiplies that token's odds against every other token by $e^{\Delta}$: $e^4 \approx 54.6$ and $e^2 \approx 7.4$.
 
@@ -214,15 +214,15 @@ Guidance only helps tokens near the top of the list. A messy word can still be m
 
 `fit(v, before, words)` runs the decoder once over a fixed sequence (teacher forcing): the start token, then the line's words before the mismatch (as context), then the candidate words. From a single forward pass it takes the log-probability of each candidate token given the image and everything before it:
 
-$$
+```math
 \ell_k = \log P\big(y_k \mid y_{<k},\ \text{image}\big) = z_{y_k} - \log\sum_v e^{z_v}
-$$
+```
 
 This is computed with the usual max-subtraction for numerical stability. The **compatibility score** is the geometric-mean token probability over the $K$ candidate tokens:
 
-$$
+```math
 f = \exp\!\Big(\tfrac{1}{K}\textstyle\sum_{k=1}^{K} \ell_k\Big)
-$$
+```
 
 $f$ measures how well a word sequence explains this image under the model. **It is not a calibrated confidence**, and it should not be read as "the probability that the student wrote this".
 
@@ -230,9 +230,9 @@ $f$ measures how well a word sequence explains this image under the model. **It 
 
 Let $f$ be the score of the *expected* words, $f_s$ the score of what the reader *saw*, and $sim$ the letter-level similarity of the two (§6). The expected words replace the misread ones if
 
-$$
+```math
 f \ge 0.03 \;\;\lor\;\; \big(f \ge 0.001 \wedge sim(\text{seen}, \text{expected}) \ge 0.58\big) \;\;\lor\;\; \ln f \ge \ln f_s - 2.5
-$$
+```
 
 If the reader dropped or merged words entirely (there is nothing seen to compare with), the rule is $f \ge 0.05$.
 
@@ -246,9 +246,9 @@ Each run costs one or two extra decoder passes. The encoder is not re-run.
 
 The student wrote *Getae* and the reader produced *Great*. Suppose the decoder assigns the three tokens of " Getae" probabilities 0.20, 0.05 and 0.40 given the image and the line so far:
 
-$$
+```math
 f = (0.20 \times 0.05 \times 0.40)^{1/3} = 0.004^{1/3} \approx 0.159 \ge 0.03 \;\Rightarrow\; \text{accept}
-$$
+```
 
 If the student had actually written *Romans*, the expected tokens might score something like 0.001, 0.0002 and 0.0005, giving $f \approx 4.6\times10^{-4}$. That fails the absolute rule. $sim(\text{Romans}, \text{Getae})$ is low, so the lookalike rule fails too. And *Romans* itself would fit far better, so the relative rule fails as well. The misreading stands, and marking reports a wrong word.
 
@@ -273,15 +273,15 @@ w vv uu | m rn nn | u ii n v | h li b n | o 0 a c | t f l + | k h x | p q b | z 
 
 It also allows **one-to-two-character confusions**. The recurrence has two extra moves:
 
-$$
+```math
 D_{i,j} = \min\Big(D_{i-1,j}+1,\ D_{i,j-1}+1,\ D_{i-1,j-1}+c(a_i,b_j),\ D_{i-2,j-1}+c(a_{i-1}a_i,\ b_j),\ D_{i-1,j-2}+c(a_i,\ b_{j-1}b_j)\Big)
-$$
+```
 
 so *rn* ↔ *m*, *cl* ↔ *d* and *vv* ↔ *w* each cost 0.3. The similarity is
 
-$$
+```math
 sim(a,b) = 1 - \frac{D_{|a|,|b|}}{\max(|a|,|b|)}
-$$
+```
 
 and the lookalike rule in §5 requires $sim \ge 0.58$.
 

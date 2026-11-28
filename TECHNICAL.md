@@ -63,7 +63,9 @@ Each sentence is learnt a few words at a time. Rather than cutting fixed windows
 
 The cut points are then chosen by a dynamic programme that minimises length cost minus gap score:
 
-$$B[j] = \min_{1\le L\le max}\Big(B[j-L] + c(L) - [j<n]\,G_{j-1}\Big),\qquad c(L)=0.7\,(L-\ell^*)^2 + 1.5\,[L>\ell^*+1]$$
+```math
+B[j] = \min_{1\le L\le max}\Big(B[j-L] + c(L) - [j<n]\,G_{j-1}\Big),\qquad c(L)=0.7\,(L-\ell^*)^2 + 1.5\,[L>\ell^*+1]
+```
 
 with $c(1)=7$, and an ideal chunk length $\ell^*=3$ by default. The whole thing runs in $O(n\cdot max)$.
 
@@ -92,7 +94,9 @@ Marking works at two levels.
 
 **Sequence level.** The typed answer is aligned with the target using optimal global alignment (Needleman–Wunsch style), built on typed arrays with cached per-word-pair verdicts. One skipped word therefore costs exactly one word, rather than shifting everything after it out of place. In a test, one skipped word plus one typo scored 9/10 with alignment, where a naive position-by-position comparison scored 3/10.
 
-$$acc = \min\!\Big(1,\frac{matched}{n + w\cdot extra_{interior}}\Big),\quad w=0.5\ (1\text{ in Verbatim}),\qquad \text{pass} \iff 100\,acc \ge strict\ (\text{default }88)$$
+```math
+acc = \min\!\Big(1,\frac{matched}{n + w\cdot extra_{interior}}\Big),\quad w=0.5\ (1\text{ in Verbatim}),\qquad \text{pass} \iff 100\,acc \ge strict\ (\text{default }88)
+```
 
 Words typed past the end of the target are free, except in Verbatim. There are four modes:
 
@@ -129,7 +133,9 @@ It is exported to ONNX (encoder in fp16 for WebGPU, int8 for CPU; decoder in int
 - **Guided decoding:** the expected essay nudges the decoder. A token gets **+4** to its logit (×54.6 odds), or +2 for the following word, but only if it is **already in the top 8 and within 5 logits of the top**. Nothing is ever forced, so a word that was clearly written differently is still read as written.
 - **Probability-based rescue:** for misread words, the expected words are scored against the ink by teacher-forced decoding. The score is a geometric-mean token probability:
 
-  $$f=\exp\big(\tfrac1K\textstyle\sum \log P(y_k\mid y_{<k},\text{image})\big)$$
+  ```math
+  f=\exp\big(\tfrac1K\textstyle\sum \log P(y_k\mid y_{<k},\text{image})\big)
+  ```
 
   The expected words are accepted if any of these hold:
   - $f \ge 0.03$;
