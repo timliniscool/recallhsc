@@ -163,9 +163,10 @@ test('Focus mode lives in the Panels menu',async({page})=>{
   await openApp(page);
   await expect(page.locator('#btnFocus')).toHaveCount(0);
   await page.locator('#btnPanels').click();
+  const was=await page.evaluate(()=>document.body.classList.contains('focus')); // on by default in the beta
   await page.locator('#mFocusBtn').click();
-  expect(await page.evaluate(()=>document.body.classList.contains('focus'))).toBe(true);
-  await expect(page.locator('#mFocusBtn')).toHaveAttribute('aria-pressed','true');
+  expect(await page.evaluate(()=>document.body.classList.contains('focus'))).toBe(!was);
+  await expect(page.locator('#mFocusBtn')).toHaveAttribute('aria-pressed',String(!was));
 });
 
 test('accessibility preferences: reduced motion, high contrast, standard text box, text size',async({page})=>{
@@ -269,4 +270,11 @@ test('picking a sentence on the map goes there without cutting earlier parts out
 test('progress where a map click had moved the start point is repaired when everything before it is learnt',async({page})=>{
   await openApp(page,{seed:{'state.sample':{startG:5,g:5,ti:0,learned:[true,true,true,true,true],started:true}}});
   expect(await page.evaluate(()=>S.startG)).toBe(0);
+});
+
+test('beta: Focus is on by default, without changing the main site’s saved setting',async({page})=>{
+  await openApp(page);
+  expect(await page.evaluate(()=>[SET.focus,document.body.classList.contains('focus')])).toEqual([true,true]);
+  await page.evaluate(()=>save());
+  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('essayRecall2.settings')).focus)).toBe(false);
 });

@@ -51,10 +51,20 @@ pad.setAttribute('role','group');pad.setAttribute('aria-label','Handwriting shee
 pad.innerHTML=`<div class="hwsheet lined" id="hwSheet"><div class="hwpage" id="hwPage"><canvas id="hwCanvas" role="img" aria-label="Handwriting area. Write your answer with Apple Pencil, then press Check. Scroll with one finger."></canvas><div class="hwscan" id="hwScan" aria-hidden="true"></div></div></div>
 <div class="hwbar"><span class="hwnote" id="hwNote" role="status"></span>
 <button class="btn small" id="hwPaper" type="button" aria-label="Paper style"></button>
+<button class="btn small" id="hwUndo" type="button" title="Undo the last stroke">↶ Undo</button>
 <button class="btn small" id="hwErase" type="button" aria-pressed="false" title="Eraser: removes whole strokes. Two-finger tap on the sheet switches it on and off.">⌫ Eraser</button><button class="btn small" id="hwClear" type="button">Clear</button>
-<button class="btn small" id="hwType" type="button">⌨ Back to typing</button><button class="btn primary" id="hwDone" type="button">Check</button></div>`;
-pad.insertBefore(pad.querySelector('.hwbar'),pad.firstChild); // the tools and Check sit above the paper, close to hand
-pad.insertBefore(pad.querySelector('#hwNote'),pad.querySelector('.hwsheet')); // status on its own line, so the buttons never wrap
+<button class="btn small" id="hwRetry" type="button" title="Clear the sheet and try this again">↻ Retry</button>
+<button class="btn small" id="hwType" type="button" title="Back to typing">⌨ Type</button><button class="btn primary small" id="hwDone" type="button">Check</button></div>`;
+const bar=pad.querySelector('.hwbar'),head=document.querySelector('#card .card-head');
+if(head)head.appendChild(bar);else pad.insertBefore(bar,pad.firstChild); // the tools and Check join the card's top row: one compact line
+pad.insertBefore(bar.querySelector('#hwNote'),pad.firstChild); // status: a small label in the sheet's corner, no extra row
+// after Check, the marked answer and the result line (Next / Retry) show at the top, above the paper
+const footEl=$('foot'),footHome={parent:footEl&&footEl.parentNode,next:footEl&&footEl.nextSibling};
+function resultsOnTop(onTop){
+  const s=pad.querySelector('.hwsheet');
+  if(onTop){pad.insertBefore(tb,s);if(footEl)pad.insertBefore(footEl,s)}
+  else{if(tb.parentNode===pad)pad.parentNode.insertBefore(tb,pad.nextSibling);if(footEl&&footEl.parentNode===pad)footHome.parent.insertBefore(footEl,footHome.next&&footHome.next.parentNode===footHome.parent?footHome.next:null)}
+}
 tb.parentNode.insertBefore(pad,tb); // the marked answer (the typing box) then shows below the paper after Check
 // first-time download of the reader: a progress bar across the top of everything
 const loadBar=document.createElement('div');loadBar.className='hwload';loadBar.id='hwLoad';loadBar.hidden=true;loadBar.setAttribute('role','progressbar');loadBar.setAttribute('aria-label','Getting the handwriting reader ready');
@@ -99,6 +109,7 @@ cv.addEventListener('pointerdown',e=>{
   e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}
   if(erasing){cur={erase:true};eraseAt(at(e));return}
   if(!tStart)tStart=performance.now();
+  try{if(task&&task.type==='build'&&SET.hide)prompt.classList.add('veil')}catch(_){} // hide the prompt as you write, like typing
   cur={id:++sid,pts:[at(e)]};strokes.push(cur);seg(cur);say('');clearReading();clearTimeout(preT);
 });
 cv.addEventListener('pointermove',e=>{
@@ -131,11 +142,35 @@ addEventListener('resize',()=>requestAnimationFrame(()=>{ruling();fit()}));
 
 /* ---------- splitting the page into written lines ----------
    Lined paper: each stroke belongs to the ruled line its middle sits on. Blank paper: strokes are grouped by height. */
+/* Scribbles: a dense back-and-forth stroke is a crossing-out. It's left out of the reading, along with whatever
+   ink it covers (the crossed-out words). */
+function scribbled(){
+  const out=new Set(),boxes=[];
+  for(const s of strokes){const p=s.pts;if(p.length<12)continue;
+    let len=0,x0=1e9,y0=1e9,x1=-1e9,y1=-1e9,flips=0,last=0;
+    for(let i=1;i<p.length;i++){const dx=p[i][0]-p[i-1][0];len+=Math.hypot(dx,p[i][1]-p[i-1][1]);if(Math.abs(dx)>1.5){const sg=Math.sign(dx);if(last&&sg!==last)flips++;last=sg}}
+    for(const[x,y] of p){if(x<x0)x0=x;if(y<y0)y0=y;if(x>x1)x1=x;if(y>y1)y1=y}
+    const diag=Math.hypot(x1-x0,y1-y0);
+    if(diag>14&&len>diag*5&&flips>=6){out.add(s);boxes.push([x0-6,y0-6,x1+6,y1+6])}}
+  if(boxes.length)for(const s of strokes){if(out.has(s))continue;let n=0;
+    for(const[x,y] of s.pts)if(boxes.some(b=>x>=b[0]&&x<=b[2]&&y>=b[1]&&y<=b[3]))n++;
+    if(n>=s.pts.length*.7)out.add(s)}
+  return out;
+}
 function lineGroups(){
-  const items=strokes.map(s=>{let y0=1e9,y1=-1e9,x0=1e9,x1=-1e9;for(const[x,y] of s.pts){if(y<y0)y0=y;if(y>y1)y1=y;if(x<x0)x0=x;if(x>x1)x1=x}return{s,y0,y1,x0,x1,mid:(y0+y1)/2}});
+  const skip=scribbled();
+  const items=strokes.filter(s=>!skip.has(s)).map(s=>{let y0=1e9,y1=-1e9,x0=1e9,x1=-1e9;for(const[x,y] of s.pts){if(y<y0)y0=y;if(y>y1)y1=y;if(x<x0)x0=x;if(x>x1)x1=x}return{s,y0,y1,x0,x1,mid:(y0+y1)/2}});
   const groups=[];
   if(paper==='lined'){
-    const m=new Map();for(const it of items){const li=Math.max(0,Math.floor((it.mid-RULE0)/RULE));if(!m.has(li))m.set(li,[]);m.get(li).push(it)}
+    // each stroke belongs to the line where most of its ink sits in the writing band (just above that line's rule),
+    // so tails (p, g, y) and tall letters (l, d, f) stay with their own word
+    const m=new Map();
+    for(const it of items){
+      const votes=new Map();
+      for(const[,y] of it.s.pts){const base=Math.round((y-RULE0)/RULE); // nearest rule below/above
+        for(const L of [base-1,base]){const rule=RULE0+(L+1)*RULE;if(y>=rule-RULE*.8&&y<=rule+RULE*.12)votes.set(L,(votes.get(L)||0)+1)}}
+      let li=Math.max(0,Math.floor((it.mid-RULE0)/RULE)),best=-1;for(const[L,v] of votes)if(v>best){best=v;li=Math.max(0,L)}
+      if(!m.has(li))m.set(li,[]);m.get(li).push(it)}
     for(const k of [...m.keys()].sort((a,b)=>a-b))groups.push(m.get(k));
   }else{
     const hs=items.map(i=>i.y1-i.y0).sort((a,b)=>a-b),h=Math.max(18,hs[hs.length>>1]||24);
@@ -210,6 +245,7 @@ async function read(){
   if(typeof phase==='undefined'||phase!=='type')return;
   const secs=Math.max(1,(performance.now()-(tStart||performance.now()))/1000),nStrokes=strokes.length;
   busy=true;$('hwDone').disabled=true;pad.classList.add('busy');
+  if(self.track)track('hw-check');
   const lines=lineGroups();showLines(lines);lines.forEach((_,i)=>markLine(i,'wait'));
   say(ready?'Reading your writing…':'Getting the handwriting reader ready…');
   try{
@@ -227,16 +263,15 @@ async function read(){
     const typingStats=JSON.parse(JSON.stringify(S.stats)),typingTime=S.stats.time;
     typed=text;ta.value=text;renderTyped();
     if(self.track)track('handwriting');
-    document.body.classList.add('hwmarked'); // the ink stays; the marked answer shows just below it
+    document.body.classList.add('hwmarked');resultsOnTop(true); // the ink stays; the marked answer shows at the top
     check();
     for(let i=0;i<80&&phase==='marking';i++)await sleep(50);
     S.stats=typingStats;S.stats.time=typingTime;
     const hs=S.hw||(S.hw={att:0,pass:0,words:0,secs:0,strokes:0,bestWpm:0});
-    hs.att++;if(phase==='ok'||phase==='review')hs.pass++;hs.words+=words;hs.secs+=secs;hs.strokes+=nStrokes;hs.bestWpm=Math.max(hs.bestWpm,wpm);
+    hs.att++;if(phase==='ok'||phase==='review'){hs.pass++;if(self.track)track('hw-pass')}hs.words+=words;hs.secs+=secs;hs.strokes+=nStrokes;hs.bestWpm=Math.max(hs.bestWpm,wpm);
     save();if(typeof renderSide==='function')renderSide();
     const f=$('foot');
     if(f){const s=document.createElement('span');s.className='hwstats';s.textContent=`✍ ${wpm} wpm · ${sps} strokes/s · ${Math.round(secs)}s · handwriting: ${hs.pass}/${hs.att} passed, best ${Math.round(hs.bestWpm)} wpm`;f.insertBefore(s,f.querySelector('.spacer')||null)}
-    if($('typebox'))$('typebox').scrollIntoView({block:'nearest',behavior:'smooth'});
     if(self.announce)announce(`Handwriting: ${wpm} words per minute, ${sps} strokes per second.`);
   }catch(err){
     say('Couldn’t read the writing just now. Your ink is still here: try Check again.');clearReading();
@@ -263,15 +298,17 @@ function setOn(v){
     if(typeof applyPanels==='function')applyPanels();
   }
   apply();
-  if(on){put(OFFER,'no');if(self.announce)announce('Handwriting on. Write your answer with Apple Pencil, then press Check.')}
+  if(on){put(OFFER,'no');if(self.track)track('hw-on');if(self.announce)announce('Handwriting on. Write your answer with Apple Pencil, then press Check.')}
   else if(self.focusTa)focusTa();
 }
-function reset(){strokes=[];cur=null;tStart=0;clearTimeout(preT);if(erasing)setErase(false);redraw();clearReading();say('');busy=false;pad.classList.remove('busy');document.body.classList.remove('hwmarked');pageH=0;page.style.height='';sheet.scrollTop=0;if(on){ruling();grow()}$('hwDone').disabled=false}
+function reset(){strokes=[];cur=null;tStart=0;clearTimeout(preT);if(erasing)setErase(false);redraw();clearReading();say('');busy=false;pad.classList.remove('busy');document.body.classList.remove('hwmarked');resultsOnTop(false);pageH=0;page.style.height='';sheet.scrollTop=0;if(on){ruling();grow()}$('hwDone').disabled=false}
 sw.onclick=()=>setOn(!on);
 $('hwType').onclick=()=>setOn(false);
 $('hwTry').onclick=()=>setOn(true);
 $('hwNo').onclick=()=>{put(OFFER,'no');offer.hidden=true};
 $('hwPaper').onclick=()=>setPaper(paper==='lined'?'blank':'lined');
+$('hwUndo').onclick=()=>{if(busy||!strokes.length)return;strokes.pop();redraw();clearReading()};
+$('hwRetry').onclick=()=>{if(busy)return;if(typeof phase!=='undefined'&&phase!=='type'&&typeof retry==='function')retry();else{strokes=[];tStart=0;redraw();clearReading();say('')}};
 $('hwErase').onclick=()=>{if(!busy)setErase(!erasing)};
 $('hwClear').onclick=async()=>{
   if(busy||!strokes.length)return;
@@ -282,6 +319,6 @@ $('hwDone').onclick=read;
 // the first Apple Pencil touch anywhere offers handwriting
 document.addEventListener('pointerdown',e=>{if(e.pointerType==='pen'&&!penSeen){penSeen=true;put(SEEN,'1');apply();if(!on&&self.toast)toast('Apple Pencil found: tap ✍ Handwrite to write your answers by hand')}},true);
 {const row=$('hwRow');if(row)row.hidden=false;const s=$('sHw');if(s)s.onchange=()=>setOn(s.checked)}
-self.HW={_rule:()=>[RULE,RULE0],setErase,_erase:eraseAt,task:reset,on:()=>on,setOn,setPaper,_strokes:()=>strokes,_lines:lineGroups,_pre:preEncode,_redraw:redraw,_img:lineImage};
+self.HW={_scribbled:scribbled,_rule:()=>[RULE,RULE0],setErase,_erase:eraseAt,task:reset,on:()=>on,setOn,setPaper,_strokes:()=>strokes,_lines:lineGroups,_pre:preEncode,_redraw:redraw,_img:lineImage};
 setPaper(paper);apply();
 })();

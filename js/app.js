@@ -86,6 +86,11 @@ o.gamify=!!o.gamify;if(o.preGame!==undefined&&!(Array.isArray(o.preGame)&&o.preG
 return o;
 }
 let SET=cleanSettings(ls.get('settings'));
+// beta: Focus is on by default. It's kept separately, because the beta shares saved settings with the main site
+// and turning it on here shouldn't change the main site.
+const MAIN_FOCUS=SET.focus;
+{let b=null;try{b=localStorage.getItem('essayRecall2.betaFocus')}catch(_){}SET.focus=b!=='0'}
+const storeSET=()=>{try{localStorage.setItem('essayRecall2.betaFocus',SET.focus?'1':'0')}catch(_){}return {...SET,focus:MAIN_FOCUS}};
 let LIB=cleanLib(ls.get('lib'));
 let ACTIVE=okId(ls.get('active'))?ls.get('active'):'sample';
 let S=null;
@@ -117,8 +122,8 @@ if(!saveWarned){saveWarned=true;setTimeout(()=>{toast('Couldn’t save progress:
 let POS=null;
 function adoptPos(){if(S)POS={id:ACTIVE,g:S.g,ti:S.ti}} // take the current position as already known (loads, merges)
 function stampPos(){if(!S)return;if(POS&&POS.id===ACTIVE&&(POS.g!==S.g||POS.ti!==S.ti))S.posAt=Date.now();if(!POS||POS.id!==ACTIVE||POS.g!==S.g||POS.ti!==S.ti)adoptPos()}
-const save=()=>{if(S){stampPos();S.nS=SENTS.length;lsTry('state.'+ACTIVE,S)}lsTry('settings',SET);lsTry('active',ACTIVE)};
-const saveSettings=()=>{lsTry('settings',SET);lsTry('active',ACTIVE)};
+const save=()=>{if(S){stampPos();S.nS=SENTS.length;lsTry('state.'+ACTIVE,S)}lsTry('settings',storeSET());lsTry('active',ACTIVE)};
+const saveSettings=()=>{lsTry('settings',storeSET());lsTry('active',ACTIVE)};
 addEventListener('pagehide',()=>save());
 function loadEssay(id){
 if(!allEssays().some(e=>e.id===id))id=allEssays()[0].id;let text=essayText(id);

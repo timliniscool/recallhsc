@@ -45,12 +45,12 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);min-height:10
 /* background canvas: sized to the LARGE viewport so mobile URL-bar show/hide never resizes or blanks it */
 html{background:#f3f8ff}
 html:has(body.gamify){background:#06080b}
-#bg{position:fixed;left:0;top:-20vh;width:100vw;height:140vh;height:calc(100lvh + 40vh);z-index:0;pointer-events:none;display:block} /* overhangs the screen so iPad toolbars/keyboard never uncover a blank strip */
+#bg{position:fixed;left:0;top:-25vh;width:100vw;height:150vh;z-index:0;pointer-events:none;display:block} /* overhangs the screen so iPad toolbars/keyboard never uncover a blank strip */
 /* touch devices: no live blur behind panels (each blur is recomputed every frame on iPad); slightly more solid glass instead */
 body.touch{--glass:rgba(255,255,255,.9);--glass2:rgba(255,255,255,.95);--topbg:rgba(255,255,255,.92)}
 body.touch.gamify{--glass:rgba(14,18,24,.95);--glass2:rgba(14,18,24,.97);--topbg:rgba(6,8,11,.95)}
 body.touch :is(.top,.panel,.card,.gnav,.gsec,.modal,.peekview){backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-@supports(height:100lvh){#bg{height:calc(100lvh + 40vh)}}
+
 body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(rgba(14,116,190,.16) 1px,transparent 1.2px);background-size:26px 26px;-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 0%,transparent 75%);mask-image:radial-gradient(ellipse at 50% 40%,#000 0%,transparent 75%)}
 .layer{position:relative;z-index:1}
 button{font:inherit;cursor:pointer}
@@ -1112,7 +1112,15 @@ body.hw .card{padding-left:clamp(18px,3vw,44px);padding-right:clamp(18px,3vw,44p
 .hwsheet.erasing{box-shadow:0 0 0 3px rgba(239,68,68,.25),0 10px 40px rgba(14,116,190,.10)}
 #hwErase.on{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
 .hwbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;flex:none}
-.hwnote{font-size:13px;color:var(--muted);min-height:18px;margin:-2px 2px 0}
+.hwpad{position:relative}
+/* status: a small label in the sheet's top-right corner (no extra row) */
+.hwnote{position:absolute;top:8px;right:14px;z-index:3;pointer-events:none;font-size:12px;color:var(--muted);background:rgba(255,255,255,.94);border:1px solid var(--line2);border-radius:99px;padding:2px 10px;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hwnote:empty{display:none}
+/* the handwriting tools share the card's top row */
+body:not(.hw) .card-head .hwbar{display:none}
+.card-head .hwbar{margin-left:auto;gap:6px}
+.hwbar .btn.small{padding:5px 9px;font-size:12.5px}
+body.hw .card-head{margin-bottom:10px}
 .hwbar #hwDone{min-width:110px;justify-content:center}
 .hwstats{font-size:12.5px;color:#4338ca;background:#eef2ff;border-radius:99px;padding:3px 10px}
 body.reduce .hwl.now i::after{animation:none;left:0;width:100%;opacity:.4}

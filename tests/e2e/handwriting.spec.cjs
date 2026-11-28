@@ -63,9 +63,9 @@ test('normal mode only, focus-style: game mode and the stats panels are off whil
   expect(await page.evaluate(()=>[SET.gamify,document.body.classList.contains('gamify'),SET.focus])).toEqual([false,false,true]);
   await page.evaluate(()=>setGame(true)); // refused while handwriting
   expect(await page.evaluate(()=>SET.gamify)).toBe(false);
-  await page.locator('#hwType').click(); // "Return to main site"
+  await page.locator('#hwType').click(); // back to typing
   await expect(page.locator('#hwPad')).toBeHidden();
-  expect(await page.evaluate(()=>SET.focus)).toBe(false);
+  await expect(page.locator('#typebox')).toBeVisible();
 });
 
 test('eraser removes whole strokes; paper button shows the other style; Clear asks first',async({page})=>{
@@ -180,4 +180,22 @@ test('handwriting counts towards progress, but only its own statistics change (t
   expect(await page.evaluate(()=>[S.g,S.ti])).not.toEqual(g0);        // progress moved on
   // and it is saved
   expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('essayRecall2.state.sample')).hw.att)).toBe(1);
+});
+
+test('a letter with a tail (p, g, y) stays on its own line; a scribble is ignored with the word under it',async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));
+  const [R_,R0]=await page.evaluate(()=>HW._rule());
+  // a word on line 0, then a "p" whose tail hangs well below line 0's rule
+  await stroke(page,'pen',0,40);
+  await page.evaluate(([R_,R0])=>{const cv=document.getElementById('hwCanvas'),r=cv.getBoundingClientRect(),x=200,top=R0+R_*.55,bottom=R0+R_*1.5;
+    const ev=(n,y)=>cv.dispatchEvent(new PointerEvent(n,{pointerType:'pen',pointerId:9,clientX:r.left+x,clientY:r.top+y,pressure:.6,bubbles:true,cancelable:true}));
+    ev('pointerdown',top);for(let i=1;i<=10;i++)ev('pointermove',top+(bottom-top)*i/10);ev('pointerup',bottom)},[R_,R0]);
+  expect(await page.evaluate(()=>HW._lines().length)).toBe(1);
+  // a word on line 2, then scribbled out: the line disappears from the reading
+  await stroke(page,'pen',2,40);
+  await page.evaluate(([R_,R0])=>{const cv=document.getElementById('hwCanvas'),r=cv.getBoundingClientRect(),y=R0+2*R_+R_*.55;
+    const ev=(n,x,yy)=>cv.dispatchEvent(new PointerEvent(n,{pointerType:'pen',pointerId:10,clientX:r.left+x,clientY:r.top+yy,pressure:.6,bubbles:true,cancelable:true}));
+    ev('pointerdown',30,y);for(let i=1;i<=24;i++)ev('pointermove',i%2?175:30,y+(i%3-1)*8);ev('pointerup',40,y)},[R_,R0]);
+  expect(await page.evaluate(()=>HW._lines().length)).toBe(1);
 });
