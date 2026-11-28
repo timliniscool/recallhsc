@@ -226,7 +226,7 @@ function markLine(i,state,text){
 }
 
 /* ---------- the on-device reader (Web Worker) ---------- */
-const MODEL_VERSION='r3'; // bump when the reader model changes (with MODEL in sw.js), so the one-time download shows its bar again
+const MODEL_VERSION='r4'; // bump when the reader model changes (with MODEL in sw.js), so the one-time download shows its bar again
 const CACHED='essayRecall2.hwModelCached.'+MODEL_VERSION;
 let slowT=0;
 let W=null,ready=false,seq=0;const waiting=new Map();
