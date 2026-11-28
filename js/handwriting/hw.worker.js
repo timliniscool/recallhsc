@@ -20,7 +20,10 @@
      {type:'result', id, texts, oks, ms} | {type:'error', id, message} */
 import {env, AutoProcessor, AutoTokenizer, VisionEncoderDecoderModel, RawImage, Tensor, LogitsProcessor} from '../vendor/transformers/transformers.min.js';
 
-const MODEL='Xenova/trocr-small-handwritten';
+// RecallHSC's own fine-tuned model (TrOCR-small trained further on handwriting lines styled like iPad ink), served
+// with the site from models/. '?m=xenova' on the worker URL loads the original from Hugging Face (for comparisons).
+const ORIGINAL=new URL(import.meta.url).searchParams.get('m')==='xenova';
+const MODEL=ORIGINAL?'Xenova/trocr-small-handwritten':'recallhsc-trocr';
 const START=2,EOS=2;      // TrOCR starts and ends every line with token 2
 const RESCUE=0.03;        // expected words replace a misread when they fit the ink at least this well (a different word scores ~0.0001)
 const RESCUE_LOOKALIKE=0.001; // ...or fit it somewhat AND look like what was read (half the letters or more in common)
@@ -47,7 +50,8 @@ function similar(a,b){
   }
   return 1-D[n][m]/Math.max(n,m);
 }
-env.allowLocalModels=false;
+env.allowLocalModels=!ORIGINAL;env.allowRemoteModels=ORIGINAL;
+env.localModelPath=new URL('../../models/',import.meta.url).pathname; // a path, not a full URL: the library only checks local files given as a path
 env.useBrowserCache=true;
 env.backends.onnx.wasm.wasmPaths=new URL('../vendor/transformers/',import.meta.url).href; // our own copy, not a CDN
 env.backends.onnx.wasm.numThreads=1; // GitHub Pages can't enable cross-origin isolation, so no threads
