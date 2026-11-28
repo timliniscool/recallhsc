@@ -134,7 +134,7 @@ It is exported to ONNX (encoder in fp16 for WebGPU, int8 for CPU; decoder in int
 - **Probability-based rescue:** for misread words, the expected words are scored against the ink by teacher-forced decoding. The score is a geometric-mean token probability:
 
   ```math
-  f=\exp\big(\tfrac1K\textstyle\sum \log P(y_k\mid y_{<k},\text{image})\big)
+  f=\exp\big(\tfrac1K\textstyle\sum \log P(y_k\mid y_{\lt k},\text{image})\big)
   ```
 
   The expected words are accepted if any of these hold:
