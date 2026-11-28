@@ -1061,6 +1061,9 @@ body.gamify .focustile[aria-pressed="true"] .fi{background:#ede9fe;color:#7c3aed
   body.gamify .card-head{display:none}
   body.gamify .card{min-height:0!important;height:auto}
 }
+/* beta site badge */
+.betatag{margin-left:6px;font-size:9.5px;font-weight:700;letter-spacing:.08em;color:#fff;background:linear-gradient(115deg,#6366f1,#ec4899);border-radius:99px;padding:2px 6px;vertical-align:middle}
+body.gamify .betatag{border-radius:0;font-family:var(--px);font-size:7px}
 /* handwriting (Apple Pencil, iPad; beta) */
 .hwtoggle{margin:0 0 8px auto;display:flex}
 .hwoffer{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:79;width:min(560px,calc(100vw - 24px));box-sizing:border-box;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;border-radius:16px;border:1px solid rgba(99,102,241,.25);background:linear-gradient(115deg,#eef2ff,#fdf2f8 45%,#ecfeff);box-shadow:0 14px 40px rgba(15,23,42,.18);animation:hwUp .35s cubic-bezier(.2,.8,.2,1)}
@@ -1197,7 +1200,7 @@ body.gamify .iconbtn:hover{background:#151c25;color:#d9f99d}
 <div id="sr" class="sr-only" aria-live="polite" aria-atomic="true"></div><div id="srAlert" class="sr-only" role="alert"></div>
 
 <header class="top">
-<div class="brand"><span class="logo"></span>Recall<b class="hsc">HSC</b></div>
+<div class="brand"><span class="logo"></span>Recall<b class="hsc">HSC</b><span class="betatag" title="Beta: new features being tested">BETA</span></div>
 <div class="tabs"><button class="tab on" data-view="mem">Memorise</button><button class="tab" data-view="guide">Rubric guide</button></div>
 <button class="btn ibtn" id="btnHelp" aria-label="How it works" title="How it works"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.6-3 4.6"/><path d="M12 18.2h.01"/></svg></button>
 <div class="mem-only"><div class="topbar"><div class="tb-fill" id="tbFill"></div></div><div class="toppct" id="topPct">0% memorised</div></div>
