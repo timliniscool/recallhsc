@@ -342,3 +342,14 @@ test('ink lands under the pencil even after the sheet changes width without a wi
     const s=HW._strokes().at(-1);let on=0;for(const[x,y] of s.pts){const p=c.getImageData(Math.round(x*d),Math.round(y*d),1,1).data;if(p[3]>80)on++}return{on,n:s.pts.length,ratio:+(cv.width/r.width).toFixed(3)}});
   expect(hit.on).toBeGreaterThanOrEqual(hit.n-1);
 });
+
+test('Retry while writing clears the sheet and shows the sentence again',async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>{SET.hide=true;HW.setOn(true)});await page.waitForTimeout(300);
+  await stroke(page,'pen',0);
+  const veiled=await page.evaluate(()=>task.type==='build'?$('prompt').classList.contains('veil'):true);
+  expect(veiled).toBe(true);
+  await page.locator('#hwRetry').click();
+  expect(await page.evaluate(()=>HW._strokes().length)).toBe(0);
+  await expect(page.locator('#prompt')).not.toHaveClass(/veil/);
+});

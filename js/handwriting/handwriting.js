@@ -356,12 +356,14 @@ $('hwTry').onclick=()=>setOn(true);
 $('hwNo').onclick=()=>{put(OFFER,'no');offer.hidden=true};
 $('hwPaper').onclick=()=>setPaper(paper==='lined'?'blank':'lined');
 $('hwUndo').onclick=()=>{if(busy||!strokes.length)return;strokes.pop();redraw();clearReading()};
-$('hwRetry').onclick=()=>{if(busy)return;if(typeof phase!=='undefined'&&phase!=='type'&&typeof retry==='function')retry();else{strokes=[];tStart=0;redraw();clearReading();say('')}};
+// starting again shows the sentence again (it hides while you write, like typing)
+const showPrompt=()=>{try{prompt.classList.remove('veil')}catch(_){}};
+$('hwRetry').onclick=()=>{if(busy)return;if(typeof phase!=='undefined'&&phase!=='type'&&typeof retry==='function')retry();else{strokes=[];tStart=0;redraw();clearReading();say('');showPrompt()}};
 $('hwErase').onclick=()=>{if(!busy)setErase(!erasing)};
 $('hwClear').onclick=async()=>{
   if(busy||!strokes.length)return;
   const sure=typeof askConfirm==='function'?await askConfirm('Everything on this sheet will be wiped. This can’t be undone.',{title:'Clear the sheet?',ok:'Clear',danger:true}):true;
-  if(sure){strokes=[];tStart=0;redraw();clearReading();say('')}
+  if(sure){strokes=[];tStart=0;redraw();clearReading();say('');showPrompt()}
 };
 $('hwDone').onclick=read;
 // the first Apple Pencil touch anywhere offers handwriting
