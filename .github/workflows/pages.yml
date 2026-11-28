@@ -58,7 +58,9 @@ jobs:
           if [ -d beta ]; then
             publish beta _site/beta
             # keep the beta out of search results
-            sed -i 's|<head>|<head>\n<meta name="robots" content="noindex">|' _site/beta/index.html
+            # (replace the site's own robots tag, or add one if there isn't any)
+            sed -i -E 's|<meta name="robots" content="[^"]*">|<meta name="robots" content="noindex">|' _site/beta/index.html
+            grep -q 'content="noindex"' _site/beta/index.html || sed -i 's|<head>|<head>\n<meta name="robots" content="noindex">|' _site/beta/index.html
             rm -f _site/beta/robots.txt _site/beta/sitemap.xml _site/beta/google*.html
           fi
           touch _site/.nojekyll
