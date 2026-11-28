@@ -95,7 +95,10 @@ function fit(){
 }
 function seg(s){
   const p=s.pts;if(!p.length)return;
-  cx.lineCap='round';cx.lineJoin='round';cx.strokeStyle=cx.fillStyle='#0b1324';
+  cx.lineCap='round';cx.lineJoin='round';cx.strokeStyle=cx.fillStyle=s.red?'#dc2626':'#0b1324';
+  if(s.red){ // red marking pen: a fine, even ballpoint line for annotating after marking
+    if(p.length===1){cx.beginPath();cx.arc(p[0][0]*DPR,p[0][1]*DPR,1.4*DPR,0,7);cx.fill();return}
+    cx.lineWidth=1.5*DPR;cx.beginPath();cx.moveTo(p[0][0]*DPR,p[0][1]*DPR);for(let i=1;i<p.length;i++)cx.lineTo(p[i][0]*DPR,p[i][1]*DPR);cx.stroke();return}
   if(p.length===1){cx.beginPath();cx.arc(p[0][0]*DPR,p[0][1]*DPR,(1+p[0][2]*1.6)*DPR,0,7);cx.fill();return}
   for(let i=1;i<p.length;i++){
     const a=p[i-1],b=p[i];cx.lineWidth=(1.1+((a[2]+b[2])/2)*2.6)*DPR;
@@ -105,11 +108,13 @@ function seg(s){
 function redraw(){cx.clearRect(0,0,cv.width,cv.height);strokes.forEach(seg)}
 const at=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top,e.pressure>0?e.pressure:.5]};
 cv.addEventListener('pointerdown',e=>{
-  if(e.pointerType!=='pen'||busy)return; // Apple Pencil only: fingers and palms never draw
+  if(e.pointerType!=='pen'||(busy&&!document.body.classList.contains('hwmarked')))return; // Apple Pencil only: fingers and palms never draw
   e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}
   if(erasing){cur={erase:true};eraseAt(at(e));return}
   if(!tStart)tStart=performance.now();
   try{if(task&&task.type==='build'&&SET.hide)prompt.classList.add('veil')}catch(_){} // hide the prompt as you write, like typing
+  // after marking, the pen becomes a red marking pen: annotations only, never read or marked
+  if(document.body.classList.contains('hwmarked')){cur={id:++sid,pts:[at(e)],red:true};strokes.push(cur);seg(cur);return}
   cur={id:++sid,pts:[at(e)]};strokes.push(cur);seg(cur);say('');clearReading();clearTimeout(preT);
 });
 cv.addEventListener('pointermove',e=>{
@@ -120,7 +125,7 @@ cv.addEventListener('pointermove',e=>{
   for(const ev of evs)cur.pts.push(at(ev));
   seg({pts:cur.pts.slice(start)});
 });
-const end=e=>{if(cur&&e.pointerType==='pen'){const was=cur;cur=null;if(!was.erase){clearTimeout(preT);preT=setTimeout(preEncode,600);
+const end=e=>{if(cur&&e.pointerType==='pen'){const was=cur;cur=null;if(!was.erase&&!was.red){clearTimeout(preT);preT=setTimeout(preEncode,600);
   // writing near the bottom: add ten more lines of paper
   let maxY=0;for(const p of was.pts)if(p[1]>maxY)maxY=p[1];if(maxY>pageH-RULE*4)grow(pageH+RULE*10)}}};
 /* Eraser: object by object. Any stroke the pencil passes within ~10px of is removed whole. */
@@ -149,7 +154,7 @@ addEventListener('resize',()=>requestAnimationFrame(()=>{ruling();fit()}));
 // (a crossing-out) or is an obvious scrawl (12x its width, 14+ sweeps). A cursive word is ~3-4x its width.
 function scribbled(){
   const out=new Set(),cands=[];
-  for(const s of strokes){const p=s.pts;if(p.length<20)continue;
+  for(const s of strokes){const p=s.pts;if(p.length<20||s.red)continue;
     let len=0,x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
     for(let i=1;i<p.length;i++)len+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);
     for(const[x,y] of p){if(x<x0)x0=x;if(y<y0)y0=y;if(x>x1)x1=x;if(y>y1)y1=y}
@@ -168,7 +173,7 @@ function scribbled(){
 }
 function lineGroups(){
   const skip=scribbled();
-  const items=strokes.filter(s=>!skip.has(s)).map(s=>{let y0=1e9,y1=-1e9,x0=1e9,x1=-1e9;for(const[x,y] of s.pts){if(y<y0)y0=y;if(y>y1)y1=y;if(x<x0)x0=x;if(x>x1)x1=x}return{s,y0,y1,x0,x1,mid:(y0+y1)/2}});
+  const items=strokes.filter(s=>!skip.has(s)&&!s.red).map(s=>{let y0=1e9,y1=-1e9,x0=1e9,x1=-1e9;for(const[x,y] of s.pts){if(y<y0)y0=y;if(y>y1)y1=y;if(x<x0)x0=x;if(x>x1)x1=x}return{s,y0,y1,x0,x1,mid:(y0+y1)/2}});
   const groups=[];
   if(paper==='lined'){
     // each stroke belongs to the line where most of its ink sits in the writing band (just above that line's rule),
@@ -272,7 +277,8 @@ async function read(){
     const typingStats=JSON.parse(JSON.stringify(S.stats)),typingTime=S.stats.time;
     typed=text;ta.value=text;renderTyped();
     if(self.track)track('handwriting');
-    document.body.classList.add('hwmarked');resultsOnTop(true); // the ink stays; the marked answer shows at the top
+    document.body.classList.add('hwmarked');resultsOnTop(true);sheet.classList.add('redpen');
+    say('✎ Red pen: annotate your answer (it isn’t marked)');note.classList.add('red'); // the ink stays; the marked answer shows at the top
     check();
     for(let i=0;i<80&&phase==='marking';i++)await sleep(50);
     S.stats=typingStats;S.stats.time=typingTime;
@@ -310,7 +316,7 @@ function setOn(v){
   if(on){put(OFFER,'no');if(self.track)track('hw-on');if(self.announce)announce('Handwriting on. Write your answer with Apple Pencil, then press Check.')}
   else if(self.focusTa)focusTa();
 }
-function reset(){strokes=[];cur=null;tStart=0;clearTimeout(preT);if(erasing)setErase(false);redraw();clearReading();say('');busy=false;pad.classList.remove('busy');document.body.classList.remove('hwmarked');resultsOnTop(false);pageH=0;page.style.height='';sheet.scrollTop=0;if(on){ruling();grow()}$('hwDone').disabled=false}
+function reset(){strokes=[];cur=null;tStart=0;clearTimeout(preT);if(erasing)setErase(false);redraw();clearReading();say('');busy=false;pad.classList.remove('busy');document.body.classList.remove('hwmarked');resultsOnTop(false);sheet.classList.remove('redpen');note.classList.remove('red');pageH=0;page.style.height='';sheet.scrollTop=0;if(on){ruling();grow()}$('hwDone').disabled=false}
 sw.onclick=()=>setOn(!on);
 $('hwType').onclick=()=>setOn(false);
 $('hwTry').onclick=()=>setOn(true);

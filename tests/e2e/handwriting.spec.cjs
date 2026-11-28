@@ -211,3 +211,15 @@ test('joined-up (cursive) words are never mistaken for scribbles',async({page})=
   expect(await page.evaluate(()=>HW._scribbled().size)).toBe(0);
   expect(await page.evaluate(()=>HW._lines().length)).toBe(1);
 });
+
+test('after marking, the pen turns into a red marking pen whose ink is never read',async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));
+  await stroke(page,'pen',0);
+  await page.locator('#hwDone').click();
+  await page.waitForFunction(()=>phase==='ok'||phase==='review');
+  await expect(page.locator('#hwNote')).toContainText('Red pen');
+  await stroke(page,'pen',2);
+  expect(await page.evaluate(()=>HW._strokes().map(s=>!!s.red))).toEqual([false,true]);
+  expect(await page.evaluate(()=>HW._lines().length)).toBe(1); // only the black writing counts
+});

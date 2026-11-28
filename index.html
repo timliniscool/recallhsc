@@ -1109,6 +1109,9 @@ body.hw .card{padding-left:clamp(18px,3vw,44px);padding-right:clamp(18px,3vw,44p
 @keyframes hwBeam{to{left:100%}}
 .hwpad.busy #hwCanvas{cursor:progress}
 .hwsheet.erasing #hwCanvas{cursor:cell}
+/* after marking: red marking pen (annotations only) */
+.hwsheet.redpen{box-shadow:0 0 0 2px rgba(220,38,38,.18),0 10px 40px rgba(14,116,190,.10)}
+.hwnote.red{color:#b91c1c;background:#fef2f2;border-color:#fecaca}
 .hwsheet.erasing{box-shadow:0 0 0 3px rgba(239,68,68,.25),0 10px 40px rgba(14,116,190,.10)}
 #hwErase.on{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
 .hwbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;flex:none}
