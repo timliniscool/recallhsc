@@ -1190,6 +1190,18 @@ body.gamify .mrow.on{border-color:#a3e635;box-shadow:4px 4px 0 rgba(0,0,0,.6)}
 body.gamify .mk2{font-family:var(--px);font-size:7px;letter-spacing:0}
 body.gamify .mgcount{font-family:var(--px);font-size:8px;background:#a3e635;color:#0b1324}
 body.gamify .iconbtn:hover{background:#151c25;color:#d9f99d}
+/* "Try the BETA" callout in How RecallHSC works (handwriting on iPad) */
+.betacall{display:flex;align-items:center;gap:12px;margin:12px 0 4px;padding:12px 14px;border-radius:14px;text-decoration:none;color:var(--ink);position:relative;overflow:hidden;
+  background:linear-gradient(135deg,rgba(99,102,241,.10),rgba(168,85,247,.10) 50%,rgba(236,72,153,.10));border:1px solid rgba(139,92,246,.38);transition:transform .15s,box-shadow .15s}
+.betacall:hover,.betacall:focus-visible{transform:translateY(-1px);box-shadow:0 8px 24px rgba(139,92,246,.20)}
+.betacall::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);transform:translateX(-100%);animation:betaSweep 3.6s ease-in-out infinite;pointer-events:none}
+.betabadge{flex:none;font-weight:800;font-size:12px;letter-spacing:.14em;color:#fff;padding:6px 10px;border-radius:999px;
+  background:linear-gradient(90deg,#6366f1,#a855f7,#ec4899,#a855f7,#6366f1);background-size:300% 100%;animation:betaShine 5s linear infinite;box-shadow:0 2px 12px rgba(168,85,247,.45)}
+.betacall b{display:block;font-size:14.5px}.betacall small{display:block;color:var(--ink2);font-size:13px;line-height:1.4;margin-top:1px}
+.betacall .arr{margin-left:auto;font-size:18px;color:#7c3aed}
+@keyframes betaShine{to{background-position:300% 0}}
+@keyframes betaSweep{0%,55%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@media (prefers-reduced-motion:reduce){.betabadge,.betacall::after{animation:none}.betacall::after{display:none}}
 </style>
 </head>
 <body>
@@ -1395,6 +1407,7 @@ body.gamify .iconbtn:hover{background:#151c25;color:#d9f99d}
 <li>Spelling and punctuation don’t count. Check the marking, then <kbd>Enter</kbd> to keep going.</li>
 <li>Hold <kbd class="k-ctl">Ctrl</kbd><kbd>P</kbd> to glance at the paragraph, <kbd class="k-ctl">Ctrl</kbd><kbd>O</kbd> for the whole essay. <kbd class="k-ctl">Ctrl</kbd><kbd>Z</kbd> on an empty box steps back.</li>
 </ol>
+<a class="betacall" href="beta/"><span class="betabadge">BETA</span><span><b>Try the BETA on iPad: handwriting</b><small>Write your answers with Apple Pencil on lined paper, like the exam. Read and marked right on your iPad.</small></span><span class="arr" aria-hidden="true">→</span></a>
 <p class="sub" style="margin:10px 0 16px">It all saves in this browser. Rubrics and exam tips are in the <b>Rubric guide</b> tab.</p>
 <button class="btn primary" id="bHowto" style="width:100%;justify-content:center;padding:10px">Got it, let’s go</button>
 </div>
