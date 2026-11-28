@@ -215,7 +215,7 @@ Guidance only helps tokens near the top of the list. A messy word can still be m
 `fit(v, before, words)` runs the decoder once over a fixed sequence (teacher forcing): the start token, then the line's words before the mismatch (as context), then the candidate words. From a single forward pass it takes the log-probability of each candidate token given the image and everything before it:
 
 ```math
-\ell_k = \log P\big(y_k \mid y_{<k},\ \text{image}\big) = z_{y_k} - \log\sum_v e^{z_v}
+\ell_k = \log P\big(y_k \mid y_{\lt k},\ \text{image}\big) = z_{y_k} - \log\sum_v e^{z_v}
 ```
 
 This is computed with the usual max-subtraction for numerical stability. The **compatibility score** is the geometric-mean token probability over the $K$ candidate tokens:
