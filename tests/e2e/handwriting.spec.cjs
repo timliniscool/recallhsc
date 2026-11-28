@@ -332,3 +332,13 @@ test('the red marking pen draws red while you write, not black',async({page})=>{
     const s=HW._strokes().at(-1);let red=0,dark=0;for(const[x,y] of s.pts){const p=c.getImageData(Math.round(x*d),Math.round(y*d),1,1).data;if(p[3]>80){if(p[0]>150&&p[1]<90)red++;else if(p[0]<60)dark++}}return{red,dark}});
   expect(px.red).toBeGreaterThan(3);expect(px.dark).toBe(0);
 });
+
+test('ink lands under the pencil even after the sheet changes width without a window resize',async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));await page.waitForTimeout(300);
+  await page.evaluate(()=>{$('hwSheet').style.width='70%'}); // layout change only; no resize event
+  await stroke(page,'pen',2,400);
+  const hit=await page.evaluate(()=>{const cv=$('hwCanvas'),c=cv.getContext('2d'),r=cv.getBoundingClientRect(),d=cv.width/r.width;
+    const s=HW._strokes().at(-1);let on=0;for(const[x,y] of s.pts){const p=c.getImageData(Math.round(x*d),Math.round(y*d),1,1).data;if(p[3]>80)on++}return{on,n:s.pts.length,ratio:+(cv.width/r.width).toFixed(3)}});
+  expect(hit.on).toBeGreaterThanOrEqual(hit.n-1);
+});

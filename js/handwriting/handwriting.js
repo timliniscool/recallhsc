@@ -110,6 +110,7 @@ const at=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.client
 cv.addEventListener('pointerdown',e=>{
   if(e.pointerType!=='pen'||(busy&&!document.body.classList.contains('hwmarked')))return; // Apple Pencil only: fingers and palms never draw
   e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}
+  {const r=cv.getBoundingClientRect();if(Math.abs(cv.width-Math.round(r.width*DPR))>1||Math.abs(cv.height-Math.round(r.height*DPR))>1)fit()} // never draw on a stale canvas size
   if(erasing){cur={erase:true};eraseAt(at(e));return}
   if(!tStart)tStart=performance.now();
   try{if(task&&task.type==='build'&&SET.hide)prompt.classList.add('veil')}catch(_){} // hide the prompt as you write, like typing
@@ -145,6 +146,9 @@ function setErase(v){erasing=!!v;const b=$('hwErase');b.setAttribute('aria-press
 cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
 cv.addEventListener('touchstart',e=>{if(e.touches.length===1&&e.touches[0].touchType==='stylus')e.preventDefault()},{passive:false});
 addEventListener('resize',()=>requestAnimationFrame(()=>{ruling();fit()}));
+// the sheet can change width without the window resizing (results moving to the top, panels, fonts, rotation):
+// re-fit then too, or the ink is drawn scaled and lands away from the pencil tip
+if(self.ResizeObserver)new ResizeObserver(()=>requestAnimationFrame(fit)).observe(cv);
 
 /* ---------- splitting the page into written lines ----------
    Lined paper: each stroke belongs to the ruled line its middle sits on. Blank paper: strokes are grouped by height. */
