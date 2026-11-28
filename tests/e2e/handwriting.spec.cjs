@@ -246,3 +246,35 @@ test('reports from handwriting include pictures of the lines; samples go only wh
   await page.waitForTimeout(800);
   expect(posts.filter(p=>p.kind==='hw_sample').length).toBe(1);
 });
+
+test('Pencil markup on the sentence being memorised fades away after a few seconds',async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));await page.waitForTimeout(300);
+  await page.evaluate(()=>{const mk=document.querySelector('.hwmarkup'),r=mk.getBoundingClientRect();
+    const ev=(n,x)=>mk.dispatchEvent(new PointerEvent(n,{pointerType:'pen',pointerId:21,clientX:r.left+x,clientY:r.top+r.height/2,pressure:.5,bubbles:true,cancelable:true}));
+    ev('pointerdown',20);for(let i=1;i<10;i++)ev('pointermove',20+i*10);ev('pointerup',120)});
+  expect(await page.evaluate(()=>HW._marks().length)).toBe(1);
+  expect(await page.evaluate(()=>HW._strokes().length)).toBe(0); // not part of the answer
+  await page.waitForTimeout(4500);
+  expect(await page.evaluate(()=>HW._marks().length)).toBe(0);
+});
+
+test('hint while handwriting reads what is written so far, then shows the word after it',async({page})=>{
+  await page.addInitScript(()=>{window.__hwAnswer=null});
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));
+  await stroke(page,'pen',0);
+  // the stand-in reader "reads" the whole expected chunk; the hint then points past it
+  await page.evaluate(()=>hint());
+  await expect.poll(()=>page.evaluate(()=>__hwMsgs.filter(t=>t==='check').length)).toBe(1);
+  await expect(page.locator('#toast')).toContainText('Next word');
+});
+
+test('the download bar shows only the first time; later loads are silent',async({page})=>{
+  await page.addInitScript(()=>{const Real=window.Worker;window.Worker=function(url,o){if(!String(url).includes('hw.worker'))return new Real(url,o);
+    const w={onmessage:null,terminate(){},postMessage(m){if(m.type==='load')setTimeout(()=>w.onmessage&&w.onmessage({data:{type:'progress',loaded:30,total:100}}),10)}};return w}});
+  await openApp(page);
+  await page.evaluate(()=>{localStorage.setItem('essayRecall2.hwModelCached','1');HW.setOn(true)});
+  await page.waitForTimeout(400);
+  await expect(page.locator('#hwLoad')).toBeHidden();
+});

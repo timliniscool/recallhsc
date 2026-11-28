@@ -221,13 +221,15 @@ function markLine(i,state,text){
 }
 
 /* ---------- the on-device reader (Web Worker) ---------- */
+const CACHED='essayRecall2.hwModelCached';let slowT=0;
 let W=null,ready=false,seq=0;const waiting=new Map();
 function reader(){
   if(W)return W;
   try{W=new Worker(new URL('hw.worker.js',SRC),{type:'module'})}catch(_){W=null;return null}
   W.onmessage=e=>{const m=e.data||{};
-    if(m.type==='progress'&&!ready&&m.total)loading(m.loaded/m.total*100);
-    else if(m.type==='ready'){ready=true;loading(null);if(!busy)say('')}
+    // the download bar only the first time: after that the reader loads from the iPad's storage
+    if(m.type==='progress'&&!ready&&m.total&&get(CACHED)!=='1')loading(m.loaded/m.total*100);
+    else if(m.type==='ready'){ready=true;put(CACHED,'1');loading(null);clearTimeout(slowT);if(!busy)say('')}
     else if(m.type==='line'){const w=waiting.get(m.id);if(w&&w.onLine)w.onLine(m)}
     else if(m.type==='result'||m.type==='error'){const w=waiting.get(m.id);if(w){waiting.delete(m.id);m.type==='result'?w.ok(m):w.no(new Error(m.message))}else if(m.type==='error'&&!busy)say('The handwriting reader couldn’t start. Check your connection, then try again.')}
   };
@@ -325,7 +327,8 @@ function apply(){
   sw.textContent=on?'⌨ Type instead':'✍ Handwrite';sw.setAttribute('aria-pressed',String(on));
   offer.hidden=on||get(OFFER)==='no';
   const s=$('sHw');if(s)s.checked=on;
-  if(on){requestAnimationFrame(()=>{ruling();grow();fit()});reader();if(!ready)loading(2)}else loading(null);
+  if(on){requestAnimationFrame(()=>{ruling();grow();fit();mkPlace()});reader();
+    if(!ready){if(get(CACHED)!=='1')loading(2);else{clearTimeout(slowT);slowT=setTimeout(()=>{if(!ready&&!busy)say('Getting the reader ready…')},2500)}}}else{loading(null);mk.remove()}
 }
 function setOn(v){
   v=!!v;if(v===on){apply();return}
@@ -359,6 +362,55 @@ $('hwDone').onclick=read;
 document.addEventListener('pointerdown',e=>{if(e.pointerType==='pen'&&!penSeen){penSeen=true;put(SEEN,'1');apply();if(!on&&self.toast)toast('Apple Pencil found: tap ✍ Handwrite to write your answers by hand')}},true);
 {const row=$('hwRow');if(row)row.hidden=false;const s=$('sHw');if(s)s.onchange=()=>setOn(s.checked);
  const sr=$('hwSampleRow'),ss=$('sHwSamples');if(sr)sr.hidden=false;if(ss){ss.checked=samplesOn();ss.onchange=()=>put(SAMPLES,ss.checked?null:'off')}}
-self.HW={_lastReport:()=>last,_sendSample:sendSample,_scribbled:scribbled,_rule:()=>[RULE,RULE0],setErase,_erase:eraseAt,task:reset,on:()=>on,setOn,setPaper,_strokes:()=>strokes,_lines:lineGroups,_pre:preEncode,_redraw:redraw,_img:lineImage};
+/* Mark up the sentence you're memorising: Apple Pencil ink on the prompt (circle a word, underline a phrase) that
+   fades away after a few seconds. It never touches the answer and is never read or marked. */
+const MARK_HOLD=2500,MARK_FADE=1500;
+const mk=document.createElement('canvas');mk.className='hwmarkup';mk.setAttribute('aria-hidden','true');
+const mkx=mk.getContext('2d');let marks=[],mkCur=null,mkAnim=0;
+function mkPlace(){
+  if(!on){mk.remove();return}
+  if(promptEl.parentNode&&mk.parentNode!==promptEl.parentNode){promptEl.parentNode.style.position=promptEl.parentNode.style.position||'relative';promptEl.parentNode.insertBefore(mk,promptEl.nextSibling)}
+  const r=promptEl.getBoundingClientRect(),pr=promptEl.parentNode.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);
+  Object.assign(mk.style,{left:(r.left-pr.left-8)+'px',top:(r.top-pr.top-8)+'px',width:(r.width+16)+'px',height:(r.height+16)+'px'});
+  const w=Math.round((r.width+16)*d),h=Math.round((r.height+16)*d);if(mk.width!==w||mk.height!==h){mk.width=w;mk.height=h}
+}
+function mkDraw(){
+  const now=performance.now(),d=mk.width/Math.max(1,mk.getBoundingClientRect().width);
+  mkx.clearRect(0,0,mk.width,mk.height);
+  marks=marks.filter(m=>m===mkCur||now-m.t<MARK_HOLD+MARK_FADE);
+  for(const m of marks){const age=m===mkCur?0:now-m.t,a=age<MARK_HOLD?1:1-(age-MARK_HOLD)/MARK_FADE;
+    mkx.globalAlpha=Math.max(0,a)*.9;mkx.strokeStyle='#2563eb';mkx.lineWidth=2.6*d;mkx.lineCap=mkx.lineJoin='round';
+    mkx.beginPath();m.pts.forEach(([x,y],i)=>i?mkx.lineTo(x*d,y*d):mkx.moveTo(x*d,y*d));mkx.stroke()}
+  mkx.globalAlpha=1;
+  mkAnim=marks.length?requestAnimationFrame(mkDraw):0;
+}
+const mkAt=e=>{const r=mk.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+mk.addEventListener('pointerdown',e=>{if(e.pointerType!=='pen')return;e.preventDefault();try{mk.setPointerCapture(e.pointerId)}catch(_){}
+  mkCur={pts:[mkAt(e)],t:performance.now()};marks.push(mkCur);if(!mkAnim)mkAnim=requestAnimationFrame(mkDraw)});
+mk.addEventListener('pointermove',e=>{if(!mkCur||e.pointerType!=='pen')return;e.preventDefault();
+  let evs=e.getCoalescedEvents?e.getCoalescedEvents():[];if(!evs.length)evs=[e];for(const ev of evs)mkCur.pts.push(mkAt(ev))});
+const mkEnd=e=>{if(mkCur&&e.pointerType==='pen'){mkCur.t=performance.now();mkCur=null}};
+mk.addEventListener('pointerup',mkEnd);mk.addEventListener('pointercancel',mkEnd);
+mk.addEventListener('touchstart',e=>{if(e.touches.length===1&&e.touches[0].touchType==='stylus')e.preventDefault()},{passive:false});
+new MutationObserver(()=>{if(on)requestAnimationFrame(mkPlace)}).observe(promptEl,{childList:true,subtree:true,characterData:true});
+addEventListener('resize',()=>{if(on)requestAnimationFrame(mkPlace)});
+/* Hint while handwriting: read what's written so far in the background (finished lines are already prepared, so
+   it's quick), then show the next word after where the student is really up to, exactly like typing mode. */
+async function quickRead(){
+  const lines=lineGroups();if(!lines.length)return '';
+  const blobs=await Promise.all(lines.map(lineImage));
+  const r=await checkLines(lines.map((L,i)=>({key:L.key,blob:blobs[i],width:L.x1-L.x0})),task.text,null);
+  return r.texts.join(' ').replace(/s+/g,' ').trim();
+}
+if(typeof hint==='function'){
+  const plainHint=hint;
+  const hwHint=function(){
+    if(!on||!strokes.length||busy||typeof phase==='undefined'||phase!=='type'){plainHint();return}
+    say('Reading so far…');
+    quickRead().then(t=>{say('');const keep=typed;typed=t;try{plainHint()}finally{typed=keep}}).catch(()=>{say('');plainHint()});
+  };
+  hint=hwHint;const hb=$('btnHint');if(hb)hb.onclick=hwHint;
+}
+self.HW={_marks:()=>marks,_mkPlace:mkPlace,_quickRead:quickRead,_lastReport:()=>last,_sendSample:sendSample,_scribbled:scribbled,_rule:()=>[RULE,RULE0],setErase,_erase:eraseAt,task:reset,on:()=>on,setOn,setPaper,_strokes:()=>strokes,_lines:lineGroups,_pre:preEncode,_redraw:redraw,_img:lineImage};
 setPaper(paper);apply();
 })();
