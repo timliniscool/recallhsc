@@ -17,6 +17,7 @@
     "icons": "node tools/make-icons.cjs"
   },
   "devDependencies": {
+    "@huggingface/transformers": "^4.3.2",
     "@playwright/test": "1.56.1",
     "@supabase/supabase-js": "2.117.3",
     "axe-core": "4.10.2"

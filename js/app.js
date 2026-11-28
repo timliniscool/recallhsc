@@ -148,6 +148,7 @@ const ROLE={ts:'Topic sentence',quote:'Quote',analysis:'Analysis',lead:'Lead-in'
 const RCLS={ts:'ts',quote:'quote',analysis:'an',lead:'lead',context:'context',heading:'ts',line:'lead',prose:'context',anecdote:'lead',reflect:'context',question:'quote',turn:'ts'};
 
 function loadTask(fresh=true){
+if(self.HW)HW.task();
 if(!SENTS.length){showEmpty();return}
 if(S.g>=SENTS.length){showDone();return}
 queue=buildQueue(S.g);
@@ -162,7 +163,8 @@ ta.setAttribute('aria-label','Your answer · '+$('chip').textContent);
 announce($('chip').textContent+'. '+(task.type==='build'?'Type: '+task.text:(prompt.querySelector('h3')||{}).textContent||''));
 focusTa();save();
 }
-function focusTa(){if(typeof choiceOn==='function'&&choiceOn())return;if($('setModal').hidden&&$('upModal').hidden&&$('modal').hidden&&$('essayModal').hidden&&$('howto').hidden&&SET.view==='mem')ta.focus({preventScroll:true})}
+function focusTa(){if(typeof choiceOn==='function'&&choiceOn())return;if(document.body.classList.contains('hw'))return; // handwriting: no on-screen keyboard
+if($('setModal').hidden&&$('upModal').hidden&&$('modal').hidden&&$('essayModal').hidden&&$('howto').hidden&&SET.view==='mem')ta.focus({preventScroll:true})}
 function renderHead(){
 gbHud();
 const mb=$('modeBadge');if(mb)mb.textContent=attemptMode!=='standard'?MODES[attemptMode].label:'';
@@ -521,7 +523,7 @@ loadTask();
 const t=$('toast');t.textContent='Back to: '+$('chip').textContent;t.classList.add('show');
 clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1400);
 }
-function retry(){clearTimeout(passT);passT=0;invalidateMarking();attemptMode=modeOf(SET.mode);phase='type';typed='';ta.value='';t0=0;L=newLive();cIdx=0;typebox.classList.remove('bad','ok');$('card').classList.remove('flash-bad');renderPrompt();renderFoot();renderChoices();focusTa()}
+function retry(){if(self.HW)HW.task();clearTimeout(passT);passT=0;invalidateMarking();attemptMode=modeOf(SET.mode);phase='type';typed='';ta.value='';t0=0;L=newLive();cIdx=0;typebox.classList.remove('bad','ok');$('card').classList.remove('flash-bad');renderPrompt();renderFoot();renderChoices();focusTa()}
 function skip(){clearTimeout(passT);passT=0;next()}
 function next(){clearTimeout(passT);passT=0;S.ti++;if(S.ti>=queue.length){S.g++;S.ti=0}loadTask()}
 function hint(){
@@ -805,6 +807,7 @@ applyPanels();
 });
 /* game mode on/off: from the Panels menu (desktop) or the ⋯ menu (phones) */
 function setGame(on){
+if(on&&document.body.classList.contains('hw')){toast('Handwriting works in normal mode. Switch to typing to play game mode.');return}
 on=!!on;if(on===!!SET.gamify)return;
 SET.gamify=on;if(on&&self.track)track('game-mode');
 if(on){SET.preGame=[...SET.hidden];SET.hidden=[...PANELS.map(p=>p.dataset.panel),'pet']}

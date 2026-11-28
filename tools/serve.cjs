@@ -5,7 +5,7 @@
 'use strict';
 const http=require('http'),fs=require('fs'),path=require('path');
 const root=path.join(__dirname,'..'),port=+process.argv[2]||+process.env.PORT||5179;
-const TYPES={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.cjs':'text/javascript; charset=utf-8','.json':'application/json',
+const TYPES={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.wasm':'application/wasm','.cjs':'text/javascript; charset=utf-8','.json':'application/json',
   '.webmanifest':'application/manifest+json','.png':'image/png','.svg':'image/svg+xml','.ico':'image/x-icon','.txt':'text/plain; charset=utf-8','.xml':'application/xml','.css':'text/css'};
 const BLOCK=/^\/(node_modules|tests|tools|supabase|\.git|\.github|package)/;
 http.createServer((req,res)=>{
