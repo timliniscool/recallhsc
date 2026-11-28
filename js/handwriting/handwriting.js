@@ -144,17 +144,26 @@ addEventListener('resize',()=>requestAnimationFrame(()=>{ruling();fit()}));
    Lined paper: each stroke belongs to the ruled line its middle sits on. Blank paper: strokes are grouped by height. */
 /* Scribbles: a dense back-and-forth stroke is a crossing-out. It's left out of the reading, along with whatever
    ink it covers (the crossed-out words). */
+// Joined-up (cursive) words loop back and forth too, so only an extremely dense stroke counts: its path goes over
+// the same spot many times (at least 6x its own width, with 8+ long sweeps), AND it either covers other ink
+// (a crossing-out) or is an obvious scrawl (12x its width, 14+ sweeps). A cursive word is ~3-4x its width.
 function scribbled(){
-  const out=new Set(),boxes=[];
-  for(const s of strokes){const p=s.pts;if(p.length<12)continue;
-    let len=0,x0=1e9,y0=1e9,x1=-1e9,y1=-1e9,flips=0,last=0;
-    for(let i=1;i<p.length;i++){const dx=p[i][0]-p[i-1][0];len+=Math.hypot(dx,p[i][1]-p[i-1][1]);if(Math.abs(dx)>1.5){const sg=Math.sign(dx);if(last&&sg!==last)flips++;last=sg}}
+  const out=new Set(),cands=[];
+  for(const s of strokes){const p=s.pts;if(p.length<20)continue;
+    let len=0,x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+    for(let i=1;i<p.length;i++)len+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);
     for(const[x,y] of p){if(x<x0)x0=x;if(y<y0)y0=y;if(x>x1)x1=x;if(y>y1)y1=y}
-    const diag=Math.hypot(x1-x0,y1-y0);
-    if(diag>14&&len>diag*5&&flips>=6){out.add(s);boxes.push([x0-6,y0-6,x1+6,y1+6])}}
-  if(boxes.length)for(const s of strokes){if(out.has(s))continue;let n=0;
-    for(const[x,y] of s.pts)if(boxes.some(b=>x>=b[0]&&x<=b[2]&&y>=b[1]&&y<=b[3]))n++;
-    if(n>=s.pts.length*.7)out.add(s)}
+    const w=Math.max(12,x1-x0);
+    // long sweeps: horizontal direction changes that come after a run of at least 30% of the stroke's width
+    let sweeps=0,dir=0,run=0;
+    for(let i=1;i<p.length;i++){const dx=p[i][0]-p[i-1][0];if(Math.abs(dx)<1)continue;const d=Math.sign(dx);
+      if(d===dir)run+=Math.abs(dx);else{if(dir&&run>=w*.3)sweeps++;dir=d;run=Math.abs(dx)}}
+    if(len>=w*6&&sweeps>=8)cands.push({s,box:[x0-4,y0-4,x1+4,y1+4],obvious:len>=w*12&&sweeps>=14});
+  }
+  for(const c of cands){
+    const covered=strokes.filter(o=>o!==c.s&&!cands.some(k=>k.s===o)&&o.pts.filter(([x,y])=>x>=c.box[0]&&x<=c.box[2]&&y>=c.box[1]&&y<=c.box[3]).length>=o.pts.length*.7);
+    if(covered.length||c.obvious){out.add(c.s);covered.forEach(o=>out.add(o))}
+  }
   return out;
 }
 function lineGroups(){

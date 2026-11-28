@@ -199,3 +199,15 @@ test('a letter with a tail (p, g, y) stays on its own line; a scribble is ignore
     ev('pointerdown',30,y);for(let i=1;i<=24;i++)ev('pointermove',i%2?175:30,y+(i%3-1)*8);ev('pointerup',40,y)},[R_,R0]);
   expect(await page.evaluate(()=>HW._lines().length)).toBe(1);
 });
+
+test('joined-up (cursive) words are never mistaken for scribbles',async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));
+  const [R_,R0]=await page.evaluate(()=>HW._rule());
+  // a long looping cursive word in ONE stroke (lots of loops, but it moves along the line)
+  await page.evaluate(([R_,R0])=>{const cv=document.getElementById('hwCanvas'),r=cv.getBoundingClientRect(),base=R0+R_*.8;
+    const ev=(n,x,y)=>cv.dispatchEvent(new PointerEvent(n,{pointerType:'pen',pointerId:11,clientX:r.left+x,clientY:r.top+y,pressure:.6,bubbles:true,cancelable:true}));
+    ev('pointerdown',60,base);for(let t=0;t<=120;t++){const a=t/120*Math.PI*14;ev('pointermove',60+t*2.2+Math.cos(a)*9,base-R_*.25-Math.sin(a)*R_*.22)}ev('pointerup',330,base)},[R_,R0]);
+  expect(await page.evaluate(()=>HW._scribbled().size)).toBe(0);
+  expect(await page.evaluate(()=>HW._lines().length)).toBe(1);
+});
