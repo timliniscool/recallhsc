@@ -32,6 +32,8 @@ test('a wrong password is refused; the right one unlocks, and the device stays u
   await expect(page.locator('#gmain')).toContainText('TIPS-SENTINEL');
   await page.locator('#gnav [data-g="exemplars"]').click();
   await expect(page.locator('#gmain')).toContainText('Test exemplar');
+  await page.locator('#gnav [data-g="booklet"]').click();
+  await expect(page.locator('#gmain .lead')).toHaveText(/PDF · 9 pages · \d+ KB · lined/); // the real size, not a placeholder
   await page.reload();
   await page.locator('#gnav [data-g="tips"]').click();
   await expect(page.locator('#gmain')).toContainText('TIPS-SENTINEL');
