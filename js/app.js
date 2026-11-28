@@ -1440,7 +1440,7 @@ return h;
 function bookletHtml(){
 return `<section class="gsec ghero"><div class="kick">Practice paper</div><h1>Writing booklet</h1><p>A 9-page lined booklet for timed practice. It’s built into the page, so it works offline.</p></section>
 <section class="gsec"><div class="booklet"><div class="page"><b>English Advanced</b><i>Writing Booklet · NESA number ______</i></div>
-<div><h2>English Advanced writing booklet</h2><p class="lead">PDF · 9 pages · +kb+ KB · lined answer pages with a NESA number box.</p>
+<div><h2>English Advanced writing booklet</h2><p class="lead">PDF · 9 pages · ${self.TOOLKIT&&self.TOOLKIT.booklet?Math.round(self.TOOLKIT.booklet.length*3/4/1024)+' KB · ':''}lined answer pages with a NESA number box.</p>
 <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" id="bDl">Download PDF</button><button class="btn" id="bOpen">Open in new tab</button></div>
 <p class="src" style="margin-top:12px">Print a few and do timed responses by hand. In the exam, how fast you write is the real limit.</p></div></div></section>`;
 }
