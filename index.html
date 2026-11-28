@@ -1074,14 +1074,24 @@ body.reduce .hwoffer{animation:none}
 .hwo-ic{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#fff;font-size:18px;box-shadow:0 2px 10px rgba(79,70,229,.18);flex:none}
 .hwo-t{display:flex;flex-direction:column;flex:1 1 220px;min-width:0;line-height:1.35}.hwo-t b{font-size:14px;color:#312e81}.hwo-t small{font-size:12.5px;color:var(--ink2)}
 body.hw #typebox,body.hw #choices,body.hw .hwtoggle{display:none!important}
-.hwpad{position:fixed;inset:0;z-index:45;display:flex;flex-direction:column;gap:10px;padding:max(12px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));background:var(--bg)}
-.hwpad[hidden],.hwpad.away{display:none}
-.hwhead{display:flex;align-items:flex-start;gap:12px;flex:none;max-height:28vh;overflow:auto}
-.hwchip{flex:none;font-size:12px;font-weight:600;color:var(--skyink);background:var(--skysoft);border-radius:99px;padding:4px 10px;margin-top:4px}
-.hwprompt{flex:1;min-width:0}.hwprompt .prompt{margin:0}
-.hwsheet{position:relative;flex:1;min-height:200px;border:1.5px solid var(--line2);border-radius:18px;background:#fff;overflow:hidden;box-shadow:0 10px 40px rgba(14,116,190,.10)}
-.hwsheet.lined{background:#fff repeating-linear-gradient(to bottom,transparent 0 43px,rgba(14,116,190,.20) 43px 44px);background-position:0 18px}
-#hwCanvas{display:block;position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+body.hw.hwmarked #typebox{display:block!important} /* after Check: the marked answer shows under the ink */
+body.hw .center{max-width:1180px;position:static} /* handwriting takes more room; side panels are closed */
+.hwpad{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.hwpad[hidden]{display:none}
+.hwsheet{position:relative;height:clamp(440px,calc(100vh - 290px),1100px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;border:1.5px solid var(--line2);border-radius:18px;background:#fff;box-shadow:0 10px 40px rgba(14,116,190,.10)}
+.hwpage{position:relative;min-height:100%}
+.hwsheet{--rule:52px;--rule0:24px;--margin:56px}
+.hwsheet.lined .hwpage{background:repeating-linear-gradient(to bottom,transparent 0 calc(var(--rule) - 1px),rgba(14,116,190,.20) calc(var(--rule) - 1px) var(--rule));background-position:0 var(--rule0)}
+/* a margin line, like an exam booklet (you can still write in it) */
+.hwpage::before{content:'';position:absolute;top:0;bottom:0;left:var(--margin);width:1.5px;background:rgba(239,68,68,.35);pointer-events:none}
+body.hw .card{padding-left:clamp(18px,3vw,44px);padding-right:clamp(18px,3vw,44px)}
+/* one finger scrolls the paper; Apple Pencil writes (its touches are claimed by the page, so they never scroll) */
+#hwCanvas{display:block;position:absolute;inset:0;width:100%;height:100%;touch-action:pan-y;cursor:crosshair}
+/* first-time download of the reader: a bar across the top of everything */
+.hwload{position:fixed;left:0;right:0;top:0;z-index:200;height:30px;display:flex;align-items:center;justify-content:center;background:#eef2ff;color:#312e81;font-size:12.5px;font-weight:600;box-shadow:0 4px 14px rgba(15,23,42,.12);overflow:hidden}
+.hwload[hidden]{display:none}
+.hwload i{position:absolute;left:0;top:0;bottom:0;width:4%;background:linear-gradient(90deg,#c7d2fe,#fbcfe8,#bae6fd);transition:width .3s}
+.hwload span{position:relative;padding:0 12px;text-align:center}
 .hwscan{position:absolute;inset:0;pointer-events:none}
 .hwl{position:absolute;border-radius:10px;transition:background .25s,box-shadow .25s}
 .hwl i{position:absolute;inset:0;border-radius:10px;overflow:hidden}
@@ -1101,8 +1111,8 @@ body.hw #typebox,body.hw #choices,body.hw .hwtoggle{display:none!important}
 .hwsheet.erasing #hwCanvas{cursor:cell}
 .hwsheet.erasing{box-shadow:0 0 0 3px rgba(239,68,68,.25),0 10px 40px rgba(14,116,190,.10)}
 #hwErase.on{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
-.hwbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:none}
-.hwnote{font-size:13px;color:var(--muted);flex:1 1 220px;min-width:0}
+.hwbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;flex:none}
+.hwnote{font-size:13px;color:var(--muted);min-height:18px;margin:-2px 2px 0}
 .hwbar #hwDone{min-width:110px;justify-content:center}
 .hwstats{font-size:12.5px;color:#4338ca;background:#eef2ff;border-radius:99px;padding:3px 10px}
 body.reduce .hwl.now i::after{animation:none;left:0;width:100%;opacity:.4}

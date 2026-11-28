@@ -60,7 +60,9 @@ o.taskMs={};for(const t of['build','para','essay']){const v=s.taskMs&&s.taskMs[t
 const g=st.game&&typeof st.game==='object'?{level:Math.max(0,num(st.game.level)|0),coins:Math.max(0,num(st.game.coins)|0),marks:{}}:undefined;
 if(g&&st.game.marks&&typeof st.game.marks==='object')for(const[k,v]of Object.entries(st.game.marks))if(/^\d+$/.test(k)&&['step','flag','castle'].includes(v))g.marks[k]=v;
 return{startG:Math.max(0,num(st.startG)|0),g:Math.max(0,num(st.g)|0),ti:Math.max(0,num(st.ti)|0),learned:(Array.isArray(st.learned)?st.learned:[]).map(Boolean),
-started:!!st.started,nS:num(st.nS),stats:o,game:g,resetAt:num(st.resetAt),epoch:Math.max(0,num(st.epoch)|0),rev:typeof st.rev==='string'&&/^r[0-9a-f]{1,32}$/.test(st.rev)?st.rev:undefined,part:st.part&&typeof st.part==='object'?{g:Math.max(0,num(st.part.g)|0),w:Math.max(0,num(st.part.w)|0)}:null,posAt:Math.max(0,num(st.posAt))};
+started:!!st.started,nS:num(st.nS),stats:o,game:g,resetAt:num(st.resetAt),epoch:Math.max(0,num(st.epoch)|0),rev:typeof st.rev==='string'&&/^r[0-9a-f]{1,32}$/.test(st.rev)?st.rev:undefined,part:st.part&&typeof st.part==='object'?{g:Math.max(0,num(st.part.g)|0),w:Math.max(0,num(st.part.w)|0)}:null,posAt:Math.max(0,num(st.posAt)),
+// handwriting (beta) keeps its own statistics; it never changes the typing ones
+hw:(()=>{const h=st.hw&&typeof st.hw==='object'?st.hw:{};return{att:Math.max(0,num(h.att)|0),pass:Math.max(0,num(h.pass)|0),words:Math.max(0,num(h.words)),secs:Math.max(0,num(h.secs)),strokes:Math.max(0,num(h.strokes)|0),bestWpm:Math.max(0,num(h.bestWpm))}})()};
 }
 /* settings from storage or a backup file are untrusted: whitelist, type-check and clamp every field (idempotent) */
 function cleanSettings(raw){

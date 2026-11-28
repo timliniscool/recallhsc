@@ -33,7 +33,7 @@ const KEY='essayRecall2.hw',SEEN='essayRecall2.penSeen',PAPER='essayRecall2.hwPa
 const get=k=>{try{return localStorage.getItem(k)}catch(_){return null}},put=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(_){}};
 let on=get(KEY)==='1',penSeen=get(SEEN)==='1',paper=get(PAPER)==='blank'?'blank':'lined';
 let erasing=false,strokes=[],cur=null,busy=false,tStart=0,prevFocus=null,sid=0,preT=0;const sent=new Set(); // line keys already encoded in the background
-const RULE=44,RULE0=18; // ruled lines: every 44px, the first at 18+43px
+let RULE=52,RULE0=24; // ruled line spacing, set from the sheet size (closer to real writing paper on bigger iPads)
 
 /* ---------- markup ---------- */
 const tb=$('typebox'),promptEl=$('prompt');if(!tb||!promptEl)return;
@@ -46,22 +46,40 @@ offer.innerHTML=`<span class="hwo-ic" aria-hidden="true">✍</span><span class="
 offer.setAttribute('role','dialog');offer.setAttribute('aria-label','Try handwriting with Apple Pencil');
 document.body.appendChild(offer); // a popup at the bottom, like the update bar
 const pad=document.createElement('div');pad.className='hwpad';pad.id='hwPad';pad.hidden=true;
-pad.setAttribute('role','dialog');pad.setAttribute('aria-label','Handwriting sheet');
-pad.innerHTML=`<div class="hwhead"><div class="hwchip" id="hwChip"></div><div class="hwprompt" id="hwPrompt"></div></div>
-<div class="hwsheet lined" id="hwSheet"><canvas id="hwCanvas" role="img" aria-label="Handwriting area. Write your answer with Apple Pencil, then press Check."></canvas><div class="hwscan" id="hwScan" aria-hidden="true"></div></div>
+pad.setAttribute('role','group');pad.setAttribute('aria-label','Handwriting sheet');
+// part of the normal page: it takes the typing box's place in the card, just much bigger. The paper scrolls and grows.
+pad.innerHTML=`<div class="hwsheet lined" id="hwSheet"><div class="hwpage" id="hwPage"><canvas id="hwCanvas" role="img" aria-label="Handwriting area. Write your answer with Apple Pencil, then press Check. Scroll with one finger."></canvas><div class="hwscan" id="hwScan" aria-hidden="true"></div></div></div>
 <div class="hwbar"><span class="hwnote" id="hwNote" role="status"></span>
 <button class="btn small" id="hwPaper" type="button" aria-label="Paper style"></button>
 <button class="btn small" id="hwErase" type="button" aria-pressed="false" title="Eraser: removes whole strokes. Two-finger tap on the sheet switches it on and off.">⌫ Eraser</button><button class="btn small" id="hwClear" type="button">Clear</button>
-<button class="btn small" id="hwType" type="button">↩ Return to main site</button><button class="btn primary" id="hwDone" type="button">Check</button></div>`;
-document.body.appendChild(pad);
-const cv=$('hwCanvas'),cx=cv.getContext('2d'),note=$('hwNote'),sheet=$('hwSheet'),scan=$('hwScan');
+<button class="btn small" id="hwType" type="button">⌨ Back to typing</button><button class="btn primary" id="hwDone" type="button">Check</button></div>`;
+pad.insertBefore(pad.querySelector('.hwbar'),pad.firstChild); // the tools and Check sit above the paper, close to hand
+pad.insertBefore(pad.querySelector('#hwNote'),pad.querySelector('.hwsheet')); // status on its own line, so the buttons never wrap
+tb.parentNode.insertBefore(pad,tb); // the marked answer (the typing box) then shows below the paper after Check
+// first-time download of the reader: a progress bar across the top of everything
+const loadBar=document.createElement('div');loadBar.className='hwload';loadBar.id='hwLoad';loadBar.hidden=true;loadBar.setAttribute('role','progressbar');loadBar.setAttribute('aria-label','Getting the handwriting reader ready');
+loadBar.innerHTML='<i id="hwLoadFill"></i><span id="hwLoadText">Getting the handwriting reader ready…</span>';
+document.body.appendChild(loadBar);
+function loading(pct){if(pct==null){loadBar.hidden=true;return}loadBar.hidden=false;$('hwLoadFill').style.width=Math.max(4,pct)+'%';loadBar.setAttribute('aria-valuenow',String(Math.round(pct)));$('hwLoadText').textContent=`Getting the handwriting reader ready (once, then it works offline): ${Math.round(pct)}%`}
+const cv=$('hwCanvas'),cx=cv.getContext('2d'),note=$('hwNote'),sheet=$('hwSheet'),page=$('hwPage'),scan=$('hwScan');
+// line spacing and margin follow the iPad's size; only changed while the sheet is empty, so ink and rules stay aligned
+function ruling(){
+  if(strokes.length)return;
+  const w=sheet.clientWidth||800;
+  RULE=w>=1000?58:w>=760?54:48;RULE0=Math.round(RULE*.45);
+  sheet.style.setProperty('--rule',RULE+'px');sheet.style.setProperty('--rule0',RULE0+'px');
+  sheet.style.setProperty('--margin',Math.round(Math.min(110,Math.max(40,w*.07)))+'px');
+  pageH=0;page.style.height='';grow();
+}
+let pageH=0; // the paper grows as the student writes near the bottom: no end to it
+function grow(minH){const want=Math.max(minH||0,sheet.clientHeight,RULE0+RULE*16);if(want>pageH){pageH=Math.ceil((want-RULE0)/RULE)*RULE+RULE0;page.style.height=pageH+'px';requestAnimationFrame(fit)}}
 const say=t=>{note.textContent=t||''};
 
 /* ---------- canvas ---------- */
 let DPR=1;
 function fit(){
   const r=cv.getBoundingClientRect();if(!r.width||!r.height)return;
-  DPR=Math.min(2,devicePixelRatio||1);
+  DPR=Math.min(1.5,devicePixelRatio||1); // long pages: keep the canvas memory sensible
   const w=Math.round(r.width*DPR),h=Math.round(r.height*DPR);
   if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;redraw()}
 }
@@ -91,7 +109,9 @@ cv.addEventListener('pointermove',e=>{
   for(const ev of evs)cur.pts.push(at(ev));
   seg({pts:cur.pts.slice(start)});
 });
-const end=e=>{if(cur&&e.pointerType==='pen'){const was=cur;cur=null;if(!was.erase){clearTimeout(preT);preT=setTimeout(preEncode,600)}}};
+const end=e=>{if(cur&&e.pointerType==='pen'){const was=cur;cur=null;if(!was.erase){clearTimeout(preT);preT=setTimeout(preEncode,600);
+  // writing near the bottom: add ten more lines of paper
+  let maxY=0;for(const p of was.pts)if(p[1]>maxY)maxY=p[1];if(maxY>pageH-RULE*4)grow(pageH+RULE*10)}}};
 /* Eraser: object by object. Any stroke the pencil passes within ~10px of is removed whole. */
 function eraseAt([x,y]){
   const r2=100,before=strokes.length;
@@ -107,7 +127,7 @@ function setErase(v){erasing=!!v;const b=$('hwErase');b.setAttribute('aria-press
   sheet.addEventListener('touchend',e=>{if(t0&&e.touches.length===0){if(!moved&&performance.now()-t0<350)setErase(!erasing);t0=0}},{passive:true});}
 cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
 cv.addEventListener('touchstart',e=>{if(e.touches.length===1&&e.touches[0].touchType==='stylus')e.preventDefault()},{passive:false});
-addEventListener('resize',()=>requestAnimationFrame(fit));
+addEventListener('resize',()=>requestAnimationFrame(()=>{ruling();fit()}));
 
 /* ---------- splitting the page into written lines ----------
    Lined paper: each stroke belongs to the ruled line its middle sits on. Blank paper: strokes are grouped by height. */
@@ -157,8 +177,8 @@ function reader(){
   if(W)return W;
   try{W=new Worker(new URL('hw.worker.js',SRC),{type:'module'})}catch(_){W=null;return null}
   W.onmessage=e=>{const m=e.data||{};
-    if(m.type==='progress'&&!ready&&m.total){say(`Getting the handwriting reader ready (once, then it works offline): ${Math.round(m.loaded/m.total*100)}%`)}
-    else if(m.type==='ready'){ready=true;if(!busy)say('')}
+    if(m.type==='progress'&&!ready&&m.total)loading(m.loaded/m.total*100);
+    else if(m.type==='ready'){ready=true;loading(null);if(!busy)say('')}
     else if(m.type==='line'){const w=waiting.get(m.id);if(w&&w.onLine)w.onLine(m)}
     else if(m.type==='result'||m.type==='error'){const w=waiting.get(m.id);if(w){waiting.delete(m.id);m.type==='result'?w.ok(m):w.no(new Error(m.message))}else if(m.type==='error'&&!busy)say('The handwriting reader couldn’t start. Check your connection, then try again.')}
   };
@@ -202,13 +222,21 @@ async function read(){
     say(`Read in ${(r.ms/1000).toFixed(1)}s. Marking…`);
     await sleep(650); // a moment to see what was read
     const words=tokens(text).length,wpm=Math.round(words/(secs/60)),sps=(nStrokes/secs).toFixed(1);
+    // progress counts (sentences learnt, position), but the typing statistics don't: keep a copy and put it back
+    // after the marking, then record this attempt in the handwriting statistics instead
+    const typingStats=JSON.parse(JSON.stringify(S.stats)),typingTime=S.stats.time;
     typed=text;ta.value=text;renderTyped();
     if(self.track)track('handwriting');
-    pad.classList.add('away'); // step aside so the marking shows on the card
+    document.body.classList.add('hwmarked'); // the ink stays; the marked answer shows just below it
     check();
     for(let i=0;i<80&&phase==='marking';i++)await sleep(50);
+    S.stats=typingStats;S.stats.time=typingTime;
+    const hs=S.hw||(S.hw={att:0,pass:0,words:0,secs:0,strokes:0,bestWpm:0});
+    hs.att++;if(phase==='ok'||phase==='review')hs.pass++;hs.words+=words;hs.secs+=secs;hs.strokes+=nStrokes;hs.bestWpm=Math.max(hs.bestWpm,wpm);
+    save();if(typeof renderSide==='function')renderSide();
     const f=$('foot');
-    if(f){const s=document.createElement('span');s.className='hwstats';s.textContent=`✍ ${wpm} wpm · ${sps} strokes/s · ${Math.round(secs)}s`;f.insertBefore(s,f.querySelector('.spacer')||null)}
+    if(f){const s=document.createElement('span');s.className='hwstats';s.textContent=`✍ ${wpm} wpm · ${sps} strokes/s · ${Math.round(secs)}s · handwriting: ${hs.pass}/${hs.att} passed, best ${Math.round(hs.bestWpm)} wpm`;f.insertBefore(s,f.querySelector('.spacer')||null)}
+    if($('typebox'))$('typebox').scrollIntoView({block:'nearest',behavior:'smooth'});
     if(self.announce)announce(`Handwriting: ${wpm} words per minute, ${sps} strokes per second.`);
   }catch(err){
     say('Couldn’t read the writing just now. Your ink is still here: try Check again.');clearReading();
@@ -216,10 +244,6 @@ async function read(){
 }
 
 /* ---------- on/off, paper, per-task reset ---------- */
-function movePrompt(inPad){
-  if(inPad){if(promptEl.parentNode!==$('hwPrompt'))$('hwPrompt').appendChild(promptEl)}
-  else if(promptEl.parentNode!==promptHome.parent)promptHome.parent.insertBefore(promptEl,promptHome.next&&promptHome.next.parentNode===promptHome.parent?promptHome.next:null);
-}
 function setPaper(p){paper=p==='blank'?'blank':'lined';put(PAPER,paper==='blank'?'blank':null);sheet.classList.toggle('lined',paper==='lined');$('hwPaper').textContent=paper==='lined'?'▢ Blank paper':'▤ Lined paper'; /* shows the paper you'd switch to */clearReading()}
 function apply(){
   document.body.classList.toggle('hw',on);
@@ -227,9 +251,7 @@ function apply(){
   sw.textContent=on?'⌨ Type instead':'✍ Handwrite';sw.setAttribute('aria-pressed',String(on));
   offer.hidden=on||get(OFFER)==='no';
   const s=$('sHw');if(s)s.checked=on;
-  movePrompt(on);
-  $('hwChip').textContent=on&&$('chip')?$('chip').textContent:'';
-  if(on){requestAnimationFrame(fit);reader()}
+  if(on){requestAnimationFrame(()=>{ruling();grow();fit()});reader();if(!ready)loading(2)}else loading(null);
 }
 function setOn(v){
   v=!!v;if(v===on){apply();return}
@@ -244,7 +266,7 @@ function setOn(v){
   if(on){put(OFFER,'no');if(self.announce)announce('Handwriting on. Write your answer with Apple Pencil, then press Check.')}
   else if(self.focusTa)focusTa();
 }
-function reset(){strokes=[];cur=null;tStart=0;clearTimeout(preT);if(erasing)setErase(false);redraw();clearReading();say('');busy=false;pad.classList.remove('away','busy');$('hwDone').disabled=false;if(on)$('hwChip').textContent=$('chip')?$('chip').textContent:''}
+function reset(){strokes=[];cur=null;tStart=0;clearTimeout(preT);if(erasing)setErase(false);redraw();clearReading();say('');busy=false;pad.classList.remove('busy');document.body.classList.remove('hwmarked');pageH=0;page.style.height='';sheet.scrollTop=0;if(on){ruling();grow()}$('hwDone').disabled=false}
 sw.onclick=()=>setOn(!on);
 $('hwType').onclick=()=>setOn(false);
 $('hwTry').onclick=()=>setOn(true);
@@ -260,6 +282,6 @@ $('hwDone').onclick=read;
 // the first Apple Pencil touch anywhere offers handwriting
 document.addEventListener('pointerdown',e=>{if(e.pointerType==='pen'&&!penSeen){penSeen=true;put(SEEN,'1');apply();if(!on&&self.toast)toast('Apple Pencil found: tap ✍ Handwrite to write your answers by hand')}},true);
 {const row=$('hwRow');if(row)row.hidden=false;const s=$('sHw');if(s)s.onchange=()=>setOn(s.checked)}
-self.HW={setErase,_erase:eraseAt,task:reset,on:()=>on,setOn,setPaper,_strokes:()=>strokes,_lines:lineGroups,_pre:preEncode,_redraw:redraw,_img:lineImage};
+self.HW={_rule:()=>[RULE,RULE0],setErase,_erase:eraseAt,task:reset,on:()=>on,setOn,setPaper,_strokes:()=>strokes,_lines:lineGroups,_pre:preEncode,_redraw:redraw,_img:lineImage};
 setPaper(paper);apply();
 })();

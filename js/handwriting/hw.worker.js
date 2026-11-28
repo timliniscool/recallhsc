@@ -23,6 +23,17 @@ import {env, AutoProcessor, AutoTokenizer, VisionEncoderDecoderModel, RawImage, 
 const MODEL='Xenova/trocr-small-handwritten';
 const START=2,EOS=2;      // TrOCR starts and ends every line with token 2
 const RESCUE=0.03;        // expected words replace a misread when they fit the ink at least this well (a different word scores ~0.0001)
+const RESCUE_LOOKALIKE=0.001; // ...or fit it somewhat AND look like what was read (half the letters or more in common)
+const RESCUE_DROPPED=0.05;    // expected words the reader dropped or merged away come back when they fit the ink this well
+const NEAR=2.5;               // ...or are within this much (log-probability per token, ~12x) of the reader's own guess
+// letter-level likeness of two word groups: 1 = identical, 0 = nothing in common (edit distance, case and punctuation ignored)
+function similar(a,b){
+  a=a.toLowerCase().replace(/[^a-z0-9]/g,'');b=b.toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(!a||!b)return 0;
+  let prev=Array.from({length:b.length+1},(_,j)=>j);
+  for(let i=1;i<=a.length;i++){const cur=[i];for(let j=1;j<=b.length;j++)cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));prev=cur}
+  return 1-prev[b.length]/Math.max(a.length,b.length);
+}
 env.allowLocalModels=false;
 env.useBrowserCache=true;
 env.backends.onnx.wasm.wasmPaths=new URL('../vendor/transformers/',import.meta.url).href; // our own copy, not a CDN
@@ -126,11 +137,24 @@ async function check(m){
     while(q<pairs.length&&!(pairs[q][0]>=0&&pairs[q][1]>=0&&norm(G[pairs[q][0]])===norm(E[pairs[q][1]]))){
       const [gi,ej]=pairs[q];if(gi>=0&&at[gi][0]!==li)break;if(gi>=0)gs.push(gi);if(ej>=0)es.push(ej);q++}
     if(q===p)q++;
-    if(li>=0&&gs.length&&es.length){
-      const first=at[gs[0]][1],before=lines[li].slice(0,first).join(' ');
-      const want=es.map(j=>E[j]).join(' ');
-      const tf=performance.now();const f_=await fit(vs[li],before,want);perf.fit+=performance.now()-tf;perf.fits++;
-      if(f_>=RESCUE)repl[li].push([first,gs.length,es.map(j=>E[j])]);
+    if(es.length){
+      // which line, and where in it: the misread words themselves, or (for words the reader dropped or merged away)
+      // the word just before the gap
+      let L=li,first;
+      if(gs.length){first=at[gs[0]][1]}
+      else{let k=p-1;while(k>=0&&pairs[k][0]<0)k--;if(k>=0){L=at[pairs[k][0]][0];first=at[pairs[k][0]][1]+1}else{L=0;first=0}}
+      if(L>=0&&L<lines.length){
+        const before=lines[L].slice(0,first).join(' '),want=es.map(j=>E[j]).join(' '),seen=gs.map(g=>G[g]).join(' ');
+        const tf=performance.now();const f_=await fit(vs[L],before,want);perf.fit+=performance.now()-tf;perf.fits++;
+        // messy handwriting: accept the expected words when they fit the ink well, or fit it somewhat and look like
+        // what was read (e.g. "place" read as "slave"). A genuinely different word fits ~0.0001 and looks different.
+        let ok=gs.length?(f_>=RESCUE||(f_>=RESCUE_LOOKALIKE&&similar(seen,want)>=0.5)):f_>=RESCUE_DROPPED;
+        // cursive and very messy writing: compare the expected words with the reader's own guess on the same ink.
+        // If the expected words are nearly as believable (within NEAR per token), the writing gets the benefit of the
+        // doubt. A clearly different word is thousands of times less likely, so real mistakes still fail.
+        if(!ok&&gs.length){const fs_=await fit(vs[L],before,seen);perf.fits++;if(fs_>0&&f_>0&&Math.log(f_)>=Math.log(fs_)-NEAR)ok=true}
+        if(ok)repl[L].push([first,gs.length,es.map(j=>E[j])]);
+      }
     }
     p=q;
   }

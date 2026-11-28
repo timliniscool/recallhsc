@@ -34,20 +34,22 @@ async function fakeReader(page){
 // write with Apple Pencil (or a finger) on the sheet: a short wavy stroke on ruled line `line`
 async function stroke(page,pointerType,line=0,x0=40){
   await page.evaluate(([type,line,x0])=>{
-    const cv=document.getElementById('hwCanvas'),r=cv.getBoundingClientRect(),y=18+line*44+24;
+    const cv=document.getElementById('hwCanvas'),r=cv.getBoundingClientRect(),[R_,R0]=HW._rule(),y=R0+line*R_+Math.round(R_*.55);
     const ev=(n,x,yy)=>cv.dispatchEvent(new PointerEvent(n,{pointerType:type,pointerId:7,clientX:r.left+x,clientY:r.top+yy,pressure:.6,bubbles:true,cancelable:true}));
     ev('pointerdown',x0,y);for(let i=1;i<=10;i++)ev('pointermove',x0+i*12,y+Math.sin(i)*6);ev('pointerup',x0+120,y);
   },[pointerType,line,x0]);
 }
 const nStrokes=page=>page.evaluate(()=>HW._strokes().length);
 
-test('iPad: offered on the main screen; the sheet fills the screen; only Apple Pencil draws',async({page})=>{
+test('iPad: offered on the main screen; a big sheet in the card, tools on top; only Apple Pencil draws',async({page})=>{
   await fakeReader(page);await openApp(page);
   await expect(page.locator('#hwOffer')).toBeVisible();
   await page.locator('#hwTry').click();
   await expect(page.locator('#hwPad')).toBeVisible();
-  const box=await page.locator('#hwPad').boundingBox();
-  expect(box.width).toBeGreaterThan(1000);expect(box.height).toBeGreaterThan(740); // full screen
+  const sheet=await page.locator('#hwSheet').boundingBox(),bar=await page.locator('.hwbar').boundingBox(),card=await page.locator('#card').boundingBox();
+  expect(sheet.height).toBeGreaterThan(420);expect(sheet.width).toBeGreaterThan(card.width-80); // big, and inside the card
+  expect(bar.y).toBeLessThan(sheet.y);                                 // Check and the tools sit above the paper
+  await expect(page.locator('#prompt')).toBeVisible();                  // the normal page around it
   await stroke(page,'touch');expect(await nStrokes(page)).toBe(0);  // fingers and palms are ignored
   await stroke(page,'pen');
   expect(await page.evaluate(()=>[HW._strokes().length,HW._strokes()[0].pts.length])).toEqual([1,11]); // pen-down + 10 moves
@@ -97,7 +99,9 @@ test('Check: finished lines are prepared while writing; the reading shows line b
   await page.waitForFunction(()=>phase==='ok'||phase==='review');
   await expect(page.locator('#foot .hwstats')).toContainText('wpm');
   await expect(page.locator('#foot .hwstats')).toContainText('strokes/s');
-  await expect(page.locator('#hwPad')).toBeHidden(); // steps aside so the marking shows
+  await expect(page.locator('#hwPad')).toBeVisible();   // the ink stays…
+  await expect(page.locator('#typebox')).toBeVisible(); // …with the marked answer under it
+  expect(await nStrokes(page)).toBe(2);
 });
 
 test('a wrong answer is marked wrong (nothing is auto-corrected towards the essay)',async({page})=>{
@@ -131,4 +135,49 @@ test('elsewhere, Settings explains handwriting is iPad-only and shows what the d
   await expect(page.locator('#hwRow')).toContainText('touch points');
   await expect(page.locator('#sHw')).toBeDisabled();
   await ctx.close();
+});
+
+test('line spacing follows the iPad size (wider on big screens)',async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));
+  const [r]=await page.evaluate(()=>HW._rule());expect(r).toBeGreaterThanOrEqual(48);
+  await expect(page.locator('#hwSheet')).toHaveCSS('--rule',r+'px');
+});
+
+test('endless paper: writing near the bottom adds more lines, and the sheet scrolls',async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));
+  const h0=await page.evaluate(()=>document.getElementById('hwPage').offsetHeight);
+  const [R_,R0]=await page.evaluate(()=>HW._rule());const lines=Math.floor((h0-R0)/R_)-2;
+  await stroke(page,'pen',lines);
+  const h1=await page.evaluate(()=>document.getElementById('hwPage').offsetHeight);
+  expect(h1).toBeGreaterThan(h0);
+  expect(await page.evaluate(()=>{const s=document.getElementById('hwSheet');return s.scrollHeight>s.clientHeight})).toBe(true);
+});
+
+test('first-time download shows a progress bar across the top',async({page})=>{
+  await page.addInitScript(()=>{const Real=window.Worker;window.Worker=function(url,o){if(!String(url).includes('hw.worker'))return new Real(url,o);
+    const w={onmessage:null,terminate(){},postMessage(m){if(m.type==='load')setTimeout(()=>w.onmessage&&w.onmessage({data:{type:'progress',loaded:30,total:100}}),10)}};return w}});
+  await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));
+  await expect(page.locator('#hwLoad')).toBeVisible();
+  await expect(page.locator('#hwLoad')).toContainText('30%');
+  const b=await page.locator('#hwLoad').boundingBox();expect(b.y).toBe(0);
+});
+
+test('handwriting counts towards progress, but only its own statistics change (typing stats untouched)',async({page})=>{
+  await fakeReader(page);await openApp(page);
+  await page.evaluate(()=>HW.setOn(true));
+  const before=await page.evaluate(()=>JSON.stringify(S.stats));
+  const g0=await page.evaluate(()=>[S.g,S.ti]);
+  await stroke(page,'pen',0);
+  await page.locator('#hwDone').click();
+  await page.waitForFunction(()=>phase==='ok'||phase==='review');
+  await page.waitForFunction(()=>S.hw&&S.hw.att===1);
+  expect(await page.evaluate(()=>JSON.stringify(S.stats))).toBe(before); // typing statistics unchanged
+  expect(await page.evaluate(()=>[S.hw.att,S.hw.pass])).toEqual([1,1]);
+  await page.evaluate(()=>advance());
+  expect(await page.evaluate(()=>[S.g,S.ti])).not.toEqual(g0);        // progress moved on
+  // and it is saved
+  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('essayRecall2.state.sample')).hw.att)).toBe(1);
 });
