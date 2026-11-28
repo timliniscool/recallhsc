@@ -1,11 +1,12 @@
 /* RecallHSC · the NSBHS toolkit (Exam tips, Adaptation guide, Mod C exemplars, writing booklet).
    The content is stored encrypted in js/toolkit.vault.json (made by tools/toolkit-vault.cjs), so it can't be read on
    GitHub or in the page source. Opening a toolkit section shows it blurred behind a password wall; the right password
-   decrypts it here in the browser (PBKDF2-SHA256 -> AES-256-GCM, Web Crypto). The device then stays unlocked until the
-   password is changed. */
+   decrypts it here in the browser (PBKDF2-SHA256 -> AES-256-GCM, Web Crypto). The device then stays unlocked for 24 hours
+   (or until the password is changed). */
 (function(){
 'use strict';
 const KEY='essayRecall2.toolkitKey';
+const TTL=24*60*60*1000; // an unlock lasts 24 hours on a device, then the password is needed again
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const tob64=u=>{let s='';for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)};
 let vaultP=null;
@@ -22,7 +23,7 @@ async function open(raw,v){
 async function unlock(pw){
   const v=await vault(),raw=await derive(pw,v);
   self.TOOLKIT=await open(raw,v); // throws if the password is wrong
-  try{localStorage.setItem(KEY,tob64(raw)+'.'+v.salt)}catch(_){}
+  try{localStorage.setItem(KEY,tob64(raw)+'.'+v.salt+'.'+Date.now())}catch(_){}
   if(self.track)track('toolkit-unlock');
 }
 // already unlocked on this device (and the password hasn't changed since)
@@ -30,8 +31,8 @@ async function auto(){
   let s=null;try{s=localStorage.getItem(KEY)}catch(_){}
   if(!s)return;
   try{
-    const [k,salt]=s.split('.'),v=await vault();
-    if(salt!==v.salt){localStorage.removeItem(KEY);return}
+    const [k,salt,at]=s.split('.'),v=await vault();
+    if(salt!==v.salt||!(Date.now()-Number(at)<TTL)){localStorage.removeItem(KEY);return} // password changed, or 24 hours are up
     self.TOOLKIT=await open(b64(k),v);
     if(typeof SET!=='undefined'&&SET.view==='guide'&&typeof renderGuide==='function')renderGuide();
   }catch(_){try{localStorage.removeItem(KEY)}catch(e){}}
