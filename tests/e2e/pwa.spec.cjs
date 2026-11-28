@@ -31,7 +31,7 @@ test('service worker installs, precaches the app, and RecallHSC works offline',a
   const big=await page.evaluate(async()=>(await COMPUTE.run('mark',{text:RAW,typed:RAW},{size:9999})).pct); // worker offline
   expect(big).toBe(100);
   await page.evaluate(()=>{setView('guide')});await expect(page.locator('#viewGuide, .gwrap').first()).toBeVisible(); // rubric guide offline
-  const pdf=await page.evaluate(async()=>(await bookletBlob()).size);expect(pdf).toBeGreaterThan(10000); // booklet offline
+  const vault=await page.evaluate(async()=>(await (await fetch('js/toolkit.vault.json')).json()).kdf);expect(vault).toBe('PBKDF2-SHA256'); // toolkit (encrypted) offline
   await context.setOffline(false);
 });
 
