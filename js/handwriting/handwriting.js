@@ -11,9 +11,23 @@
 (function(){
 'use strict';
 const UA=navigator.userAgent||'';
-const IPAD=/iPad/.test(UA)||(/Macintosh/.test(UA)&&navigator.maxTouchPoints>0); // iPadOS Safari presents as a Mac with touch; real Macs report 0
-if(!IPAD&&!self.__HW_TEST)return;
 const $=id=>document.getElementById(id);
+const flag=k=>{try{return localStorage.getItem(k)}catch(_){return null}};
+// iPadOS browsers (Safari, Chrome, Edge…) usually present as a Mac; a Mac with touch is an iPad (real Macs report none).
+// Some hide even that, so the first Apple Pencil touch on an Apple device also marks it as an iPad (remembered).
+const IPAD=/iPad/.test(UA)||navigator.platform==='iPad'||
+  (/Macintosh|Mac OS X/.test(UA)&&(navigator.maxTouchPoints>0||'ontouchend' in document))||flag('essayRecall2.ipad')==='1';
+function status(text,enabled){const row=$('hwRow'),s=$('sHw');if(!row)return;row.hidden=false;const sm=row.querySelector('small');if(sm)sm.textContent=text;if(s)s.disabled=!enabled}
+if(!IPAD&&!self.__HW_TEST){
+  // Settings says why it isn't offered, so a device that should qualify can be checked
+  status(`(iPad with Apple Pencil only. This device reports: ${navigator.platform||'unknown platform'}, ${navigator.maxTouchPoints|0} touch points)`,false);
+  if(/Mac|iPad|iPhone/.test(UA))document.addEventListener('pointerdown',function pen(e){
+    if(e.pointerType!=='pen')return;document.removeEventListener('pointerdown',pen,true);
+    try{localStorage.setItem('essayRecall2.ipad','1')}catch(_){}location.reload();
+  },true);
+  return;
+}
+status('(practise writing answers by hand, like the exam)',true);
 const SRC=(document.currentScript&&document.currentScript.src)||location.href; // to find hw.worker.js next to this file
 const KEY='essayRecall2.hw',SEEN='essayRecall2.penSeen',PAPER='essayRecall2.hwPaper',OFFER='essayRecall2.hwOffer';
 const get=k=>{try{return localStorage.getItem(k)}catch(_){return null}},put=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(_){}};

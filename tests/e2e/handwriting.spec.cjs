@@ -115,3 +115,20 @@ test('not an iPad (other tablets included): no handwriting at all',async({browse
   expect(await page.evaluate(()=>!!document.getElementById('hwPad')||!!document.getElementById('hwOffer')||!!self.HW)).toBe(false);
   await ctx.close();
 });
+
+test('Chrome on iPad is detected too (its user agent says iPad)',async({browser})=>{
+  const ctx=await browser.newContext({userAgent:'Mozilla/5.0 (iPad; CPU OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/131.0.6778.73 Mobile/15E148 Safari/604.1',hasTouch:true,viewport:{width:1024,height:768}});
+  const page=await ctx.newPage();await openApp(page);
+  await expect(page.locator('#hwOffer')).toBeVisible();
+  await ctx.close();
+});
+
+test('elsewhere, Settings explains handwriting is iPad-only and shows what the device reports',async({browser})=>{
+  const ctx=await browser.newContext({userAgent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131 Safari/537.36'});
+  const page=await ctx.newPage();await openApp(page);
+  await page.evaluate(()=>openSettings());
+  await expect(page.locator('#hwRow')).toBeVisible();
+  await expect(page.locator('#hwRow')).toContainText('touch points');
+  await expect(page.locator('#sHw')).toBeDisabled();
+  await ctx.close();
+});
