@@ -44,3 +44,13 @@ test('the real toolkit text is not in the page or the repo files the site serves
   const vault=await (await request.get('js/toolkit.vault.json')).json();
   expect(vault.kdf).toBe('PBKDF2-SHA256');expect(vault.iter).toBeGreaterThanOrEqual(600000);
 });
+
+test('an unlock lasts 24 hours, then the password is needed again',async({page})=>{
+  await openToolkit(page,'tips');
+  await page.locator('#tkPw').fill('test-pass-123');await page.locator('#tkGo').click();
+  await expect(page.locator('#gmain')).toContainText('TIPS-SENTINEL');
+  // pretend the unlock happened 25 hours ago
+  await page.evaluate(()=>{const k='essayRecall2.toolkitKey',p=localStorage.getItem(k).split('.');p[2]=String(Date.now()-25*3600*1000);localStorage.setItem(k,p.join('.'))});
+  await page.reload();await page.locator('#gnav [data-g="tips"]').click();
+  await expect(page.locator('#tkForm')).toBeVisible();
+});
