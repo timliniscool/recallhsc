@@ -10,12 +10,12 @@
    Scope: only requests under this worker's own directory (/recallhsc/ on GitHub Pages). */
 'use strict';
 const VERSION='2.0.0';
-const ASSET_HASH='617654305248';
+const ASSET_HASH='0b549799f685';
 const SHELL='recallhsc-shell-'+VERSION+'-'+ASSET_HASH;
 const FONTS='recallhsc-fonts-v1';
 // the handwriting reader's model (~107 MB, models/): its own cache, kept across app updates and replaced only when
 // the model changes. Bump this together with MODEL_VERSION in js/handwriting/handwriting.js.
-const MODEL='recallhsc-model-r2';
+const MODEL='recallhsc-model-r3';
 const PRECACHE=[
   './','index.html','manifest.webmanifest',
   'js/engine/text.js','js/engine/chunker.js','js/engine/parser.js','js/engine/marking.js','js/engine/policies.js','js/engine/recall.js',

@@ -274,7 +274,7 @@ test('the download bar shows only the first time; later loads are silent',async(
   await page.addInitScript(()=>{const Real=window.Worker;window.Worker=function(url,o){if(!String(url).includes('hw.worker'))return new Real(url,o);
     const w={onmessage:null,terminate(){},postMessage(m){if(m.type==='load')setTimeout(()=>w.onmessage&&w.onmessage({data:{type:'progress',loaded:30,total:100}}),10)}};return w}});
   await openApp(page);
-  await page.evaluate(()=>{localStorage.setItem('essayRecall2.hwModelCached.r2','1');HW.setOn(true)});
+  await page.evaluate(()=>{localStorage.setItem('essayRecall2.hwModelCached.r3','1');HW.setOn(true)});
   await page.waitForTimeout(400);
   await expect(page.locator('#hwLoad')).toBeHidden();
 });
