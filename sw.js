@@ -9,7 +9,7 @@
    Scope: only requests under this worker's own directory (/recallhsc/ on GitHub Pages). */
 'use strict';
 const VERSION='2.0.0';
-const ASSET_HASH='88bc3a2ad320';
+const ASSET_HASH='3ea5e7d64efe';
 const SHELL='recallhsc-shell-'+VERSION+'-'+ASSET_HASH;
 const FONTS='recallhsc-fonts-v1';
 const PRECACHE=[

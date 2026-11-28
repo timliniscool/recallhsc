@@ -29,7 +29,8 @@ sw.className='btn small hwtoggle';sw.id='hwToggle';sw.type='button';sw.hidden=tr
 tb.parentNode.insertBefore(sw,tb);
 const offer=document.createElement('div');offer.className='hwoffer';offer.id='hwOffer';offer.hidden=true;
 offer.innerHTML=`<span class="hwo-ic" aria-hidden="true">✍</span><span class="hwo-t"><b>New on iPad: write it by hand</b><small>Practise your recall with Apple Pencil on a full-screen sheet, like the exam. Read on your iPad, marked in seconds.</small></span><button class="btn small primary" id="hwTry" type="button">Try it</button><button class="btn small" id="hwNo" type="button">Not now</button>`;
-tb.parentNode.insertBefore(offer,sw);
+offer.setAttribute('role','dialog');offer.setAttribute('aria-label','Try handwriting with Apple Pencil');
+document.body.appendChild(offer); // a popup at the bottom, like the update bar
 const pad=document.createElement('div');pad.className='hwpad';pad.id='hwPad';pad.hidden=true;
 pad.setAttribute('role','dialog');pad.setAttribute('aria-label','Handwriting sheet');
 pad.innerHTML=`<div class="hwhead"><div class="hwchip" id="hwChip"></div><div class="hwprompt" id="hwPrompt"></div></div>
